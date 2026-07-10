@@ -1,0 +1,166 @@
+// PostPilot AI — Database Schema
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
+
+enum UserRole {
+  ADMIN
+  EDITOR
+}
+
+enum PageStatus {
+  ACTIVE
+  PAUSED
+  DISCONNECTED
+  TOKEN_EXPIRING
+}
+
+enum PostStatus {
+  DRAFT
+  APPROVED
+  SCHEDULED
+  PUBLISHING
+  POSTED
+  FAILED
+  ARCHIVED
+}
+
+enum ScheduleStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum MediaType {
+  NONE
+  IMAGE
+  VIDEO
+  LINK
+}
+
+// ─────────────────────────────────────────────
+// Models
+// ─────────────────────────────────────────────
+
+model User {
+  id    String   @id @default(cuid())
+  email String   @unique
+  name  String?
+  image String?
+  role  UserRole @default(ADMIN)
+
+  fbPages    FbPage[]
+  posts      Post[]
+  schedules  Schedule[]
+  activities ActivityLog[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model FbPage {
+  id             String     @id @default(cuid())
+  userId         String     @map("user_id")
+  metaPageId     String     @unique @map("meta_page_id")
+  name           String
+  accessToken    String     @map("access_token")
+  tokenExpiresAt DateTime?  @map("token_expires_at")
+  topic          String
+  personaPrompt  String?    @db.Text @map("persona_prompt")
+  status         PageStatus @default(ACTIVE)
+  avatarUrl      String?    @map("avatar_url")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  posts     Post[]
+  schedules Schedule[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([status])
+  @@map("fb_pages")
+}
+
+model Post {
+  id          String     @id @default(cuid())
+  userId      String     @map("user_id")
+  fbPageId    String     @map("fb_page_id")
+  title       String?
+  body        String     @db.Text
+  mediaUrl    String?    @map("media_url")
+  mediaType   MediaType  @default(NONE) @map("media_type")
+  status      PostStatus @default(DRAFT)
+  fbPostId    String?    @map("fb_post_id")
+  aiGenerated Boolean    @default(false) @map("ai_generated")
+  aiModel     String?    @map("ai_model")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fbPage    FbPage     @relation(fields: [fbPageId], references: [id], onDelete: Cascade)
+  schedules Schedule[]
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  publishedAt DateTime? @map("published_at")
+
+  @@index([userId])
+  @@index([fbPageId])
+  @@index([status])
+  @@map("posts")
+}
+
+model Schedule {
+  id            String         @id @default(cuid())
+  userId        String         @map("user_id")
+  postId        String         @map("post_id")
+  fbPageId      String         @map("fb_page_id")
+  scheduledAt   DateTime       @map("scheduled_at")
+  publishedAt   DateTime?      @map("published_at")
+  status        ScheduleStatus @default(PENDING)
+  jitterSeconds Int            @default(0) @map("jitter_seconds")
+  retryCount    Int            @default(0) @map("retry_count")
+  errorMessage  String?        @map("error_message")
+  qstashMsgId   String?        @map("qstash_msg_id")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  fbPage FbPage @relation(fields: [fbPageId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([status, scheduledAt])
+  @@index([fbPageId])
+  @@map("schedules")
+}
+
+model ActivityLog {
+  id         String  @id @default(cuid())
+  userId     String  @map("user_id")
+  entityType String  @map("entity_type")
+  entityId   String  @map("entity_id")
+  action     String
+  metadata   Json?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@map("activity_logs")
+}
