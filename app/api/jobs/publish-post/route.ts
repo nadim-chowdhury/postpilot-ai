@@ -89,18 +89,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // Log success activity
-    await logActivity({
-      userId: schedule.userId,
-      entityType: "schedule",
-      entityId: scheduleId,
-      action: "post.published",
-      metadata: {
-        postTitle: schedule.post.title || "Untitled",
-        pageName: schedule.post.fbPage.name,
-      },
-    });
-
     return NextResponse.json({ success: true, fbPostId: publishResult.data.fbPostId });
   } catch (error: any) {
     console.error(`Error executing scheduled job ${scheduleId}:`, error);
@@ -126,18 +114,7 @@ export async function POST(request: Request) {
         }),
       ]);
 
-      // Log failure activity
-      await logActivity({
-        userId: schedule.userId,
-        entityType: "schedule",
-        entityId: scheduleId,
-        action: "post.failed",
-        metadata: {
-          postTitle: schedule.post.title || "Untitled",
-          pageName: schedule.post.fbPage.name,
-          error: errorMessage,
-        },
-      });
+      // Return 200 so QStash stops retrying
 
       // Return 200 so QStash stops retrying
       return NextResponse.json({ success: false, error: "Max retries reached. Job marked as failed." }, { status: 200 });

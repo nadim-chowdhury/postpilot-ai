@@ -69,17 +69,6 @@ export async function GET(request: Request) {
           },
         });
 
-        await logActivity({
-          userId: schedule.userId,
-          entityType: "schedule",
-          entityId: schedule.id,
-          action: "post.published",
-          metadata: {
-            postTitle: schedule.post.title || "Untitled",
-            pageName: schedule.post.fbPage.name,
-            note: "Published by cron safety-net sweeper",
-          },
-        });
       } else {
         throw new Error(result.error || "Publishing action failed");
       }

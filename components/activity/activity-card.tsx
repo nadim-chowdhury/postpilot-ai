@@ -92,34 +92,47 @@ function formatAction(
   action: string,
   metadata: Record<string, unknown> | null,
 ): string {
-  const name =
-    (metadata?.name as string) ?? (metadata?.pageName as string) ?? "";
+  const pageName = (metadata?.name as string) ?? (metadata?.pageName as string) ?? "";
+  const postTitle = (metadata?.postTitle as string) ?? "";
+  const postBody = (metadata?.postBody as string) ?? "";
+
+  const postInfo = postTitle && postTitle !== "Untitled"
+    ? `"${postTitle}"`
+    : postBody
+      ? `"${postBody.substring(0, 40)}${postBody.length > 40 ? "..." : ""}"`
+      : "";
+
+  const forPageStr = pageName ? ` for "${pageName}"` : "";
+  const toPageStr = pageName ? ` to "${pageName}"` : "";
+  const onPageStr = pageName ? ` on "${pageName}"` : "";
+  const fromPageStr = pageName ? ` from "${pageName}"` : "";
+
   switch (action) {
     case "page.connected":
-      return `Connected page "${name}"`;
+      return `Connected page "${pageName}"`;
     case "page.disconnected":
-      return `Disconnected page "${name}"`;
+      return `Disconnected page "${pageName}"`;
     case "page.updated":
-      return `Updated page "${name}"`;
+      return `Updated page "${pageName}"`;
     case "page.paused":
-      return `Paused page "${name}"`;
+      return `Paused page "${pageName}"`;
     case "page.resumed":
-      return `Resumed page "${name}"`;
+      return `Resumed page "${pageName}"`;
     case "post.created":
-      return name ? `Created post for "${name}"` : "Created a new post";
+      return `Created post ${postInfo}${forPageStr}`;
     case "post.published":
-      return name ? `Published post to "${name}"` : "Published a post";
+      return `Published post ${postInfo}${toPageStr}`;
     case "post.failed":
-      return name ? `Post failed for "${name}"` : "A post failed";
+      return `Post ${postInfo} failed${onPageStr}`;
     case "post.deleted":
-      return name ? `Deleted post from "${name}"` : "Deleted a post";
+      return `Deleted post ${postInfo}${fromPageStr}`;
     case "schedule.created":
-      return name ? `Scheduled post for "${name}"` : "Scheduled a post";
+      return `Scheduled post ${postInfo}${forPageStr}`;
     case "schedule.cancelled":
-      return name ? `Cancelled schedule for "${name}"` : "Cancelled a schedule";
+      return `Cancelled schedule for post ${postInfo}`;
     case "schedule.updated":
-      return name ? `Updated schedule for "${name}"` : "Updated a schedule";
+      return `Rescheduled post ${postInfo}${forPageStr}`;
     default:
-      return action.replace(".", " ");
+      return action.replace(".", " — ");
   }
 }

@@ -97,6 +97,7 @@ export async function schedulePost(
       action: "schedule.created",
       metadata: {
         postTitle: post.title || "Untitled",
+        postBody: post.body,
         pageName: post.fbPage.name,
         scheduledAt: jitteredTime.toISOString(),
       },
@@ -126,7 +127,7 @@ export async function cancelSchedule(
 
     const schedule = await prisma.schedule.findFirst({
       where: { id: scheduleId, userId },
-      include: { post: true },
+      include: { post: { include: { fbPage: true } } },
     });
 
     if (!schedule) {
@@ -166,6 +167,8 @@ export async function cancelSchedule(
       action: "schedule.cancelled",
       metadata: {
         postTitle: schedule.post.title || "Untitled",
+        postBody: schedule.post.body,
+        pageName: schedule.post.fbPage.name,
       },
     });
 
@@ -252,6 +255,7 @@ export async function reschedulePost(
       action: "schedule.updated",
       metadata: {
         postTitle: schedule.post.title || "Untitled",
+        postBody: schedule.post.body,
         pageName: schedule.post.fbPage.name,
         scheduledAt: newJitteredTime.toISOString(),
       },
@@ -397,17 +401,6 @@ export async function triggerQueueSweeper(): Promise<ActionResult<{ processed: n
             },
           });
 
-          await logActivity({
-            userId: schedule.userId,
-            entityType: "schedule",
-            entityId: schedule.id,
-            action: "post.published",
-            metadata: {
-              postTitle: schedule.post.title || "Untitled",
-              pageName: schedule.post.fbPage.name,
-              note: "Published by manual queue sweeper",
-            },
-          });
           processed++;
         } else {
           throw new Error(result.error || "Publishing failed");
@@ -427,19 +420,6 @@ export async function triggerQueueSweeper(): Promise<ActionResult<{ processed: n
             data: { status: "FAILED" },
           }),
         ]);
-
-        await logActivity({
-          userId: schedule.userId,
-          entityType: "schedule",
-          entityId: schedule.id,
-          action: "post.failed",
-          metadata: {
-            postTitle: schedule.post.title || "Untitled",
-            pageName: schedule.post.fbPage.name,
-            error: err.message || "Unknown error",
-            note: "Failed during manual queue sweeper recovery",
-          },
-        });
       }
     }
 
@@ -496,17 +476,6 @@ export async function forcePublishSchedule(
         },
       });
 
-      await logActivity({
-        userId,
-        entityType: "schedule",
-        entityId: scheduleId,
-        action: "post.published",
-        metadata: {
-          postTitle: schedule.post.title || "Untitled",
-          note: "Published via force publish",
-        },
-      });
-
       return { success: true, data: { fbPostId: result.data.fbPostId } };
     } else {
       throw new Error(result.error || "Publishing action failed");
@@ -529,19 +498,6 @@ export async function forcePublishSchedule(
           data: { status: "FAILED" },
         });
 
-        // Log failure activity
-        await logActivity({
-          userId: schedule.userId,
-          entityType: "schedule",
-          entityId: scheduleId,
-          action: "post.failed",
-          metadata: {
-            postTitle: schedule.post?.title || "Untitled",
-            pageName: schedule.post?.fbPage?.name || "Unknown Page",
-            error: error.message || "Unknown error",
-            note: "Failed during force publish",
-          },
-        });
       }
     } catch (dbErr) {
       console.error("[Force Publish Error Recovery Failed]", dbErr);

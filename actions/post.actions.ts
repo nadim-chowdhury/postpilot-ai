@@ -184,6 +184,7 @@ export async function createPost(data: {
       action: "post.created",
       metadata: {
         postTitle: data.title || "Untitled",
+        postBody: data.body,
         pageName: page.name,
       },
     });
@@ -354,6 +355,7 @@ export async function publishPostNowInternal(
         action: "post.published",
         metadata: {
           postTitle: post.title || "Untitled",
+          postBody: post.body,
           pageName: post.fbPage.name ?? "Unknown",
           fbPostId,
         },
@@ -388,6 +390,7 @@ export async function publishPostNowInternal(
         action: "post.failed",
         metadata: {
           postTitle: post.title || "Untitled",
+          postBody: post.body,
           pageName: post.fbPage.name ?? "Unknown",
           error: publishError instanceof Error ? publishError.message : "Unknown error",
         },
@@ -443,6 +446,7 @@ export async function deletePost(
 
     const post = await prisma.post.findFirst({
       where: { id: postId, userId },
+      include: { fbPage: true },
     });
 
     if (!post) {
@@ -458,6 +462,8 @@ export async function deletePost(
       action: "post.deleted",
       metadata: {
         postTitle: post.title || "Untitled",
+        postBody: post.body,
+        pageName: post.fbPage?.name || "Unknown",
       },
     });
 
