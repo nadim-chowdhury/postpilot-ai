@@ -11,7 +11,7 @@ export const authOptions: AuthOptions = {
       authorization: {
         params: {
           ...(process.env.META_CONFIG_ID
-            ? { config_id: process.env.META_CONFIG_ID }
+            ? { config_id: process.env.META_CONFIG_ID, scope: "public_profile" }
             : { scope: metaApiConfig.scopes.join(",") }),
         },
       },
