@@ -1201,13 +1201,13 @@ docs(architecture): add scheduling flow diagram
 
 | Task                                                   | Status         |
 | ------------------------------------------------------ | -------------- |
-| Upstash QStash integration                             | ⬜ Not started |
-| Schedule creation with jitter logic                    | ⬜ Not started |
-| Background job: `publish-post`                         | ⬜ Not started |
-| Retry mechanism (3 attempts + exponential backoff)     | ⬜ Not started |
-| Vercel Cron: `process-queue` safety-net sweeper        | ⬜ Not started |
-| Post queue UI (approve / reject / edit before publish) | ⬜ Not started |
-| Calendar view UI                                       | ⬜ Not started |
+| Upstash QStash integration                             | ✅ Done        |
+| Schedule creation with jitter logic                    | ✅ Done        |
+| Background job: `publish-post`                         | ✅ Done        |
+| Retry mechanism (3 attempts + exponential backoff)     | ✅ Done        |
+| Vercel Cron: `process-queue` safety-net sweeper        | ✅ Done        |
+| Post queue UI (approve / reject / edit before publish) | ✅ Done        |
+| Calendar view UI                                       | ✅ Done        |
 
 ### Phase 3 — AI Content Engine
 
