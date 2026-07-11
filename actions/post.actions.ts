@@ -8,6 +8,7 @@ import {
   publishPhotoToPage,
 } from "@/lib/services/meta-api.service";
 import { publishPostSchedule } from "@/lib/services/qstash.service";
+import { logActivity } from "@/actions/activity.actions";
 import { AppError, ErrorCodes } from "@/lib/errors";
 import type { ActionResult } from "@/types/api.types";
 import type { PostSummary, PostDetail } from "@/types/post.types";
@@ -176,6 +177,17 @@ export async function createPost(data: {
       },
     });
 
+    await logActivity({
+      userId,
+      entityType: "post",
+      entityId: post.id,
+      action: "post.created",
+      metadata: {
+        postTitle: data.title || "Untitled",
+        pageName: page.name,
+      },
+    });
+
     return { success: true, data: { id: post.id } };
   } catch (error) {
     if (error instanceof AppError) {
@@ -263,7 +275,7 @@ export async function publishPostNowInternal(
         status: { in: ["DRAFT", "APPROVED", "SCHEDULED", "FAILED"] },
       },
       include: {
-        fbPage: { select: { id: true, metaPageId: true, accessToken: true, status: true } },
+        fbPage: { select: { id: true, name: true, metaPageId: true, accessToken: true, status: true } },
       },
     });
 
@@ -324,6 +336,19 @@ export async function publishPostNowInternal(
         },
       });
 
+      // Log activity for successful publish
+      await logActivity({
+        userId: post.userId,
+        entityType: "post",
+        entityId: postId,
+        action: "post.published",
+        metadata: {
+          postTitle: post.title || "Untitled",
+          pageName: post.fbPage.name ?? "Unknown",
+          fbPostId,
+        },
+      });
+
       // Also mark any associated schedules as COMPLETED
       await prisma.schedule.updateMany({
         where: {
@@ -343,6 +368,19 @@ export async function publishPostNowInternal(
       await prisma.post.update({
         where: { id: postId },
         data: { status: "FAILED" },
+      });
+
+      // Log activity for failed publish
+      await logActivity({
+        userId: post.userId,
+        entityType: "post",
+        entityId: postId,
+        action: "post.failed",
+        metadata: {
+          postTitle: post.title || "Untitled",
+          pageName: post.fbPage.name ?? "Unknown",
+          error: publishError instanceof Error ? publishError.message : "Unknown error",
+        },
       });
 
       throw publishError;
@@ -402,6 +440,16 @@ export async function deletePost(
     }
 
     await prisma.post.delete({ where: { id: postId } });
+
+    await logActivity({
+      userId,
+      entityType: "post",
+      entityId: postId,
+      action: "post.deleted",
+      metadata: {
+        postTitle: post.title || "Untitled",
+      },
+    });
 
     return { success: true, data: { id: postId } };
   } catch (error) {

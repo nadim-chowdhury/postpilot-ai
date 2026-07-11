@@ -7,6 +7,9 @@ import {
   Settings,
   Unplug,
   Pencil,
+  Clock,
+  XCircle,
+  CalendarClock,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ActivityEntry } from "@/actions/activity.actions";
@@ -21,6 +24,9 @@ const actionIcons: Record<string, { icon: LucideIcon; color: string }> = {
   "post.published": { icon: Send, color: "text-emerald-500" },
   "post.failed": { icon: AlertTriangle, color: "text-red-400" },
   "post.deleted": { icon: FileText, color: "text-zinc-400" },
+  "schedule.created": { icon: Clock, color: "text-violet-400" },
+  "schedule.cancelled": { icon: XCircle, color: "text-amber-500" },
+  "schedule.updated": { icon: CalendarClock, color: "text-blue-400" },
 };
 
 const defaultAction = { icon: CheckCircle, color: "text-muted-foreground" };
@@ -83,6 +89,18 @@ function formatAction(
       return `Post failed${name ? ` on "${name}"` : ""}`;
     case "post.deleted":
       return `Deleted a post`;
+    case "schedule.created": {
+      const postTitle = (metadata?.postTitle as string) ?? "";
+      return `Scheduled a post${postTitle ? ` "${postTitle}"` : ""}`;
+    }
+    case "schedule.cancelled": {
+      const postTitle2 = (metadata?.postTitle as string) ?? "";
+      return `Cancelled schedule${postTitle2 ? ` for "${postTitle2}"` : ""}`;
+    }
+    case "schedule.updated": {
+      const postTitle3 = (metadata?.postTitle as string) ?? "";
+      return `Rescheduled a post${postTitle3 ? ` "${postTitle3}"` : ""}`;
+    }
     default:
       return action.replace(".", " — ");
   }

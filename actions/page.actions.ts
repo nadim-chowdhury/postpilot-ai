@@ -12,6 +12,7 @@ import { AppError, ErrorCodes } from "@/lib/errors";
 import type { ActionResult } from "@/types/api.types";
 import type { PageSummary, PageDetail } from "@/types/page.types";
 import { generatePageTopicAndPersona } from "@/lib/services/ai.service";
+import { logActivity } from "@/actions/activity.actions";
 
 // ─────────────────────────────────────────────
 // Queries
@@ -225,6 +226,17 @@ export async function connectPages(
       connected++;
     }
 
+    // Log activity for each connected page
+    for (const page of pages) {
+      await logActivity({
+        userId,
+        entityType: "page",
+        entityId: page.metaPageId,
+        action: "page.connected",
+        metadata: { name: page.name },
+      });
+    }
+
     return { success: true, data: { connected } };
   } catch (error) {
     if (error instanceof AppError) {
@@ -415,6 +427,14 @@ export async function disconnectPage(
     await prisma.fbPage.update({
       where: { id: pageId },
       data: { status: "DISCONNECTED" },
+    });
+
+    await logActivity({
+      userId,
+      entityType: "page",
+      entityId: pageId,
+      action: "page.disconnected",
+      metadata: { name: page.name },
     });
 
     return { success: true, data: { id: pageId } };
