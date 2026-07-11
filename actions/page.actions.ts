@@ -44,6 +44,7 @@ export async function getPages(): Promise<ActionResult<PageSummary[]>> {
       postCount: page._count.posts,
       lastPostedAt: page.posts[0]?.publishedAt ?? null,
       personaPrompt: page.personaPrompt,
+      game: page.game,
     }));
 
     return { success: true, data };
@@ -86,6 +87,7 @@ export async function getPage(
       status: page.status,
       avatarUrl: page.avatarUrl,
       personaPrompt: page.personaPrompt,
+      game: page.game,
       tokenExpiresAt: page.tokenExpiresAt,
       postCount: page._count.posts,
       lastPostedAt: page.posts[0]?.publishedAt ?? null,
@@ -326,7 +328,7 @@ export async function connectPageManually(data: {
  */
 export async function updatePage(
   pageId: string,
-  data: { topic?: string; personaPrompt?: string; status?: string },
+  data: { topic?: string; personaPrompt?: string; status?: string; game?: string | null },
 ): Promise<ActionResult<{ id: string }>> {
   try {
     const userId = await requireUserId();
@@ -343,6 +345,7 @@ export async function updatePage(
     if (data.topic !== undefined) updateData.topic = data.topic;
     if (data.personaPrompt !== undefined) updateData.personaPrompt = data.personaPrompt;
     if (data.status !== undefined) updateData.status = data.status;
+    if (data.game !== undefined) updateData.game = data.game;
 
     await prisma.fbPage.update({
       where: { id: pageId },

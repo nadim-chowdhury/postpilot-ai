@@ -7,6 +7,7 @@ import {
   Play,
   Unplug,
   Pencil,
+  Gamepad2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -52,7 +53,16 @@ export function PageCard({
           <h3 className="truncate text-sm font-semibold text-foreground">
             {page.name}
           </h3>
-          <p className="truncate text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Facebook Page</p>
+          <p className="truncate text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+            {page.game ? (
+              <span className="inline-flex items-center gap-1">
+                <Gamepad2 className="h-3 w-3" />
+                {page.game}
+              </span>
+            ) : (
+              "Facebook Page"
+            )}
+          </p>
         </div>
 
         {/* Status */}

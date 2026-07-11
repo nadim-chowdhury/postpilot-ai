@@ -20,6 +20,7 @@ export interface PageSummary {
   postCount: number;
   lastPostedAt: Date | null;
   personaPrompt?: string | null;
+  game?: string | null;
 }
 
 export interface PageDetail extends PageSummary {
@@ -42,4 +43,5 @@ export interface UpdatePageInput {
   topic?: string;
   personaPrompt?: string;
   status?: PageStatus;
+  game?: string | null;
 }

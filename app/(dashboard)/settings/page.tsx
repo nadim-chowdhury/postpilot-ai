@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Settings, Save, Sparkles, CheckCircle2, AlertCircle } from "lucide-react";
+import { Settings, Save, Sparkles, CheckCircle2, AlertCircle, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPages, updatePage } from "@/actions/page.actions";
 import { Spinner } from "@/components/shared/spinner";
@@ -16,6 +16,7 @@ export default function SettingsPage() {
   const [topics, setTopics] = useState<Record<string, string>>({});
   const [personas, setPersonas] = useState<Record<string, string>>({});
   const [statuses, setStatuses] = useState<Record<string, string>>({});
+  const [games, setGames] = useState<Record<string, string>>({});
 
   // Message notifications
   const [notification, setNotification] = useState<{
@@ -34,16 +35,19 @@ export default function SettingsPage() {
       const initialTopics: Record<string, string> = {};
       const initialPersonas: Record<string, string> = {};
       const initialStatuses: Record<string, string> = {};
+      const initialGames: Record<string, string> = {};
       
       result.data.forEach((p) => {
         initialTopics[p.id] = p.topic || "";
         initialPersonas[p.id] = p.personaPrompt || "";
         initialStatuses[p.id] = p.status || "ACTIVE";
+        initialGames[p.id] = p.game || "";
       });
       
       setTopics(initialTopics);
       setPersonas(initialPersonas);
       setStatuses(initialStatuses);
+      setGames(initialGames);
     }
     setLoading(false);
   };
@@ -60,6 +64,7 @@ export default function SettingsPage() {
       topic: topics[pageId],
       personaPrompt: personas[pageId],
       status: statuses[pageId],
+      game: games[pageId] || null,
     });
 
     if (result.success) {
@@ -194,6 +199,46 @@ export default function SettingsPage() {
                       Define the copywriting personality, tone styles, banned phrases, or custom guidelines.
                     </p>
                   </div>
+                </div>
+
+                {/* Game Assignment */}
+                <div className="space-y-2 border-t border-border/40 pt-5">
+                  <div className="flex items-center gap-1.5">
+                    <Gamepad2 className="h-3.5 w-3.5 text-brand" />
+                    <label className="block text-xs font-medium text-foreground">
+                      Assigned Game
+                    </label>
+                  </div>
+                  <select
+                    value={games[pageId] || ""}
+                    onChange={(e) => setGames({ ...games, [pageId]: e.target.value })}
+                    className="h-9 w-full max-w-sm rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
+                  >
+                    <option value="">— No Game Assigned —</option>
+                    <option value="GTA V">GTA V</option>
+                    <option value="GTA VI">GTA VI</option>
+                    <option value="GTA San Andreas">GTA San Andreas</option>
+                    <option value="Red Dead Redemption 2">Red Dead Redemption 2</option>
+                    <option value="Minecraft">Minecraft</option>
+                    <option value="Fortnite">Fortnite</option>
+                    <option value="Valorant">Valorant</option>
+                    <option value="League of Legends">League of Legends</option>
+                    <option value="Counter-Strike 2">Counter-Strike 2</option>
+                    <option value="Apex Legends">Apex Legends</option>
+                    <option value="Call of Duty">Call of Duty</option>
+                    <option value="FIFA / EA FC">FIFA / EA FC</option>
+                    <option value="Elden Ring">Elden Ring</option>
+                    <option value="The Witcher 3">The Witcher 3</option>
+                    <option value="Cyberpunk 2077">Cyberpunk 2077</option>
+                    <option value="Roblox">Roblox</option>
+                    <option value="Among Us">Among Us</option>
+                    <option value="Overwatch 2">Overwatch 2</option>
+                    <option value="Genshin Impact">Genshin Impact</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <p className="text-[11px] text-muted-foreground">
+                    Assign a game for visibility. This label is displayed on the page card for easy identification.
+                  </p>
                 </div>
 
                 {/* Notifications Alert */}
