@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Activity } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ActivityItem } from "@/components/activity/activity-item";
 import { getActivities } from "@/actions/activity.actions";
@@ -13,14 +14,22 @@ export default function ActivityPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [entityType, setEntityType] = useState("");
 
-  const fetchActivities = async (pageNum: number, typeFilter: string) => {
+  // Filters
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterAction, setFilterAction] = useState("");
+  const [filterStartDate, setFilterStartDate] = useState("");
+  const [filterEndDate, setFilterEndDate] = useState("");
+
+  const fetchActivities = async (pageNum: number) => {
     setLoading(true);
     const result = await getActivities({
       page: pageNum,
       pageSize: 30,
-      entityType: typeFilter || undefined,
+      entityType: filterCategory || undefined,
+      action: filterAction || undefined,
+      startDate: filterStartDate || undefined,
+      endDate: filterEndDate || undefined,
     });
     if (result.success) {
       setActivities(result.data.items);
@@ -30,35 +39,103 @@ export default function ActivityPage() {
   };
 
   useEffect(() => {
-    fetchActivities(page, entityType);
-  }, [page, entityType]);
+    fetchActivities(page);
+  }, [page]);
+
+  // Re-fetch when filters change (reset to page 1)
+  useEffect(() => {
+    setPage(1);
+    fetchActivities(1);
+  }, [filterCategory, filterAction, filterStartDate, filterEndDate]);
+
+  const hasActiveFilters =
+    filterCategory || filterAction || filterStartDate || filterEndDate;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Activity</h2>
-          <p className="text-sm text-muted-foreground">
-            Full audit trail of every action across your pages.
-          </p>
-        </div>
+      <div>
+        <h2 className="text-lg font-semibold text-foreground">Activity</h2>
+        <p className="text-sm text-muted-foreground">
+          Full audit trail of every action across your pages.
+        </p>
+      </div>
 
-        {/* Filters */}
-        <div className="flex gap-2">
-          <select
-            value={entityType}
-            onChange={(e) => {
-              setEntityType(e.target.value);
-              setPage(1);
-            }}
-            className="h-8 rounded-lg border border-border/50 bg-background px-2.5 text-xs text-foreground focus:border-brand/50 focus:outline-none"
-          >
-            <option value="">All Categories</option>
-            <option value="page">Pages</option>
-            <option value="post">Posts</option>
-            <option value="schedule">Schedules</option>
-          </select>
+      {/* Filter Bar */}
+      <div className="rounded-xl border border-border/40 bg-card p-4 shadow-sm">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 items-end">
+          {/* Category */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Category
+            </label>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+            >
+              <option value="">All Categories</option>
+              <option value="page">Pages</option>
+              <option value="post">Posts</option>
+              <option value="schedule">Schedules</option>
+            </select>
+          </div>
+
+          {/* Action search */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Search Action
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. created, published..."
+              value={filterAction}
+              onChange={(e) => setFilterAction(e.target.value)}
+              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
+            />
+          </div>
+
+          {/* From Date */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              From Date
+            </label>
+            <input
+              type="date"
+              value={filterStartDate}
+              onChange={(e) => setFilterStartDate(e.target.value)}
+              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+            />
+          </div>
+
+          {/* To Date & Reset */}
+          <div className="space-y-1.5 flex gap-2 items-end">
+            <div className="flex-1 space-y-1.5">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                To Date
+              </label>
+              <input
+                type="date"
+                value={filterEndDate}
+                onChange={(e) => setFilterEndDate(e.target.value)}
+                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+              />
+            </div>
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setFilterCategory("");
+                  setFilterAction("");
+                  setFilterStartDate("");
+                  setFilterEndDate("");
+                }}
+                className="h-9 text-xs px-2 hover:bg-accent/80 hover:text-foreground text-muted-foreground"
+              >
+                Reset
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -103,10 +180,10 @@ export default function ActivityPage() {
       ) : (
         <EmptyState
           icon={Activity}
-          title="No activity yet"
+          title={hasActiveFilters ? "No matching activity" : "No activity yet"}
           description={
-            entityType
-              ? `No logs found matching category filter "${entityType}".`
+            hasActiveFilters
+              ? "Try adjusting your filter settings above to view other activity."
               : "All actions — posts created, published, failed — will be logged here."
           }
         />

@@ -18,6 +18,12 @@ export default function PagesPage() {
   const [fetchingAvailable, setFetchingAvailable] = useState(false);
   const [editPage, setEditPage] = useState<PageSummary | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredPages = pages.filter((p) =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.topic?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   const fetchPages = async () => {
     setLoading(true);
@@ -119,10 +125,28 @@ export default function PagesPage() {
         </Button>
       </div>
 
+      {/* Search Bar */}
+      {pages.length > 0 && (
+        <div className="rounded-xl border border-border/40 bg-card p-4 shadow-sm">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Search Pages
+            </label>
+            <input
+              type="text"
+              placeholder="Search by page name or topic..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-9 w-full max-w-md rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Page grid */}
-      {pages.length > 0 ? (
+      {filteredPages.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {pages.map((page) => (
+          {filteredPages.map((page) => (
             <PageCard
               key={page.id}
               page={page}
@@ -132,6 +156,12 @@ export default function PagesPage() {
             />
           ))}
         </div>
+      ) : pages.length > 0 && searchQuery ? (
+        <EmptyState
+          icon={Globe}
+          title="No pages match your search"
+          description={`No pages found matching "${searchQuery}". Try a different search term.`}
+        />
       ) : (
         <EmptyState
           icon={Globe}

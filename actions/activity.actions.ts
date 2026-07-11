@@ -56,6 +56,9 @@ export async function logActivity(data: {
 
 export async function getActivities(filters?: {
   entityType?: string;
+  action?: string;
+  startDate?: string;
+  endDate?: string;
   page?: number;
   pageSize?: number;
 }): Promise<ActionResult<{ items: ActivityEntry[]; total: number }>> {
@@ -64,8 +67,23 @@ export async function getActivities(filters?: {
     const page = filters?.page ?? 1;
     const pageSize = filters?.pageSize ?? 30;
 
-    const where: Record<string, unknown> = { userId };
+    const where: any = { userId };
     if (filters?.entityType) where.entityType = filters.entityType;
+    if (filters?.action) {
+      where.action = { contains: filters.action, mode: "insensitive" };
+    }
+
+    if (filters?.startDate || filters?.endDate) {
+      where.createdAt = {};
+      if (filters.startDate) {
+        where.createdAt.gte = new Date(filters.startDate);
+      }
+      if (filters.endDate) {
+        const end = new Date(filters.endDate);
+        end.setHours(23, 59, 59, 999);
+        where.createdAt.lte = end;
+      }
+    }
 
     const [activities, total] = await Promise.all([
       prisma.activityLog.findMany({
