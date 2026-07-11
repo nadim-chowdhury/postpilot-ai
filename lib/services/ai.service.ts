@@ -222,3 +222,47 @@ function getMockAiPost(params: {
     imagePrompt: `A beautiful high-quality editorial photograph illustrating ${params.topic}`,
   };
 }
+
+/**
+ * Analyze a page's name and category using AI to recommend a relevant topic and persona.
+ */
+export async function generatePageTopicAndPersona(
+  pageName: string,
+  category: string,
+): Promise<{ topic: string; personaPrompt: string }> {
+  const resolved = resolveModel();
+
+  if (resolved.provider === "mock") {
+    return {
+      topic: category || "General",
+      personaPrompt: `An engaging and professional voice representing ${pageName}.`,
+    };
+  }
+
+  try {
+    const systemInstructions = `You are a social media branding expert. Given a Facebook page name and category, generate a concise, engaging primary topic (1-5 words) and a detailed persona prompt (2-3 sentences) defining the writing tone and style for content automation on this page.`;
+    const userPrompt = `Page Name: "${pageName}"\nCategory: "${category}"`;
+
+    const resultSchema = z.object({
+      topic: z.string().max(80),
+      personaPrompt: z.string().max(300),
+    });
+
+    const { object } = await generateObject({
+      model: resolved.model,
+      schema: resultSchema,
+      system: systemInstructions,
+      prompt: userPrompt,
+      temperature: 0.7,
+    });
+
+    return object;
+  } catch (error) {
+    console.error("[AI] Topic & Persona generation failed:", error);
+    return {
+      topic: category || "General",
+      personaPrompt: `An engaging and professional voice representing ${pageName}.`,
+    };
+  }
+}
+

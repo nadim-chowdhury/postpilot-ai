@@ -11,6 +11,7 @@ import {
 import { AppError, ErrorCodes } from "@/lib/errors";
 import type { ActionResult } from "@/types/api.types";
 import type { PageSummary, PageDetail } from "@/types/page.types";
+import { generatePageTopicAndPersona } from "@/lib/services/ai.service";
 
 // ─────────────────────────────────────────────
 // Queries
@@ -186,6 +187,10 @@ export async function connectPages(
         continue;
       }
 
+      // Get AI suggested topic and persona if connecting for the first time
+      const aiSuggestions = await generatePageTopicAndPersona(page.name, metaPage.category);
+      const finalTopic = page.topic && page.topic !== metaPage.category ? page.topic : aiSuggestions.topic;
+
       // Encrypt the page access token
       const encryptedToken = encrypt(metaPage.accessToken);
 
@@ -195,7 +200,8 @@ export async function connectPages(
           metaPageId: page.metaPageId,
           name: page.name,
           accessToken: encryptedToken,
-          topic: page.topic,
+          topic: finalTopic,
+          personaPrompt: aiSuggestions.personaPrompt,
           avatarUrl: page.avatarUrl ?? null,
           status: "ACTIVE",
         },
@@ -252,6 +258,10 @@ export async function connectPageManually(data: {
     const avatarUrl = result.picture?.data?.url ?? null;
     const encryptedToken = encrypt(data.accessToken);
 
+    // Get AI suggested topic and persona
+    const aiSuggestions = await generatePageTopicAndPersona(name, category);
+    const finalTopic = data.topic ? data.topic : aiSuggestions.topic;
+
     // Check if page already exists
     const existing = await prisma.fbPage.findUnique({
       where: { metaPageId: data.metaPageId },
@@ -279,7 +289,8 @@ export async function connectPageManually(data: {
           metaPageId: data.metaPageId,
           name,
           accessToken: encryptedToken,
-          topic: data.topic || category,
+          topic: finalTopic,
+          personaPrompt: aiSuggestions.personaPrompt,
           avatarUrl,
           status: "ACTIVE",
         },
