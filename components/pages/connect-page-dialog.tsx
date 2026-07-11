@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Globe, Check } from "lucide-react";
+import { X, Globe, Check, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AvailablePage {
@@ -31,6 +31,7 @@ export function ConnectPageDialog({
   const [selected, setSelected] = useState<
     Map<string, { topic: string }>
   >(new Map());
+  const [searchQuery, setSearchQuery] = useState("");
 
   if (!open) return null;
 
@@ -63,6 +64,12 @@ export function ConnectPageDialog({
     onConnect(pages);
   };
 
+  const filteredPages = availablePages.filter(
+    (page) =>
+      page.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      page.category.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
@@ -74,7 +81,7 @@ export function ConnectPageDialog({
       {/* Dialog */}
       <div className="relative z-10 w-full max-w-lg rounded-xl border border-border/50 bg-card p-6 shadow-2xl">
         {/* Header */}
-        <div className="mb-5 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <div>
             <h2 className="text-base font-semibold text-foreground">
               Connect Pages
@@ -91,16 +98,29 @@ export function ConnectPageDialog({
           </button>
         </div>
 
+        {/* Search bar */}
+        <div className="relative mb-4">
+          <Search className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/60" />
+          <input
+            type="text"
+            placeholder="Search pages by name or category..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-9 w-full rounded-lg border border-border/50 bg-background pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
+          />
+        </div>
+
         {/* Page list */}
         <div className="max-h-72 space-y-2 overflow-y-auto">
-          {availablePages.length === 0 && (
+          {filteredPages.length === 0 && (
             <p className="py-8 text-center text-sm text-muted-foreground">
-              No pages found. Make sure your Facebook account manages at least
-              one page.
+              {availablePages.length === 0
+                ? "No pages found. Make sure your Facebook account manages at least one page."
+                : "No matching pages found."}
             </p>
           )}
 
-          {availablePages.map((page) => {
+          {filteredPages.map((page) => {
             const isSelected = selected.has(page.id);
             return (
               <div
