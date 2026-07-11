@@ -127,7 +127,16 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold text-foreground">{page.name}</h3>
-                      <p className="text-xs text-muted-foreground">Page Configuration Settings</p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
+                        <span>
+                          <strong className="text-foreground/70">Topic:</strong> {page.topic || "None"}
+                        </span>
+                        {page.personaPrompt && (
+                          <span className="max-w-xs truncate" title={page.personaPrompt}>
+                            <strong className="text-foreground/70">Description:</strong> {page.personaPrompt}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -180,7 +189,7 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-1.5">
                       <Sparkles className="h-3.5 w-3.5 text-brand" />
                       <label className="block text-xs font-medium text-foreground">
-                        AI Copywriter Persona / Instructions
+                        Description (AI Copywriter Persona / Instructions)
                       </label>
                     </div>
                     <textarea

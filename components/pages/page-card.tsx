@@ -52,11 +52,34 @@ export function PageCard({
           <h3 className="truncate text-sm font-semibold text-foreground">
             {page.name}
           </h3>
-          <p className="truncate text-xs text-muted-foreground">{page.topic}</p>
+          <p className="truncate text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Facebook Page</p>
         </div>
 
         {/* Status */}
         <StatusBadge status={statusVariant} />
+      </div>
+
+      {/* Niche & Description */}
+      <div className="mt-3.5 space-y-2 border-t border-border/40 pt-3.5">
+        <div>
+          <span className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">
+            Target Topic / Niche
+          </span>
+          <p className="text-xs text-foreground font-medium leading-relaxed">
+            {page.topic}
+          </p>
+        </div>
+        
+        {page.personaPrompt && (
+          <div>
+            <span className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">
+              AI Persona / Description
+            </span>
+            <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              {page.personaPrompt}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Stats */}
