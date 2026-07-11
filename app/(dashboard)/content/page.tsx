@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, Plus, Minus, Sparkles } from "lucide-react";
+import { FileText, Plus, Minus, Sparkles, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Spinner } from "@/components/shared/spinner";
 import { PostComposer } from "@/components/content/post-composer";
 import { PostCard } from "@/components/content/post-card";
 import { AiGenerateDialog } from "@/components/content/ai-generate-dialog";
+import { BulkImportDialog } from "@/components/content/bulk-import-dialog";
 import {
   getPosts,
   createPost,
@@ -24,6 +25,7 @@ export default function ContentPage() {
   const [loading, setLoading] = useState(true);
   const [showComposer, setShowComposer] = useState(false);
   const [aiGenerateOpen, setAiGenerateOpen] = useState(false);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [schedulingPostId, setSchedulingPostId] = useState<string | null>(null);
   const [scheduleTime, setScheduleTime] = useState("");
@@ -146,6 +148,14 @@ export default function ContentPage() {
           <Button
             variant="outline"
             className="gap-2"
+            onClick={() => setBulkImportOpen(true)}
+          >
+            <Upload className="h-4 w-4" />
+            Bulk Import
+          </Button>
+          <Button
+            variant="outline"
+            className="gap-2"
             onClick={() => setAiGenerateOpen(true)}
           >
             <Sparkles className="h-4 w-4" />
@@ -260,6 +270,14 @@ export default function ContentPage() {
         onClose={() => setAiGenerateOpen(false)}
         pages={pages}
         onSaved={fetchData}
+      />
+
+      {/* Bulk Import Dialog */}
+      <BulkImportDialog
+        open={bulkImportOpen}
+        onClose={() => setBulkImportOpen(false)}
+        pages={pages}
+        onImported={fetchData}
       />
     </div>
   );

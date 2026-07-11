@@ -7,6 +7,7 @@ import {
   publishToPageFeed,
   publishPhotoToPage,
 } from "@/lib/services/meta-api.service";
+import { publishPostSchedule } from "@/lib/services/qstash.service";
 import { AppError, ErrorCodes } from "@/lib/errors";
 import type { ActionResult } from "@/types/api.types";
 import type { PostSummary, PostDetail } from "@/types/post.types";
@@ -311,4 +312,146 @@ export async function deletePost(
     }
     return { success: false, error: "Failed to delete post" };
   }
+}
+
+// ─────────────────────────────────────────────
+// Bulk Import
+// ─────────────────────────────────────────────
+
+export async function bulkImportPosts(data: {
+  fbPageId: string;
+  posts: { title?: string; body: string }[];
+  autoSchedule?: boolean;
+  startDate?: string;
+  endDate?: string;
+  postsPerDay?: number;
+}): Promise<ActionResult<{ imported: number; scheduled: number }>> {
+  try {
+    const userId = await requireUserId();
+
+    // Verify page belongs to user
+    const page = await prisma.fbPage.findFirst({
+      where: { id: data.fbPageId, userId },
+    });
+    if (!page) {
+      return { success: false, error: "Page not found", code: ErrorCodes.NOT_FOUND };
+    }
+
+    // Generate schedule slots if auto-scheduling
+    let scheduledDates: Date[] = [];
+    if (data.autoSchedule && data.startDate && data.endDate && data.postsPerDay) {
+      scheduledDates = generateScheduleSlots(
+        new Date(data.startDate),
+        new Date(data.endDate),
+        data.postsPerDay,
+        data.posts.length,
+      );
+    }
+
+    let importedCount = 0;
+    let scheduledCount = 0;
+
+    for (let index = 0; index < data.posts.length; index++) {
+      const postData = data.posts[index];
+      const scheduledAt = scheduledDates[index] || null;
+
+      // 1. Create Post
+      const post = await prisma.post.create({
+        data: {
+          userId,
+          fbPageId: data.fbPageId,
+          title: postData.title || `Imported Post #${index + 1}`,
+          body: postData.body,
+          status: scheduledAt ? "SCHEDULED" : "DRAFT",
+          aiGenerated: false,
+        },
+      });
+
+      importedCount++;
+
+      // 2. If scheduled, create schedule and enqueue with QStash
+      if (scheduledAt) {
+        const schedule = await prisma.schedule.create({
+          data: {
+            userId,
+            postId: post.id,
+            fbPageId: data.fbPageId,
+            scheduledAt,
+            status: "PENDING",
+            jitterSeconds: 0,
+          },
+        });
+
+        try {
+          const qstashMsgId = await publishPostSchedule(schedule.id, scheduledAt);
+          await prisma.schedule.update({
+            where: { id: schedule.id },
+            data: { qstashMsgId },
+          });
+          scheduledCount++;
+        } catch (err) {
+          console.error(`Failed to register QStash callback for schedule ${schedule.id}:`, err);
+          // Keep database schedule as-is or fallback
+        }
+      }
+    }
+
+    return {
+      success: true,
+      data: {
+        imported: importedCount,
+        scheduled: scheduledCount,
+      },
+    };
+  } catch (error) {
+    console.error("Bulk import failed:", error);
+    if (error instanceof AppError) {
+      return { success: false, error: error.message, code: error.code };
+    }
+    return { success: false, error: "Failed to import posts" };
+  }
+}
+
+/**
+ * Generate evenly-distributed schedule slots across a date range.
+ * Each day gets up to `postsPerDay` posts at randomized hours (8am–9pm range).
+ * No two posts share the same time slot.
+ */
+function generateScheduleSlots(
+  start: Date,
+  end: Date,
+  postsPerDay: number,
+  totalPosts: number,
+): Date[] {
+  const slots: Date[] = [];
+  const currentDate = new Date(start);
+  currentDate.setHours(0, 0, 0, 0);
+
+  const endDate = new Date(end);
+  endDate.setHours(23, 59, 59, 999);
+
+  while (currentDate <= endDate && slots.length < totalPosts) {
+    // Generate time slots for this day (between 8am and 9pm)
+    const daySlots: Date[] = [];
+    const hoursRange = [8, 10, 12, 14, 16, 18, 20]; // Possible posting hours
+
+    // Shuffle hours for randomness
+    const shuffled = hoursRange.sort(() => Math.random() - 0.5);
+    const selectedHours = shuffled.slice(0, postsPerDay);
+    selectedHours.sort((a, b) => a - b); // Sort chronologically
+
+    for (const hour of selectedHours) {
+      if (slots.length >= totalPosts) break;
+      const slotDate = new Date(currentDate);
+      slotDate.setHours(hour, Math.floor(Math.random() * 50) + 5, 0, 0); // Random minutes 5-54
+      daySlots.push(slotDate);
+    }
+
+    slots.push(...daySlots);
+
+    // Move to next day
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return slots;
 }
