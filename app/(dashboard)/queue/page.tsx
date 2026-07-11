@@ -7,28 +7,73 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { getSchedules, cancelSchedule, reschedulePost } from "@/actions/schedule.actions";
 import { publishPostNow } from "@/actions/post.actions";
+import { getPages } from "@/actions/page.actions";
 import type { ScheduleSummary } from "@/types/schedule.types";
 
 export default function QueuePage() {
   const [schedules, setSchedules] = useState<ScheduleSummary[]>([]);
+  const [pages, setPages] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [rescheduleTime, setRescheduleTime] = useState("");
 
+  // Filters State
+  const [filterPageId, setFilterPageId] = useState("ALL");
+  const [filterStatus, setFilterStatus] = useState("PENDING");
+  const [filterStartDate, setFilterStartDate] = useState("");
+  const [filterEndDate, setFilterEndDate] = useState("");
+  const [filterSearch, setFilterSearch] = useState("");
+
   const fetchQueue = async () => {
-    setLoading(true);
-    // Fetch only PENDING schedules for the publishing queue
-    const result = await getSchedules({ status: "PENDING", pageSize: 50 });
+    const result = await getSchedules({
+      status: filterStatus as any,
+      fbPageId: filterPageId !== "ALL" ? filterPageId : undefined,
+      startDate: filterStartDate || undefined,
+      endDate: filterEndDate || undefined,
+      search: filterSearch || undefined,
+      pageSize: 50,
+    });
     if (result.success) {
       setSchedules(result.data.items);
     }
-    setLoading(false);
+  };
+
+  const fetchData = async () => {
+    const [queueResult, pagesResult] = await Promise.all([
+      getSchedules({
+        status: filterStatus as any,
+        fbPageId: filterPageId !== "ALL" ? filterPageId : undefined,
+        startDate: filterStartDate || undefined,
+        endDate: filterEndDate || undefined,
+        search: filterSearch || undefined,
+        pageSize: 50,
+      }),
+      getPages(),
+    ]);
+
+    if (queueResult.success) {
+      setSchedules(queueResult.data.items);
+    }
+    if (pagesResult.success) {
+      setPages(pagesResult.data.map((p) => ({ id: p.id, name: p.name })));
+    }
   };
 
   useEffect(() => {
-    fetchQueue();
+    const init = async () => {
+      setLoading(true);
+      await fetchData();
+      setLoading(false);
+    };
+    init();
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      fetchQueue();
+    }
+  }, [filterPageId, filterStatus, filterStartDate, filterEndDate, filterSearch]);
 
   const handleForcePublish = async (scheduleId: string, postId: string) => {
     if (!confirm("Are you sure you want to force publish this post right now?")) return;
@@ -94,6 +139,110 @@ export default function QueuePage() {
         </p>
       </div>
 
+      {/* Filter Bar */}
+      <div className="rounded-xl border border-border/40 bg-card p-4 shadow-sm">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-5 items-end">
+          {/* Search */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Search Queue
+            </label>
+            <input
+              type="text"
+              placeholder="Search title, body..."
+              value={filterSearch}
+              onChange={(e) => setFilterSearch(e.target.value)}
+              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
+            />
+          </div>
+
+          {/* Page Filter */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Filter by Page
+            </label>
+            <select
+              value={filterPageId}
+              onChange={(e) => setFilterPageId(e.target.value)}
+              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+            >
+              <option value="ALL">All Pages</option>
+              {pages.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Queue Status
+            </label>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="PENDING">Pending (Scheduled)</option>
+              <option value="IN_PROGRESS">Publishing</option>
+              <option value="COMPLETED">Completed (Posted)</option>
+              <option value="FAILED">Failed</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </div>
+
+          {/* Start Date */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              From Date
+            </label>
+            <input
+              type="date"
+              value={filterStartDate}
+              onChange={(e) => setFilterStartDate(e.target.value)}
+              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+            />
+          </div>
+
+          {/* End Date & Reset */}
+          <div className="space-y-1.5 flex gap-2 items-end">
+            <div className="flex-1 space-y-1.5">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                To Date
+              </label>
+              <input
+                type="date"
+                value={filterEndDate}
+                onChange={(e) => setFilterEndDate(e.target.value)}
+                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+              />
+            </div>
+            {(filterPageId !== "ALL" ||
+              filterStatus !== "PENDING" ||
+              filterStartDate ||
+              filterEndDate ||
+              filterSearch) && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setFilterPageId("ALL");
+                  setFilterStatus("PENDING");
+                  setFilterStartDate("");
+                  setFilterEndDate("");
+                  setFilterSearch("");
+                }}
+                className="h-9 text-xs px-2 hover:bg-accent/80 hover:text-foreground text-muted-foreground"
+              >
+                Reset
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Queue items */}
       {schedules.length > 0 ? (
         <div className="space-y-4">
@@ -109,12 +258,12 @@ export default function QueuePage() {
                 {/* Left side: Post and Page Info */}
                 <div className="flex items-start gap-3 flex-1 min-w-0">
                   {/* Page avatar */}
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/50">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
                     {item.pageAvatarUrl ? (
                       <img
                         src={item.pageAvatarUrl}
                         alt={item.pageName}
-                        className="h-9 w-9 rounded-full object-cover"
+                        className="h-full w-full object-cover"
                       />
                     ) : (
                       <Globe className="h-4.5 w-4.5 text-muted-foreground" />
@@ -221,8 +370,24 @@ export default function QueuePage() {
       ) : (
         <EmptyState
           icon={ListChecks}
-          title="Queue is empty"
-          description="Posts scheduled for future times will appear here. Head over to Content to schedule a post."
+          title={
+            (filterPageId !== "ALL" ||
+            filterStatus !== "PENDING" ||
+            filterStartDate ||
+            filterEndDate ||
+            filterSearch)
+              ? "No matching queue items"
+              : "Queue is empty"
+          }
+          description={
+            (filterPageId !== "ALL" ||
+            filterStatus !== "PENDING" ||
+            filterStartDate ||
+            filterEndDate ||
+            filterSearch)
+              ? "Try adjusting your filter settings above to view other items."
+              : "Posts scheduled for future times will appear here. Head over to Content to schedule a post."
+          }
         />
       )}
     </div>

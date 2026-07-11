@@ -261,19 +261,47 @@ export async function reschedulePost(
  * Fetch list of schedules. Supports filtering by status or Facebook page.
  */
 export async function getSchedules(filters?: {
-  status?: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "FAILED" | "CANCELLED";
+  status?: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "FAILED" | "CANCELLED" | "ALL";
   fbPageId?: string;
+  startDate?: string;
+  endDate?: string;
+  search?: string;
   page?: number;
   pageSize?: number;
 }): Promise<ActionResult<{ items: ScheduleSummary[]; total: number }>> {
   try {
     const userId = await requireUserId();
     const page = filters?.page ?? 1;
-    const pageSize = filters?.pageSize ?? 30;
+    const pageSize = filters?.pageSize ?? 50; // default to 50 for queue list
 
-    const where: Record<string, unknown> = { userId };
-    if (filters?.status) where.status = filters.status;
-    if (filters?.fbPageId) where.fbPageId = filters.fbPageId;
+    const where: any = { userId };
+    if (filters?.status && filters.status !== "ALL") {
+      where.status = filters.status;
+    }
+    if (filters?.fbPageId && filters.fbPageId !== "ALL") {
+      where.fbPageId = filters.fbPageId;
+    }
+
+    if (filters?.startDate || filters?.endDate) {
+      where.scheduledAt = {};
+      if (filters.startDate) {
+        where.scheduledAt.gte = new Date(filters.startDate);
+      }
+      if (filters.endDate) {
+        const end = new Date(filters.endDate);
+        end.setHours(23, 59, 59, 999);
+        where.scheduledAt.lte = end;
+      }
+    }
+
+    if (filters?.search) {
+      where.post = {
+        OR: [
+          { title: { contains: filters.search, mode: "insensitive" } },
+          { body: { contains: filters.search, mode: "insensitive" } },
+        ],
+      };
+    }
 
     const [schedules, total] = await Promise.all([
       prisma.schedule.findMany({
