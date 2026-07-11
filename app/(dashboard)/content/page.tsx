@@ -9,11 +9,13 @@ import { PostComposer } from "@/components/content/post-composer";
 import { PostCard } from "@/components/content/post-card";
 import { AiGenerateDialog } from "@/components/content/ai-generate-dialog";
 import { BulkImportDialog } from "@/components/content/bulk-import-dialog";
+import { EditPostDialog } from "@/components/content/edit-post-dialog";
 import {
   getPosts,
   createPost,
   publishPostNow,
   deletePost,
+  updatePost,
 } from "@/actions/post.actions";
 import { getPages } from "@/actions/page.actions";
 import { schedulePost } from "@/actions/schedule.actions";
@@ -26,6 +28,7 @@ export default function ContentPage() {
   const [showComposer, setShowComposer] = useState(false);
   const [aiGenerateOpen, setAiGenerateOpen] = useState(false);
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState<PostSummary | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [schedulingPostId, setSchedulingPostId] = useState<string | null>(null);
   const [scheduleTime, setScheduleTime] = useState("");
@@ -338,6 +341,7 @@ export default function ContentPage() {
               onPublish={handlePublishExisting}
               onSchedule={setSchedulingPostId}
               onDelete={handleDelete}
+              onEdit={setEditingPost}
             />
           ))}
         </div>
@@ -421,6 +425,15 @@ export default function ContentPage() {
         onClose={() => setBulkImportOpen(false)}
         pages={pages}
         onImported={fetchData}
+      />
+
+      {/* Edit Post Dialog */}
+      <EditPostDialog
+        post={editingPost}
+        open={!!editingPost}
+        onClose={() => setEditingPost(null)}
+        pages={pages}
+        onSaved={fetchData}
       />
     </div>
   );

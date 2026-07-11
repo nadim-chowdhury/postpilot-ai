@@ -1,4 +1,4 @@
-import { FileText, Globe, Trash2, Calendar } from "lucide-react";
+import { FileText, Globe, Trash2, Calendar, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { PostSummary } from "@/types/post.types";
@@ -8,9 +8,10 @@ interface PostCardProps {
   onPublish?: (postId: string) => void;
   onSchedule?: (postId: string) => void;
   onDelete?: (postId: string) => void;
+  onEdit?: (post: PostSummary) => void;
 }
 
-export function PostCard({ post, onPublish, onSchedule, onDelete }: PostCardProps) {
+export function PostCard({ post, onPublish, onSchedule, onDelete, onEdit }: PostCardProps) {
   const statusVariant = post.status.toLowerCase() as
     | "draft"
     | "approved"
@@ -105,6 +106,17 @@ export function PostCard({ post, onPublish, onSchedule, onDelete }: PostCardProp
             >
               <Calendar className="h-3 w-3" />
               Schedule
+            </Button>
+          )}
+          {post.status !== "POSTED" && post.status !== "PUBLISHING" && onEdit && (
+            <Button
+              variant="outline"
+              size="xs"
+              className="gap-1 text-muted-foreground hover:text-foreground"
+              onClick={() => onEdit(post)}
+            >
+              <Edit2 className="h-3 w-3" />
+              Edit
             </Button>
           )}
           {onDelete && (

@@ -188,6 +188,7 @@ export async function createPost(data: {
 export async function updatePost(
   postId: string,
   data: {
+    fbPageId?: string;
     title?: string;
     body?: string;
     mediaUrl?: string;
@@ -198,20 +199,44 @@ export async function updatePost(
     const userId = await requireUserId();
 
     const post = await prisma.post.findFirst({
-      where: { id: postId, userId, status: { in: ["DRAFT", "APPROVED"] } },
+      where: {
+        id: postId,
+        userId,
+        status: { in: ["DRAFT", "APPROVED", "SCHEDULED", "FAILED"] },
+      },
     });
 
     if (!post) {
       return {
         success: false,
-        error: "Post not found or cannot be edited",
+        error: "Post not found or cannot be edited (already published or publishing)",
         code: ErrorCodes.NOT_FOUND,
       };
     }
 
+    // Verify page belongs to user if provided
+    if (data.fbPageId) {
+      const page = await prisma.fbPage.findFirst({
+        where: { id: data.fbPageId, userId },
+      });
+      if (!page) {
+        return {
+          success: false,
+          error: "Selected page not found",
+          code: ErrorCodes.NOT_FOUND,
+        };
+      }
+    }
+
     await prisma.post.update({
       where: { id: postId },
-      data,
+      data: {
+        fbPageId: data.fbPageId,
+        title: data.title,
+        body: data.body,
+        mediaUrl: data.mediaUrl,
+        mediaType: data.mediaType,
+      },
     });
 
     return { success: true, data: { id: postId } };
