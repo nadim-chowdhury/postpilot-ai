@@ -127,16 +127,7 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold text-foreground">{page.name}</h3>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
-                        <span>
-                          <strong className="text-foreground/70">Topic:</strong> {page.topic || "None"}
-                        </span>
-                        {page.personaPrompt && (
-                          <span className="max-w-xs truncate" title={page.personaPrompt}>
-                            <strong className="text-foreground/70">Description:</strong> {page.personaPrompt}
-                          </span>
-                        )}
-                      </div>
+                      <p className="text-xs text-muted-foreground">Facebook Page Settings</p>
                     </div>
                   </div>
 
