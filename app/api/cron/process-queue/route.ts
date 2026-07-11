@@ -2,8 +2,15 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { publishPostNow } from "@/actions/post.actions";
 import { logActivity } from "@/actions/activity.actions";
+import { limitRequest } from "@/lib/services/rate-limit.service";
 
 export async function GET(request: Request) {
+  // Rate limiting (max 5 hits per minute for safety sweeper)
+  const rateLimit = await limitRequest("cron:process-queue", 5, 60);
+  if (!rateLimit.success) {
+    return new Response("Too Many Requests", { status: 429 });
+  }
+
   // Validate Cron secret
   const cronSecret = process.env.CRON_SECRET;
   const authHeader = request.headers.get("Authorization");
