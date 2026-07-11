@@ -10,8 +10,9 @@ export const authOptions: AuthOptions = {
       clientSecret: process.env.META_APP_SECRET!,
       authorization: {
         params: {
-          scope: metaApiConfig.scopes.join(","),
-          ...(process.env.META_CONFIG_ID ? { config_id: process.env.META_CONFIG_ID } : {}),
+          ...(process.env.META_CONFIG_ID
+            ? { config_id: process.env.META_CONFIG_ID }
+            : { scope: metaApiConfig.scopes.join(",") }),
         },
       },
     }),
