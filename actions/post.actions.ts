@@ -260,7 +260,7 @@ export async function publishPostNowInternal(
     const post = await prisma.post.findFirst({
       where: {
         id: postId,
-        status: { in: ["DRAFT", "APPROVED", "SCHEDULED"] },
+        status: { in: ["DRAFT", "APPROVED", "SCHEDULED", "FAILED"] },
       },
       include: {
         fbPage: { select: { id: true, metaPageId: true, accessToken: true, status: true } },

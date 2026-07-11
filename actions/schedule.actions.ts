@@ -33,10 +33,10 @@ export async function schedulePost(
       throw new AppError(ErrorCodes.NOT_FOUND, "Post not found", 404);
     }
 
-    if (post.status !== "DRAFT" && post.status !== "APPROVED") {
+    if (post.status !== "DRAFT" && post.status !== "APPROVED" && post.status !== "FAILED") {
       throw new AppError(
         ErrorCodes.VALIDATION_ERROR,
-        "Only draft or approved posts can be scheduled",
+        "Only draft, approved, or failed posts can be scheduled",
         400,
       );
     }
