@@ -171,7 +171,7 @@ export function CalendarView({
                 <div
                   key={`curr-${day}`}
                   className={`min-h-24 p-2 transition-colors hover:bg-muted/10 border-t ${
-                    isToday ? "bg-brand/5 border-brand/20" : ""
+                    isToday ? "bg-brand/5 border-brand/20 border-l" : ""
                   }`}
                 >
                   <div className="flex justify-between items-center mb-1">

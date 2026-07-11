@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, Sparkles, AlertCircle, RefreshCw, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/shared/spinner";
 import { generateSinglePost } from "@/actions/ai.actions";
 import { createPost } from "@/actions/post.actions";
 import type { GeneratedPostType } from "@/lib/services/ai.service";
@@ -175,7 +176,7 @@ export function AiGenerateDialog({
               >
                 {loading ? (
                   <>
-                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    <Spinner size="sm" className="border-t-brand-foreground" />
                     Generating…
                   </>
                 ) : (

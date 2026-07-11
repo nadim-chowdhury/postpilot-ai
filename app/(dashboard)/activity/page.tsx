@@ -5,6 +5,7 @@ import { Activity } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ActivityItem } from "@/components/activity/activity-item";
 import { getActivities } from "@/actions/activity.actions";
+import { Spinner } from "@/components/shared/spinner";
 import type { ActivityEntry } from "@/actions/activity.actions";
 
 export default function ActivityPage() {
@@ -63,7 +64,7 @@ export default function ActivityPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-brand" />
+          <Spinner size="md" />
         </div>
       ) : activities.length > 0 ? (
         <div className="rounded-xl border border-border/50 bg-card">

@@ -6,6 +6,7 @@ import { StatCard } from "@/components/shared/stat-card";
 import { ActivityItem } from "@/components/activity/activity-item";
 import { getDashboardStats } from "@/actions/dashboard.actions";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { Spinner } from "@/components/shared/spinner";
 import type { DashboardStats } from "@/actions/dashboard.actions";
 
 export default function DashboardPage() {
@@ -27,7 +28,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-brand" />
+        <Spinner size="md" />
       </div>
     );
   }

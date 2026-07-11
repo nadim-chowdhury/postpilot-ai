@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getSchedules, cancelSchedule, reschedulePost } from "@/actions/schedule.actions";
 import { CalendarView } from "@/components/calendar/calendar-view";
+import { Spinner } from "@/components/shared/spinner";
 import type { ScheduleSummary } from "@/types/schedule.types";
 
 export default function CalendarPage() {
@@ -44,7 +45,7 @@ export default function CalendarPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-brand" />
+        <Spinner size="md" />
       </div>
     );
   }

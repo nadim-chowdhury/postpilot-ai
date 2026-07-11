@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { LogOut, User } from "lucide-react";
+import { Spinner } from "@/components/shared/spinner";
 import { cn } from "@/lib/utils";
 
 interface UserMenuProps {
@@ -14,7 +15,7 @@ export function UserMenu({ collapsed }: UserMenuProps) {
   if (status === "loading") {
     return (
       <div className="flex items-center justify-center p-2">
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted border-t-brand" />
+        <Spinner size="sm" />
       </div>
     );
   }

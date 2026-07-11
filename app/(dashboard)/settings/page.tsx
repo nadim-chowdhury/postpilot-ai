@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Settings, Save, Sparkles, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPages, updatePage } from "@/actions/page.actions";
+import { Spinner } from "@/components/shared/spinner";
 import type { PageSummary } from "@/types/page.types";
 
 export default function SettingsPage() {
@@ -80,7 +81,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-brand" />
+        <Spinner size="md" />
       </div>
     );
   }
