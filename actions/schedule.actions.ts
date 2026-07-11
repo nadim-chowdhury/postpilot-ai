@@ -133,10 +133,10 @@ export async function cancelSchedule(
       throw new AppError(ErrorCodes.NOT_FOUND, "Schedule record not found", 404);
     }
 
-    if (schedule.status !== "PENDING") {
+    if (schedule.status !== "PENDING" && schedule.status !== "FAILED") {
       throw new AppError(
         ErrorCodes.VALIDATION_ERROR,
-        "Only pending schedules can be cancelled",
+        "Only pending or failed schedules can be cancelled",
         400,
       );
     }
@@ -190,16 +190,20 @@ export async function reschedulePost(
     const userId = await requireUserId();
 
     const schedule = await prisma.schedule.findFirst({
-      where: { id: scheduleId, userId, status: "PENDING" },
+      where: {
+        id: scheduleId,
+        userId,
+        status: { in: ["PENDING", "FAILED", "CANCELLED"] },
+      },
       include: { post: { include: { fbPage: true } } },
     });
 
     if (!schedule) {
-      throw new AppError(ErrorCodes.NOT_FOUND, "Pending schedule not found", 404);
+      throw new AppError(ErrorCodes.NOT_FOUND, "Schedule not found", 404);
     }
 
-    // Cancel old QStash scheduling
-    if (schedule.qstashMsgId) {
+    // Cancel old QStash scheduling if it was pending
+    if (schedule.status === "PENDING" && schedule.qstashMsgId) {
       await cancelPostSchedule(schedule.qstashMsgId);
     }
 
@@ -220,15 +224,25 @@ export async function reschedulePost(
     // Register new QStash callback
     const newQstashMsgId = await publishPostSchedule(scheduleId, newJitteredTime);
 
-    // Update database schedule details
-    await prisma.schedule.update({
-      where: { id: scheduleId },
-      data: {
-        scheduledAt: newJitteredTime,
-        jitterSeconds,
-        qstashMsgId: newQstashMsgId,
-      },
-    });
+    // Update database schedule and associated post details
+    await prisma.$transaction([
+      prisma.schedule.update({
+        where: { id: scheduleId },
+        data: {
+          scheduledAt: newJitteredTime,
+          jitterSeconds,
+          qstashMsgId: newQstashMsgId,
+          status: "PENDING",
+          errorMessage: null,
+        },
+      }),
+      prisma.post.update({
+        where: { id: schedule.postId },
+        data: {
+          status: "SCHEDULED",
+        },
+      }),
+    ]);
 
     // Log Activity
     await logActivity({
@@ -422,6 +436,89 @@ export async function triggerQueueSweeper(): Promise<ActionResult<{ processed: n
       return { success: false, error: error.message, code: error.code };
     }
     return { success: false, error: "Failed to trigger queue sweeper" };
+  }
+}
+
+/**
+ * Force publish a scheduled post immediately, updating both schedule and post status.
+ */
+export async function forcePublishSchedule(
+  scheduleId: string,
+): Promise<ActionResult<{ fbPostId: string }>> {
+  try {
+    const userId = await requireUserId();
+
+    const schedule = await prisma.schedule.findFirst({
+      where: { id: scheduleId, userId },
+      include: { post: true },
+    });
+
+    if (!schedule) {
+      throw new AppError(ErrorCodes.NOT_FOUND, "Schedule record not found", 404);
+    }
+
+    // Cancel QStash schedule if pending
+    if (schedule.status === "PENDING" && schedule.qstashMsgId) {
+      await cancelPostSchedule(schedule.qstashMsgId);
+    }
+
+    // Mark schedule as IN_PROGRESS
+    await prisma.schedule.update({
+      where: { id: scheduleId },
+      data: { status: "IN_PROGRESS" },
+    });
+
+    // Execute direct publishing
+    const { publishPostNowInternal } = await import("@/actions/post.actions");
+    const result = await publishPostNowInternal(schedule.postId);
+
+    if (result.success) {
+      await prisma.schedule.update({
+        where: { id: scheduleId },
+        data: {
+          status: "COMPLETED",
+          publishedAt: new Date(),
+          errorMessage: null,
+        },
+      });
+
+      await logActivity({
+        userId,
+        entityType: "schedule",
+        entityId: scheduleId,
+        action: "post.published",
+        metadata: {
+          postTitle: schedule.post.title || "Untitled",
+          note: "Published via force publish",
+        },
+      });
+
+      return { success: true, data: { fbPostId: result.data.fbPostId } };
+    } else {
+      throw new Error(result.error || "Publishing action failed");
+    }
+  } catch (error: any) {
+    console.error(`[Force Publish] Failed for schedule ${scheduleId}:`, error);
+    
+    // Restore schedule to FAILED
+    await prisma.$transaction([
+      prisma.schedule.update({
+        where: { id: scheduleId },
+        data: {
+          status: "FAILED",
+          errorMessage: `Force publish failed: ${error.message || "Unknown error"}`,
+        },
+      }),
+      prisma.post.update({
+        where: { id: scheduleId },
+        data: { status: "FAILED" },
+      }).catch(() => {}),
+    ]);
+
+    if (error instanceof AppError) {
+      return { success: false, error: error.message, code: error.code };
+    }
+    return { success: false, error: error.message || "Failed to force publish scheduled post" };
   }
 }
 

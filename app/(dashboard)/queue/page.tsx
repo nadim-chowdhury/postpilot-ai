@@ -5,7 +5,7 @@ import { ListChecks, Clock, Send, Ban, RefreshCw, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { getSchedules, cancelSchedule, reschedulePost, triggerQueueSweeper } from "@/actions/schedule.actions";
+import { getSchedules, cancelSchedule, reschedulePost, triggerQueueSweeper, forcePublishSchedule } from "@/actions/schedule.actions";
 import { publishPostNow } from "@/actions/post.actions";
 import { getPages } from "@/actions/page.actions";
 import type { ScheduleSummary } from "@/types/schedule.types";
@@ -92,18 +92,12 @@ export default function QueuePage() {
     if (!confirm("Are you sure you want to force publish this post right now?")) return;
     setActionLoading(scheduleId);
     
-    // First cancel the QStash schedule
-    const cancelResult = await cancelSchedule(scheduleId);
-    if (cancelResult.success) {
-      // Then publish immediately
-      const publishResult = await publishPostNow(postId);
-      if (publishResult.success) {
-        await fetchQueue();
-      } else {
-        alert(publishResult.error || "Failed to publish post immediately");
-      }
+    // Call the dedicated force publish action which handles pending/failed/cancelled states
+    const result = await forcePublishSchedule(scheduleId);
+    if (result.success) {
+      await fetchQueue();
     } else {
-      alert(cancelResult.error || "Failed to cancel scheduled queue item");
+      alert(result.error || "Failed to publish post immediately");
     }
     setActionLoading(null);
   };
@@ -312,7 +306,7 @@ export default function QueuePage() {
                           minute: "2-digit",
                         })}
                       </span>
-                      <StatusBadge status="pending" className="py-0 h-4 text-[9px]" />
+                      <StatusBadge status={item.status.toLowerCase() as any} className="py-0 h-4 text-[9px]" />
                     </div>
 
                     {item.postTitle && (
@@ -354,39 +348,43 @@ export default function QueuePage() {
                     </div>
                   ) : (
                     <>
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        className="gap-1"
-                        onClick={() => {
-                          setEditingId(item.id);
-                          // Initialize with local time string for input
-                          const localIso = new Date(item.scheduledAt).toISOString().substring(0, 16);
-                          setRescheduleTime(localIso);
-                        }}
-                        disabled={isLoading}
-                      >
-                        <RefreshCw className="h-3 w-3" /> Reschedule
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        className="gap-1 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/5"
-                        onClick={() => handleForcePublish(item.id, item.postId)}
-                        disabled={isLoading}
-                      >
-                        <Send className="h-3 w-3" /> Publish Now
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => handleCancel(item.id)}
-                        disabled={isLoading}
-                        title="Cancel Schedule"
-                      >
-                        <Ban className="h-3.5 w-3.5" />
-                      </Button>
+                      {item.status !== "COMPLETED" && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            className="gap-1"
+                            onClick={() => {
+                              setEditingId(item.id);
+                              // Initialize with local time string for input
+                              const localIso = new Date(item.scheduledAt).toISOString().substring(0, 16);
+                              setRescheduleTime(localIso);
+                            }}
+                            disabled={isLoading}
+                          >
+                            <RefreshCw className="h-3 w-3" /> Reschedule
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            className="gap-1 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/5"
+                            onClick={() => handleForcePublish(item.id, item.postId)}
+                            disabled={isLoading}
+                          >
+                            <Send className="h-3 w-3" /> Publish Now
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => handleCancel(item.id)}
+                            disabled={isLoading}
+                            title="Cancel Schedule"
+                          >
+                            <Ban className="h-3.5 w-3.5" />
+                          </Button>
+                        </>
+                      )}
                     </>
                   )}
                 </div>

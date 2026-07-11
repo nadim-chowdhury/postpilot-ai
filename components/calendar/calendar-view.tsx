@@ -288,7 +288,7 @@ export function CalendarView({
             </div>
 
             {/* Reschedule forms */}
-            {selectedPost.status === "PENDING" && onReschedule && (
+            {(selectedPost.status === "PENDING" || selectedPost.status === "FAILED" || selectedPost.status === "CANCELLED") && onReschedule && (
               <div className="space-y-3">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 block">
                   Reschedule Post
@@ -314,7 +314,7 @@ export function CalendarView({
 
             {/* Action buttons */}
             <div className="flex justify-between items-center pt-2">
-              {selectedPost.status === "PENDING" && onCancelSchedule && (
+              {(selectedPost.status === "PENDING" || selectedPost.status === "FAILED") && onCancelSchedule && (
                 <Button
                   variant="destructive"
                   size="xs"
