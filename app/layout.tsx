@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { StoreProvider } from "@/components/providers/store-provider";
+import { SessionProvider } from "@/components/providers/session-provider";
 import { siteConfig } from "@/config/site";
 import "./globals.css";
 
@@ -38,7 +39,9 @@ export default function RootLayout({
     >
       <body className="min-h-full" suppressHydrationWarning>
         <ThemeProvider>
-          <StoreProvider>{children}</StoreProvider>
+          <SessionProvider>
+            <StoreProvider>{children}</StoreProvider>
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>

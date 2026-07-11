@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession, signOut } from "next-auth/react";
 import { LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -8,10 +9,19 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ collapsed }: UserMenuProps) {
-  // TODO: Replace with actual session data from NextAuth
-  const user = {
-    name: "Admin",
-    email: "admin@postpilot.ai",
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center p-2">
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted border-t-brand" />
+      </div>
+    );
+  }
+
+  const user = session?.user || {
+    name: "Guest User",
+    email: "not-signed-in@postpilot.ai",
     image: null as string | null,
   };
 
@@ -27,7 +37,7 @@ export function UserMenu({ collapsed }: UserMenuProps) {
         {user.image ? (
           <img
             src={user.image}
-            alt={user.name}
+            alt={user.name || "User Avatar"}
             className="h-8 w-8 rounded-full object-cover"
           />
         ) : (
@@ -39,13 +49,14 @@ export function UserMenu({ collapsed }: UserMenuProps) {
         <>
           <div className="flex-1 truncate">
             <p className="truncate text-sm font-medium text-foreground">
-              {user.name}
+              {user.name || "User"}
             </p>
             <p className="truncate text-xs text-muted-foreground">
-              {user.email}
+              {user.email || ""}
             </p>
           </div>
           <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
             className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             title="Sign out"
           >
