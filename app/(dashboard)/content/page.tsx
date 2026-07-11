@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { FileText, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Spinner } from "@/components/shared/spinner";
 import { PostComposer } from "@/components/content/post-composer";
 import { PostCard } from "@/components/content/post-card";
 import { AiGenerateDialog } from "@/components/content/ai-generate-dialog";
@@ -126,7 +127,7 @@ export default function ContentPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-brand" />
+        <Spinner size="md" />
       </div>
     );
   }
@@ -154,7 +155,6 @@ export default function ContentPage() {
             className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90"
             onClick={() => setShowComposer(!showComposer)}
           >
-            <Plus className="h-4 w-4" />
             {showComposer ? "Hide Composer" : "Create Post"}
           </Button>
         </div>
