@@ -337,3 +337,91 @@ export async function getSchedules(filters?: {
     return { success: false, error: "Failed to fetch schedules" };
   }
 }
+
+/**
+ * Manually trigger the safety sweeper queue processor to publish any missed/pending posts.
+ */
+export async function triggerQueueSweeper(): Promise<ActionResult<{ processed: number }>> {
+  try {
+    const userId = await requireUserId();
+
+    // Find missed PENDING schedules (scheduled in the past)
+    const missedSchedules = await prisma.schedule.findMany({
+      where: {
+        userId,
+        status: "PENDING",
+        scheduledAt: {
+          lte: new Date(), // Any scheduled time that has already passed!
+        },
+      },
+      include: { post: { include: { fbPage: true } } },
+    });
+
+    if (missedSchedules.length === 0) {
+      return { success: true, data: { processed: 0 } };
+    }
+
+    let processed = 0;
+    const { publishPostNow } = await import("@/actions/post.actions");
+
+    for (const schedule of missedSchedules) {
+      try {
+        await prisma.schedule.update({
+          where: { id: schedule.id },
+          data: { status: "IN_PROGRESS" },
+        });
+
+        const result = await publishPostNow(schedule.postId);
+
+        if (result.success) {
+          await prisma.schedule.update({
+            where: { id: schedule.id },
+            data: {
+              status: "COMPLETED",
+              publishedAt: new Date(),
+              errorMessage: null,
+            },
+          });
+
+          await logActivity({
+            userId: schedule.userId,
+            entityType: "schedule",
+            entityId: schedule.id,
+            action: "post.published",
+            metadata: {
+              postTitle: schedule.post.title || "Untitled",
+              pageName: schedule.post.fbPage.name,
+              note: "Published by manual queue sweeper",
+            },
+          });
+          processed++;
+        } else {
+          throw new Error(result.error || "Publishing failed");
+        }
+      } catch (err: any) {
+        console.error(`[Manual Sweeper] Failed recovery for schedule ${schedule.id}:`, err);
+        await prisma.$transaction([
+          prisma.schedule.update({
+            where: { id: schedule.id },
+            data: {
+              status: "FAILED",
+              errorMessage: `Manual sweeper recovery failed: ${err.message || "Unknown error"}`,
+            },
+          }),
+          prisma.post.update({
+            where: { id: schedule.postId },
+            data: { status: "FAILED" },
+          }),
+        ]);
+      }
+    }
+
+    return { success: true, data: { processed } };
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      return { success: false, error: error.message, code: error.code };
+    }
+    return { success: false, error: "Failed to trigger queue sweeper" };
+  }
+}
+

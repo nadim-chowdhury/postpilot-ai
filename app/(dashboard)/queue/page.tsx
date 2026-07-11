@@ -5,7 +5,7 @@ import { ListChecks, Clock, Send, Ban, RefreshCw, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { getSchedules, cancelSchedule, reschedulePost } from "@/actions/schedule.actions";
+import { getSchedules, cancelSchedule, reschedulePost, triggerQueueSweeper } from "@/actions/schedule.actions";
 import { publishPostNow } from "@/actions/post.actions";
 import { getPages } from "@/actions/page.actions";
 import type { ScheduleSummary } from "@/types/schedule.types";
@@ -17,6 +17,19 @@ export default function QueuePage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [rescheduleTime, setRescheduleTime] = useState("");
+  const [sweeperLoading, setSweeperLoading] = useState(false);
+
+  const handleRunSweeper = async () => {
+    setSweeperLoading(true);
+    const result = await triggerQueueSweeper();
+    setSweeperLoading(false);
+    if (result.success) {
+      alert(`Queue sweeper ran successfully! Processed/Published ${result.data.processed} overdue post(s).`);
+      await fetchQueue();
+    } else {
+      alert(result.error || "Failed to execute queue sweeper");
+    }
+  };
 
   // Filters State
   const [filterPageId, setFilterPageId] = useState("ALL");
@@ -132,11 +145,25 @@ export default function QueuePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h2 className="text-lg font-semibold text-foreground">Queue</h2>
-        <p className="text-sm text-muted-foreground">
-          Review, reschedule, or cancel posts before they go live on Facebook.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Queue</h2>
+          <p className="text-sm text-muted-foreground">
+            Review, reschedule, or cancel posts before they go live on Facebook.
+          </p>
+        </div>
+        <Button
+          onClick={handleRunSweeper}
+          disabled={sweeperLoading}
+          className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90"
+        >
+          {sweeperLoading ? (
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-brand" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+          Run Queue Sweeper
+        </Button>
       </div>
 
       {/* Filter Bar */}
