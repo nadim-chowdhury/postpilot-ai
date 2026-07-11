@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, Globe, Check, Search, Cpu, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/shared/spinner";
 
 interface AvailablePage {
   id: string;
@@ -272,15 +273,16 @@ export function ConnectPageDialog({
                 {selected.size} page{selected.size !== 1 ? "s" : ""} selected
               </p>
               <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={onClose}>
+                <Button variant="ghost" size="sm" onClick={onClose} disabled={loading}>
                   Cancel
                 </Button>
                 <Button
                   size="sm"
-                  className="bg-brand text-brand-foreground hover:bg-brand/90"
+                  className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90"
                   onClick={handleConnect}
                   disabled={selected.size === 0 || loading}
                 >
+                  {loading && <Spinner size="sm" className="border-t-current" />}
                   {loading ? "Connecting…" : "Connect"}
                 </Button>
               </div>
@@ -351,16 +353,17 @@ export function ConnectPageDialog({
 
             {/* Footer */}
             <div className="mt-5 flex items-center justify-end gap-2 border-t border-border/50 pt-4">
-              <Button variant="ghost" size="sm" type="button" onClick={onClose}>
+              <Button variant="ghost" size="sm" type="button" onClick={onClose} disabled={manualLoading}>
                 Cancel
               </Button>
               <Button
                 size="sm"
                 type="submit"
-                className="bg-brand text-brand-foreground hover:bg-brand/90"
+                className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90"
                 disabled={manualLoading}
               >
-                {manualLoading ? "Verifying & Connecting…" : "Connect Manually"}
+                {manualLoading && <Spinner size="sm" className="border-t-current" />}
+                {manualLoading ? "Connecting…" : "Connect Manually"}
               </Button>
             </div>
           </form>

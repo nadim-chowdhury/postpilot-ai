@@ -115,17 +115,30 @@ export async function fetchAvailablePages(): Promise<
   >
 > {
   try {
-    await requireUserId();
+    const userId = await requireUserId();
     const userAccessToken = await requireUserAccessToken();
 
-    const metaPages = await fetchUserPages(userAccessToken);
+    const [metaPages, connectedPages] = await Promise.all([
+      fetchUserPages(userAccessToken),
+      prisma.fbPage.findMany({
+        where: {
+          userId,
+          status: { in: ["ACTIVE", "PAUSED", "TOKEN_EXPIRING"] },
+        },
+        select: { metaPageId: true },
+      }),
+    ]);
 
-    const available = metaPages.map((p) => ({
-      id: p.id,
-      name: p.name,
-      category: p.category,
-      avatarUrl: p.avatarUrl,
-    }));
+    const connectedMetaIds = new Set(connectedPages.map((p) => p.metaPageId));
+
+    const available = metaPages
+      .filter((p) => !connectedMetaIds.has(p.id))
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        avatarUrl: p.avatarUrl,
+      }));
 
     return { success: true, data: available };
   } catch (error) {
