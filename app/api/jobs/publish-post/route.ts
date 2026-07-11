@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Receiver } from "@upstash/qstash";
 import { prisma } from "@/lib/prisma";
-import { publishPostNow } from "@/actions/post.actions";
+import { publishPostNowInternal } from "@/actions/post.actions";
 import { logActivity } from "@/actions/activity.actions";
 import { MAX_RETRY_ATTEMPTS } from "@/lib/constants";
 
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     });
 
     // Execute direct Meta API publishing action from Phase 1B
-    const publishResult = await publishPostNow(schedule.postId);
+    const publishResult = await publishPostNowInternal(schedule.postId);
 
     if (!publishResult.success) {
       throw new Error(publishResult.error || "Meta publishing action failed");

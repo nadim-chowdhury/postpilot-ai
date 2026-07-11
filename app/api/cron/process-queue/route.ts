@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { publishPostNow } from "@/actions/post.actions";
+import { publishPostNowInternal } from "@/actions/post.actions";
 import { logActivity } from "@/actions/activity.actions";
 import { limitRequest } from "@/lib/services/rate-limit.service";
 
@@ -57,7 +57,7 @@ export async function GET(request: Request) {
       });
 
       // Execute publishing
-      const result = await publishPostNow(schedule.postId);
+      const result = await publishPostNowInternal(schedule.postId);
 
       if (result.success) {
         await prisma.schedule.update({

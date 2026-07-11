@@ -249,19 +249,17 @@ export async function updatePost(
 }
 
 /**
- * Immediately publish a post to Facebook.
+ * Internal helper to immediately publish a post to Facebook without a session check.
+ * Use for background jobs and cron safety nets.
  */
-export async function publishPostNow(
+export async function publishPostNowInternal(
   postId: string,
 ): Promise<ActionResult<{ fbPostId: string }>> {
   try {
-    const userId = await requireUserId();
-
     // Get the post with its target page
     const post = await prisma.post.findFirst({
       where: {
         id: postId,
-        userId,
         status: { in: ["DRAFT", "APPROVED", "SCHEDULED"] },
       },
       include: {
@@ -336,6 +334,38 @@ export async function publishPostNow(
 
       throw publishError;
     }
+  } catch (error) {
+    console.error(`[publishPostNowInternal] Error publishing post ${postId}:`, error);
+    if (error instanceof AppError) {
+      return { success: false, error: error.message, code: error.code };
+    }
+    return { success: false, error: "Failed to publish post" };
+  }
+}
+
+/**
+ * Immediately publish a post to Facebook (User-facing action).
+ */
+export async function publishPostNow(
+  postId: string,
+): Promise<ActionResult<{ fbPostId: string }>> {
+  try {
+    const userId = await requireUserId();
+
+    // Verify post ownership
+    const post = await prisma.post.findFirst({
+      where: { id: postId, userId },
+    });
+
+    if (!post) {
+      return {
+        success: false,
+        error: "Post not found or unauthorized",
+        code: ErrorCodes.NOT_FOUND,
+      };
+    }
+
+    return publishPostNowInternal(postId);
   } catch (error) {
     if (error instanceof AppError) {
       return { success: false, error: error.message, code: error.code };
