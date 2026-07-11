@@ -7,13 +7,15 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { PageCard } from "@/components/pages/page-card";
 import { ConnectPageDialog } from "@/components/pages/connect-page-dialog";
 import { EditPageDialog } from "@/components/pages/edit-page-dialog";
-import { getPages, togglePageStatus, disconnectPage, updatePage } from "@/actions/page.actions";
+import { getPages, togglePageStatus, disconnectPage, updatePage, fetchAvailablePages, connectPages } from "@/actions/page.actions";
 import type { PageSummary } from "@/types/page.types";
 
 export default function PagesPage() {
   const [pages, setPages] = useState<PageSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [connectOpen, setConnectOpen] = useState(false);
+  const [availablePages, setAvailablePages] = useState<any[]>([]);
+  const [fetchingAvailable, setFetchingAvailable] = useState(false);
   const [editPage, setEditPage] = useState<PageSummary | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -29,6 +31,34 @@ export default function PagesPage() {
   useEffect(() => {
     fetchPages();
   }, []);
+
+  const handleOpenConnect = async () => {
+    setConnectOpen(true);
+    setFetchingAvailable(true);
+    const result = await fetchAvailablePages();
+    if (result.success) {
+      setAvailablePages(result.data);
+    } else {
+      alert(result.error || "Failed to load pages from Facebook. Make sure you are logged in.");
+      setConnectOpen(false);
+    }
+    setFetchingAvailable(false);
+  };
+
+  const handleConnectPages = async (
+    selectedPages: { metaPageId: string; name: string; topic: string; avatarUrl?: string }[],
+  ) => {
+    setActionLoading(true);
+    const result = await connectPages(selectedPages);
+
+    if (result.success) {
+      setConnectOpen(false);
+      await fetchPages();
+    } else {
+      alert(result.error || "Failed to connect pages");
+    }
+    setActionLoading(false);
+  };
 
   const handleToggleStatus = async (pageId: string) => {
     setActionLoading(true);
@@ -82,7 +112,7 @@ export default function PagesPage() {
         </div>
         <Button
           className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90"
-          onClick={() => setConnectOpen(true)}
+          onClick={handleOpenConnect}
         >
           <Plus className="h-4 w-4" />
           Connect Page
@@ -112,7 +142,7 @@ export default function PagesPage() {
               variant="outline"
               size="sm"
               className="gap-2"
-              onClick={() => setConnectOpen(true)}
+              onClick={handleOpenConnect}
             >
               <Globe className="h-3.5 w-3.5" />
               Connect your first page
@@ -125,13 +155,9 @@ export default function PagesPage() {
       <ConnectPageDialog
         open={connectOpen}
         onClose={() => setConnectOpen(false)}
-        availablePages={[]}
-        onConnect={async () => {
-          // TODO: Wire up OAuth flow to populate availablePages
-          setConnectOpen(false);
-          await fetchPages();
-        }}
-        loading={actionLoading}
+        availablePages={availablePages}
+        onConnect={handleConnectPages}
+        loading={actionLoading || fetchingAvailable}
       />
 
       {/* Edit dialog */}

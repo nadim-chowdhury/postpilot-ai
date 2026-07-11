@@ -53,6 +53,7 @@ export const authOptions: AuthOptions = {
       if (session.user) {
         const sessionUser = session.user as Record<string, unknown>;
         sessionUser.id = token.sub;
+        sessionUser.accessToken = token.accessToken;
 
         // Look up internal user ID from database
         if (token.email) {

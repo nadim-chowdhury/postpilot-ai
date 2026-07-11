@@ -30,3 +30,23 @@ export async function requireUserId(): Promise<string> {
 
   return userId;
 }
+
+/**
+ * Get the current user's Meta access token or throw if not authenticated.
+ */
+export async function requireUserAccessToken(): Promise<string> {
+  const session = await getSession();
+  const token = (session?.user as Record<string, unknown> | undefined)?.accessToken as
+    | string
+    | undefined;
+
+  if (!token) {
+    throw new AppError(
+      ErrorCodes.UNAUTHORIZED,
+      "No active Facebook session found. Please sign in again.",
+      401,
+    );
+  }
+
+  return token;
+}

@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireUserId } from "@/lib/session";
+import { requireUserId, requireUserAccessToken } from "@/lib/session";
 import { encrypt, decrypt } from "@/lib/services/encryption.service";
 import {
   fetchUserPages,
@@ -107,15 +107,14 @@ export async function getPage(
 /**
  * Fetch available pages from Meta and return them for selection.
  */
-export async function fetchAvailablePages(
-  userAccessToken: string,
-): Promise<
+export async function fetchAvailablePages(): Promise<
   ActionResult<
     { id: string; name: string; category: string; avatarUrl: string | null }[]
   >
 > {
   try {
     await requireUserId();
+    const userAccessToken = await requireUserAccessToken();
 
     const metaPages = await fetchUserPages(userAccessToken);
 
@@ -136,22 +135,35 @@ export async function fetchAvailablePages(
 }
 
 /**
- * Connect selected pages: exchange tokens, encrypt, and save to DB.
+ * Connect selected pages: fetch tokens securely on server, encrypt, and save to DB.
  */
 export async function connectPages(
   pages: {
     metaPageId: string;
     name: string;
-    accessToken: string;
     topic: string;
     avatarUrl?: string;
   }[],
 ): Promise<ActionResult<{ connected: number }>> {
   try {
     const userId = await requireUserId();
+    const userAccessToken = await requireUserAccessToken();
+
+    // Fetch all pages from Facebook to get their real page access tokens
+    const metaPages = await fetchUserPages(userAccessToken);
     let connected = 0;
 
     for (const page of pages) {
+      // Find the page in Meta's response to get its access token
+      const metaPage = metaPages.find((p) => p.id === page.metaPageId);
+      if (!metaPage) {
+        throw new AppError(
+          ErrorCodes.NOT_FOUND,
+          `Page ${page.name} not found in Facebook account`,
+          404,
+        );
+      }
+
       // Check if already connected
       const existing = await prisma.fbPage.findUnique({
         where: { metaPageId: page.metaPageId },
@@ -159,7 +171,7 @@ export async function connectPages(
 
       if (existing) {
         // Update token if reconnecting
-        const encryptedToken = encrypt(page.accessToken);
+        const encryptedToken = encrypt(metaPage.accessToken);
         await prisma.fbPage.update({
           where: { metaPageId: page.metaPageId },
           data: {
@@ -174,7 +186,7 @@ export async function connectPages(
       }
 
       // Encrypt the page access token
-      const encryptedToken = encrypt(page.accessToken);
+      const encryptedToken = encrypt(metaPage.accessToken);
 
       await prisma.fbPage.create({
         data: {

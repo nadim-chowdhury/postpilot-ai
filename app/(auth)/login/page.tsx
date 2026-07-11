@@ -1,5 +1,8 @@
+"use client";
+
 import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
   return (
@@ -29,6 +32,7 @@ export default function LoginPage() {
         </div>
 
         <Button
+          onClick={() => signIn("facebook", { callbackUrl: "/" })}
           className="w-full gap-2 bg-[#1877F2] text-white hover:bg-[#166FE5]"
           size="lg"
         >
