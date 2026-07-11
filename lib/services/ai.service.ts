@@ -14,7 +14,7 @@ export const GeneratedPostSchema = z.object({
   hashtags: z.array(z.string()).max(5),
   tone: z.enum(["educational", "inspirational", "conversational", "humorous"]),
   suggestImage: z.boolean(),
-  imagePrompt: z.string().optional(),
+  imagePrompt: z.string(),
 });
 
 export type GeneratedPostType = z.infer<typeof GeneratedPostSchema>;
