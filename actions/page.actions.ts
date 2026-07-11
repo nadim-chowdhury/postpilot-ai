@@ -189,7 +189,7 @@ export async function connectPages(
 
       // Get AI suggested topic and persona if connecting for the first time
       const aiSuggestions = await generatePageTopicAndPersona(page.name, metaPage.category);
-      const finalTopic = page.topic && page.topic !== metaPage.category ? page.topic : aiSuggestions.topic;
+      const finalTopic = page.topic ? page.topic : aiSuggestions.topic;
 
       // Encrypt the page access token
       const encryptedToken = encrypt(metaPage.accessToken);

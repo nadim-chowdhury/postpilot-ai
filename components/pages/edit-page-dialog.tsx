@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PageSummary } from "@/types/page.types";
@@ -23,8 +23,15 @@ export function EditPageDialog({
   onSave,
   loading,
 }: EditPageDialogProps) {
-  const [topic, setTopic] = useState(page?.topic ?? "");
+  const [topic, setTopic] = useState("");
   const [personaPrompt, setPersonaPrompt] = useState("");
+
+  useEffect(() => {
+    if (page) {
+      setTopic(page.topic ?? "");
+      setPersonaPrompt(page.personaPrompt ?? "");
+    }
+  }, [page]);
 
   if (!open || !page) return null;
 
