@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ViewModeToggle, type ViewMode } from "@/components/shared/view-mode-toggle";
 import { ActivityItem } from "@/components/activity/activity-item";
+import { ActivityCard } from "@/components/activity/activity-card";
 import { getActivities } from "@/actions/activity.actions";
 import { Spinner } from "@/components/shared/spinner";
 import { ActivityDetailModal } from "@/components/activity/activity-detail-modal";
@@ -22,6 +24,7 @@ export default function ActivityPage() {
   const [filterAction, setFilterAction] = useState("");
   const [filterStartDate, setFilterStartDate] = useState("");
   const [filterEndDate, setFilterEndDate] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   const fetchActivities = async (pageNum: number) => {
     setLoading(true);
@@ -139,6 +142,9 @@ export default function ActivityPage() {
             )}
           </div>
         </div>
+        <div className="flex justify-end pt-3 border-t border-border/30">
+          <ViewModeToggle mode={viewMode} onModeChange={setViewMode} />
+        </div>
       </div>
 
       {loading ? (
@@ -146,43 +152,83 @@ export default function ActivityPage() {
           <Spinner size="md" />
         </div>
       ) : activities.length > 0 ? (
-        <div className="rounded-xl border border-border/50 bg-card">
-          <div className="divide-y divide-border/50 px-5">
-            {activities.map((activity) => (
-              <ActivityItem
-                key={activity.id}
-                activity={activity}
-                onClick={() => setSelectedActivity(activity)}
-              />
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {total > 30 && (
-            <div className="flex items-center justify-between border-t border-border/50 px-5 py-3">
-              <p className="text-xs text-muted-foreground">
-                Showing {(page - 1) * 30 + 1}–
-                {Math.min(page * 30, total)} of {total}
-              </p>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setPage(Math.max(1, page - 1))}
-                  disabled={page === 1}
-                  className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => setPage(page + 1)}
-                  disabled={page * 30 >= total}
-                  className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
-                >
-                  Next
-                </button>
-              </div>
+        viewMode === "list" ? (
+          <div className="rounded-xl border border-border/50 bg-card">
+            <div className="divide-y divide-border/50 px-5">
+              {activities.map((activity) => (
+                <ActivityItem
+                  key={activity.id}
+                  activity={activity}
+                  onClick={() => setSelectedActivity(activity)}
+                />
+              ))}
             </div>
-          )}
-        </div>
+
+            {/* Pagination */}
+            {total > 30 && (
+              <div className="flex items-center justify-between border-t border-border/50 px-5 py-3">
+                <p className="text-xs text-muted-foreground">
+                  Showing {(page - 1) * 30 + 1}–
+                  {Math.min(page * 30, total)} of {total}
+                </p>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setPage(page + 1)}
+                    disabled={page * 30 >= total}
+                    className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {activities.map((activity) => (
+                <ActivityCard
+                  key={activity.id}
+                  activity={activity}
+                  onClick={() => setSelectedActivity(activity)}
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {total > 30 && (
+              <div className="flex items-center justify-between rounded-xl border border-border/50 bg-card px-5 py-3">
+                <p className="text-xs text-muted-foreground">
+                  Showing {(page - 1) * 30 + 1}–
+                  {Math.min(page * 30, total)} of {total}
+                </p>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setPage(page + 1)}
+                    disabled={page * 30 >= total}
+                    className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )
       ) : (
         <EmptyState
           icon={Activity}

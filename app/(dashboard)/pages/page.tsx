@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { Globe, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ViewModeToggle, type ViewMode } from "@/components/shared/view-mode-toggle";
 import { PageCard } from "@/components/pages/page-card";
+import { PageListItem } from "@/components/pages/page-list-item";
 import { ConnectPageDialog } from "@/components/pages/connect-page-dialog";
 import { EditPageDialog } from "@/components/pages/edit-page-dialog";
 import {
@@ -27,6 +29,7 @@ export default function PagesPage() {
   const [editPage, setEditPage] = useState<PageSummary | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   const filteredPages = pages.filter(
     (p) =>
@@ -163,34 +166,51 @@ export default function PagesPage() {
       {/* Search Bar */}
       {pages.length > 0 && (
         <div className="rounded-xl border border-border/40 bg-card p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Search Pages
-            </label>
-            <input
-              type="text"
-              placeholder="Search by page name or topic..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-full max-w-md rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
-            />
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground shrink-0">
+                Search Pages
+              </label>
+              <input
+                type="text"
+                placeholder="Search by page name or topic..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 w-full max-w-md rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
+              />
+            </div>
+            <ViewModeToggle mode={viewMode} onModeChange={setViewMode} />
           </div>
         </div>
       )}
 
       {/* Page grid */}
       {filteredPages.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredPages.map((page) => (
-            <PageCard
-              key={page.id}
-              page={page}
-              onEdit={setEditPage}
-              onToggleStatus={handleToggleStatus}
-              onDisconnect={handleDisconnect}
-            />
-          ))}
-        </div>
+        viewMode === "grid" ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredPages.map((page) => (
+              <PageCard
+                key={page.id}
+                page={page}
+                onEdit={setEditPage}
+                onToggleStatus={handleToggleStatus}
+                onDisconnect={handleDisconnect}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {filteredPages.map((page) => (
+              <PageListItem
+                key={page.id}
+                page={page}
+                onEdit={setEditPage}
+                onToggleStatus={handleToggleStatus}
+                onDisconnect={handleDisconnect}
+              />
+            ))}
+          </div>
+        )
       ) : pages.length > 0 && searchQuery ? (
         <EmptyState
           icon={Globe}

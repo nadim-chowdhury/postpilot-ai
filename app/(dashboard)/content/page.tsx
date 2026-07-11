@@ -5,8 +5,10 @@ import { FileText, Plus, Minus, Sparkles, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Spinner } from "@/components/shared/spinner";
+import { ViewModeToggle, type ViewMode } from "@/components/shared/view-mode-toggle";
 import { PostComposer } from "@/components/content/post-composer";
 import { PostCard } from "@/components/content/post-card";
+import { PostListItem } from "@/components/content/post-list-item";
 import { AiGenerateDialog } from "@/components/content/ai-generate-dialog";
 import { BulkImportDialog } from "@/components/content/bulk-import-dialog";
 import { EditPostDialog } from "@/components/content/edit-post-dialog";
@@ -39,6 +41,7 @@ export default function ContentPage() {
   const [filterStartDate, setFilterStartDate] = useState("");
   const [filterEndDate, setFilterEndDate] = useState("");
   const [filterSearch, setFilterSearch] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   const fetchPosts = async () => {
     const postsResult = await getPosts({
@@ -319,6 +322,9 @@ export default function ContentPage() {
             )}
           </div>
         </div>
+        <div className="flex justify-end pt-3 border-t border-border/30">
+          <ViewModeToggle mode={viewMode} onModeChange={setViewMode} />
+        </div>
       </div>
 
       {/* Composer */}
@@ -333,18 +339,33 @@ export default function ContentPage() {
 
       {/* Post list */}
       {posts.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              onPublish={handlePublishExisting}
-              onSchedule={setSchedulingPostId}
-              onDelete={handleDelete}
-              onEdit={setEditingPost}
-            />
-          ))}
-        </div>
+        viewMode === "grid" ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {posts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                onPublish={handlePublishExisting}
+                onSchedule={setSchedulingPostId}
+                onDelete={handleDelete}
+                onEdit={setEditingPost}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {posts.map((post) => (
+              <PostListItem
+                key={post.id}
+                post={post}
+                onPublish={handlePublishExisting}
+                onSchedule={setSchedulingPostId}
+                onDelete={handleDelete}
+                onEdit={setEditingPost}
+              />
+            ))}
+          </div>
+        )
       ) : (
         !showComposer && (
           <EmptyState
