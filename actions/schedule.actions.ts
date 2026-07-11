@@ -531,7 +531,7 @@ export async function forcePublishSchedule(
 
         // Log failure activity
         await logActivity({
-          userId,
+          userId: schedule.userId,
           entityType: "schedule",
           entityId: scheduleId,
           action: "post.failed",
