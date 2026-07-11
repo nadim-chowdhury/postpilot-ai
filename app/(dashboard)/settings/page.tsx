@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { getPages, updatePage } from "@/actions/page.actions";
 import { Spinner } from "@/components/shared/spinner";
+import { EmptyState } from "@/components/shared/empty-state";
 import type { PageSummary } from "@/types/page.types";
 
 export default function SettingsPage() {
@@ -24,6 +25,14 @@ export default function SettingsPage() {
   const [personas, setPersonas] = useState<Record<string, string>>({});
   const [statuses, setStatuses] = useState<Record<string, string>>({});
   const [games, setGames] = useState<Record<string, string>>({});
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredPages = pages.filter(
+    (p) =>
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.topic?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.game?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   // Message notifications
   const [notification, setNotification] = useState<{
@@ -128,17 +137,35 @@ export default function SettingsPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {pages.map((page) => {
-            const pageId = page.id;
-            const isSaving = saveLoading === pageId;
-            const pageNotif =
-              notification?.pageId === pageId ? notification : null;
+          {/* Search Bar */}
+          <div className="rounded-xl border border-border/40 bg-card p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Search Settings
+              </label>
+              <input
+                type="text"
+                placeholder="Search by page name, topic, or game..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 w-full max-w-md rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
+              />
+            </div>
+          </div>
 
-            return (
-              <div
-                key={pageId}
-                className="rounded-xl border border-border/50 bg-card p-6 space-y-6"
-              >
+          {filteredPages.length > 0 ? (
+            <div className="space-y-6">
+              {filteredPages.map((page) => {
+                const pageId = page.id;
+                const isSaving = saveLoading === pageId;
+                const pageNotif =
+                  notification?.pageId === pageId ? notification : null;
+
+                return (
+                  <div
+                    key={pageId}
+                    className="rounded-xl border border-border/50 bg-card p-6 space-y-6"
+                  >
                 {/* Page Header */}
                 <div className="flex items-center justify-between border-b border-border/50 pb-4">
                   <div className="flex items-center gap-3">
@@ -370,6 +397,14 @@ export default function SettingsPage() {
               </div>
             );
           })}
+            </div>
+          ) : (
+            <EmptyState
+              icon={Settings}
+              title="No settings match your search"
+              description={`No settings found matching "${searchQuery}". Try a different search term.`}
+            />
+          )}
         </div>
       )}
     </div>
