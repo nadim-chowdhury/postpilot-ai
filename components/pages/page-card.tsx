@@ -31,7 +31,7 @@ export function PageCard({
     | "disconnected";
 
   return (
-    <div className="group relative rounded-xl border border-border/50 bg-card p-5 transition-all duration-200 hover:border-border hover:shadow-sm">
+    <div className="group relative flex flex-col h-full rounded-xl border border-border/50 bg-card p-5 transition-all duration-200 hover:border-border hover:shadow-sm">
       {/* Header */}
       <div className="flex items-start gap-3">
         {/* Avatar */}
@@ -60,7 +60,7 @@ export function PageCard({
       </div>
 
       {/* Niche & Description */}
-      <div className="mt-3.5 space-y-2 border-t border-border/40 pt-3.5">
+      <div className="mt-3.5 space-y-2 border-t border-border/40 pt-3.5 flex-1">
         <div>
           <span className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">
             Target Topic / Niche
@@ -83,7 +83,7 @@ export function PageCard({
       </div>
 
       {/* Stats */}
-      <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+      <div className="mt-auto pt-4 flex items-center gap-4 text-xs text-muted-foreground">
         <span>
           <strong className="text-foreground">{page.postCount}</strong> posts
         </span>
