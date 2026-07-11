@@ -229,7 +229,7 @@ export function CalendarView({
         {selectedPost ? (
           <div className="rounded-xl border border-border/50 bg-card p-5 space-y-5 animate-in fade-in slide-in-from-right-3 duration-200">
             {/* Header info */}
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted/50">
                   {selectedPost.pageAvatarUrl ? (

@@ -445,10 +445,11 @@ export async function triggerQueueSweeper(): Promise<ActionResult<{ processed: n
 export async function forcePublishSchedule(
   scheduleId: string,
 ): Promise<ActionResult<{ fbPostId: string }>> {
+  let schedule: any = null;
   try {
     const userId = await requireUserId();
 
-    const schedule = await prisma.schedule.findFirst({
+    schedule = await prisma.schedule.findFirst({
       where: { id: scheduleId, userId },
       include: { post: true },
     });
