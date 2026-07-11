@@ -501,19 +501,21 @@ export async function forcePublishSchedule(
     console.error(`[Force Publish] Failed for schedule ${scheduleId}:`, error);
     
     // Restore schedule to FAILED
-    await prisma.$transaction([
-      prisma.schedule.update({
+    try {
+      await prisma.schedule.update({
         where: { id: scheduleId },
         data: {
           status: "FAILED",
           errorMessage: `Force publish failed: ${error.message || "Unknown error"}`,
         },
-      }),
-      prisma.post.update({
-        where: { id: scheduleId },
+      });
+      await prisma.post.update({
+        where: { id: schedule.postId },
         data: { status: "FAILED" },
-      }).catch(() => {}),
-    ]);
+      });
+    } catch (dbErr) {
+      console.error("[Force Publish Error Recovery Failed]", dbErr);
+    }
 
     if (error instanceof AppError) {
       return { success: false, error: error.message, code: error.code };
