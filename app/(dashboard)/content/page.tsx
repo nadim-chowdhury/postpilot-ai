@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, Plus, Sparkles } from "lucide-react";
+import { FileText, Plus, Minus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Spinner } from "@/components/shared/spinner";
@@ -155,6 +155,11 @@ export default function ContentPage() {
             className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90"
             onClick={() => setShowComposer(!showComposer)}
           >
+            {showComposer ? (
+              <Minus className="h-4 w-4" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
             {showComposer ? "Hide Composer" : "Create Post"}
           </Button>
         </div>
