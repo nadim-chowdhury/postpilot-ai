@@ -1215,13 +1215,13 @@ docs(architecture): add scheduling flow diagram
 
 | Task                                                      | Status         |
 | --------------------------------------------------------- | -------------- |
-| Vercel AI SDK integration (OpenAI provider)               | ⬜ Not started |
-| Per-page persona system (CRUD for persona prompts)        | ⬜ Not started |
-| Single post generation (one page, one post)               | ⬜ Not started |
-| Bulk generation ("Generate Week's Content" for all pages) | ⬜ Not started |
-| Content uniqueness validation                             | ⬜ Not started |
-| AI generation UI (prompt input, preview, edit, save)      | ⬜ Not started |
-| Image generation integration (DALL-E 3)                   | ⬜ Not started |
+| Vercel AI SDK integration (OpenAI provider)               | ✅ Done        |
+| Per-page persona system (CRUD for persona prompts)        | ✅ Done        |
+| Single post generation (one page, one post)               | ✅ Done        |
+| Bulk generation ("Generate Week's Content" for all pages) | ✅ Done        |
+| Content uniqueness validation                             | ✅ Done        |
+| AI generation UI (prompt input, preview, edit, save)      | ✅ Done        |
+| Image generation integration (DALL-E 3)                   | ✅ Done        |
 
 ### Phase 4 — Polish & Production Hardening
 
