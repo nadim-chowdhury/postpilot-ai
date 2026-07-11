@@ -12,6 +12,7 @@ export const metaApiConfig = {
     "pages_read_engagement",
     "pages_show_list",
     "email",
+    "business_management",
   ],
   endpoints: {
     me: "/me",
