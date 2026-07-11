@@ -1229,16 +1229,16 @@ docs(architecture): add scheduling flow diagram
 
 | Task                                                    | Status         |
 | ------------------------------------------------------- | -------------- |
-| Dashboard overview page (stats, health, upcoming posts) | ⬜ Not started |
-| Activity log UI with filtering                          | ⬜ Not started |
-| Token health monitoring (cron: check-token-expiry)      | ⬜ Not started |
-| Error boundaries on every route segment                 | ⬜ Not started |
-| Loading skeletons on every route segment                | ⬜ Not started |
-| Sentry integration for error monitoring                 | ⬜ Not started |
-| Rate limiting on all API routes                         | ⬜ Not started |
-| Token encryption at rest                                | ⬜ Not started |
-| Comprehensive `.env.example`                            | ⬜ Not started |
-| Deployment to Vercel (production)                       | ⬜ Not started |
+| Dashboard overview page (stats, health, upcoming posts) | ✅ Done        |
+| Activity log UI with filtering                          | ✅ Done        |
+| Token health monitoring (cron: check-token-expiry)      | ✅ Done        |
+| Error boundaries on every route segment                 | ✅ Done        |
+| Loading skeletons on every route segment                | ✅ Done        |
+| Sentry integration for error monitoring                 | ✅ Done        |
+| Rate limiting on all API routes                         | ✅ Done        |
+| Token encryption at rest                                | ✅ Done        |
+| Comprehensive `.env.example`                            | ✅ Done        |
+| Deployment to Vercel (production)                       | ✅ Done        |
 
 ### Phase 5 — Future Enhancements (Backlog)
 
