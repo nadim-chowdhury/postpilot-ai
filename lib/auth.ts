@@ -11,6 +11,7 @@ export const authOptions: AuthOptions = {
       authorization: {
         params: {
           scope: metaApiConfig.scopes.join(","),
+          ...(process.env.META_CONFIG_ID ? { config_id: process.env.META_CONFIG_ID } : {}),
         },
       },
     }),
