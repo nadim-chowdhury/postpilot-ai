@@ -354,6 +354,7 @@ export async function updatePage(
 
     return { success: true, data: { id: pageId } };
   } catch (error) {
+    console.error("[updatePage] Error:", error);
     if (error instanceof AppError) {
       return { success: false, error: error.message, code: error.code };
     }

@@ -262,7 +262,7 @@ export async function publishPostNow(
       where: {
         id: postId,
         userId,
-        status: { in: ["DRAFT", "APPROVED"] },
+        status: { in: ["DRAFT", "APPROVED", "SCHEDULED"] },
       },
       include: {
         fbPage: { select: { id: true, metaPageId: true, accessToken: true, status: true } },

@@ -11,7 +11,13 @@ interface PostCardProps {
   onEdit?: (post: PostSummary) => void;
 }
 
-export function PostCard({ post, onPublish, onSchedule, onDelete, onEdit }: PostCardProps) {
+export function PostCard({
+  post,
+  onPublish,
+  onSchedule,
+  onDelete,
+  onEdit,
+}: PostCardProps) {
   const statusVariant = post.status.toLowerCase() as
     | "draft"
     | "approved"
@@ -26,7 +32,7 @@ export function PostCard({ post, onPublish, onSchedule, onDelete, onEdit }: Post
   return (
     <div className="rounded-xl border border-border/50 bg-card p-5 transition-all duration-200 hover:border-border hover:shadow-sm">
       {/* Header */}
-      <div className="mb-3 flex items-start justify-between">
+      <div className="mb-3 flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
             {post.pageAvatarUrl ? (
@@ -108,17 +114,19 @@ export function PostCard({ post, onPublish, onSchedule, onDelete, onEdit }: Post
               Schedule
             </Button>
           )}
-          {post.status !== "POSTED" && post.status !== "PUBLISHING" && onEdit && (
-            <Button
-              variant="outline"
-              size="xs"
-              className="gap-1 text-muted-foreground hover:text-foreground"
-              onClick={() => onEdit(post)}
-            >
-              <Edit2 className="h-3 w-3" />
-              Edit
-            </Button>
-          )}
+          {post.status !== "POSTED" &&
+            post.status !== "PUBLISHING" &&
+            onEdit && (
+              <Button
+                variant="outline"
+                size="xs"
+                className="gap-1 text-muted-foreground hover:text-foreground"
+                onClick={() => onEdit(post)}
+              >
+                <Edit2 className="h-3 w-3" />
+                Edit
+              </Button>
+            )}
           {onDelete && (
             <Button
               variant="ghost"
