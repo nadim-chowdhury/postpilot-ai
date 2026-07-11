@@ -427,6 +427,19 @@ export async function triggerQueueSweeper(): Promise<ActionResult<{ processed: n
             data: { status: "FAILED" },
           }),
         ]);
+
+        await logActivity({
+          userId: schedule.userId,
+          entityType: "schedule",
+          entityId: schedule.id,
+          action: "post.failed",
+          metadata: {
+            postTitle: schedule.post.title || "Untitled",
+            pageName: schedule.post.fbPage.name,
+            error: err.message || "Unknown error",
+            note: "Failed during manual queue sweeper recovery",
+          },
+        });
       }
     }
 
@@ -451,7 +464,7 @@ export async function forcePublishSchedule(
 
     schedule = await prisma.schedule.findFirst({
       where: { id: scheduleId, userId },
-      include: { post: true },
+      include: { post: { include: { fbPage: true } } },
     });
 
     if (!schedule) {
@@ -514,6 +527,20 @@ export async function forcePublishSchedule(
         await prisma.post.update({
           where: { id: schedule.postId },
           data: { status: "FAILED" },
+        });
+
+        // Log failure activity
+        await logActivity({
+          userId,
+          entityType: "schedule",
+          entityId: scheduleId,
+          action: "post.failed",
+          metadata: {
+            postTitle: schedule.post?.title || "Untitled",
+            pageName: schedule.post?.fbPage?.name || "Unknown Page",
+            error: error.message || "Unknown error",
+            note: "Failed during force publish",
+          },
         });
       }
     } catch (dbErr) {

@@ -62,7 +62,7 @@ function formatAction(
   action: string,
   metadata: Record<string, unknown> | null,
 ): string {
-  const name = (metadata?.name as string) ?? "";
+  const name = (metadata?.name as string) ?? (metadata?.pageName as string) ?? "";
 
   switch (action) {
     case "page.connected":
