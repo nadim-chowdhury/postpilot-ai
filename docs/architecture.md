@@ -1188,8 +1188,8 @@ docs(architecture): add scheduling flow diagram
 | Task                                                           | Status         |
 | -------------------------------------------------------------- | -------------- |
 | Project scaffolding (Next.js 16, TypeScript, Tailwind, shadcn) | ✅ Done        |
-| Database setup (Neon + Prisma schema + migrations)             | ⬜ Not started |
-| NextAuth.js with Meta/Facebook OAuth provider                  | ⬜ Not started |
+| Database setup (Neon + Prisma schema + migrations)             | ✅ Done        |
+| NextAuth.js with Meta/Facebook OAuth provider                  | ✅ Done        |
 | Page connection flow (OAuth → fetch pages → save tokens)       | ⬜ Not started |
 | Page management UI (list, pause, disconnect)                   | ⬜ Not started |
 | Manual "Post Now" feature via Meta Graph API                   | ⬜ Not started |

@@ -168,3 +168,7 @@
     background: oklch(0.5 0 0 / 40%);
   }
 }
+
+button {
+  cursor: pointer;
+}
