@@ -293,7 +293,7 @@ export function CalendarView({
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 block">
                   Reschedule Post
                 </span>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   <input
                     type="datetime-local"
                     value={rescheduleTime}

@@ -27,12 +27,12 @@ export function PostCard({ post, onPublish, onSchedule, onDelete }: PostCardProp
       {/* Header */}
       <div className="mb-3 flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted/50">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
             {post.pageAvatarUrl ? (
               <img
                 src={post.pageAvatarUrl}
                 alt={post.pageName}
-                className="h-7 w-7 rounded-full object-cover"
+                className="h-full w-full object-cover"
               />
             ) : (
               <Globe className="h-3.5 w-3.5 text-muted-foreground" />
