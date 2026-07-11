@@ -19,6 +19,7 @@ export interface PageSummary {
   avatarUrl: string | null;
   postCount: number;
   lastPostedAt: Date | null;
+  personaPrompt?: string | null;
 }
 
 export interface PageDetail extends PageSummary {

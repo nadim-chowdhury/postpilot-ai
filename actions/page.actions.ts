@@ -42,6 +42,7 @@ export async function getPages(): Promise<ActionResult<PageSummary[]>> {
       avatarUrl: page.avatarUrl,
       postCount: page._count.posts,
       lastPostedAt: page.posts[0]?.publishedAt ?? null,
+      personaPrompt: page.personaPrompt,
     }));
 
     return { success: true, data };
