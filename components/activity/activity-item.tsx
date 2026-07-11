@@ -10,9 +10,11 @@ import {
   Clock,
   XCircle,
   CalendarClock,
+  Eye,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ActivityEntry } from "@/actions/activity.actions";
+import { Button } from "@/components/ui/button";
 
 const actionIcons: Record<string, { icon: LucideIcon; color: string }> = {
   "page.connected": { icon: Globe, color: "text-emerald-500" },
@@ -33,33 +35,47 @@ const defaultAction = { icon: CheckCircle, color: "text-muted-foreground" };
 
 interface ActivityItemProps {
   activity: ActivityEntry;
+  onClick?: () => void;
 }
 
-export function ActivityItem({ activity }: ActivityItemProps) {
+export function ActivityItem({ activity, onClick }: ActivityItemProps) {
   const { icon: Icon, color } = actionIcons[activity.action] ?? defaultAction;
 
   const timeAgo = getRelativeTime(activity.createdAt);
 
   return (
-    <div className="flex gap-3 py-3">
-      {/* Icon */}
-      <div
-        className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted/50 ${color}`}
-      >
-        <Icon className="h-3.5 w-3.5" />
-      </div>
+    <div className="flex items-center justify-between gap-4 py-3.5">
+      <div className="flex gap-3 min-w-0 flex-1">
+        {/* Icon */}
+        <div
+          className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted/50 ${color}`}
+        >
+          <Icon className="h-3.5 w-3.5" />
+        </div>
 
-      {/* Content */}
-      <div className="min-w-0 flex-1">
-        <p className="text-sm text-foreground">
-          {formatAction(activity.action, activity.metadata)}
-        </p>
-        <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground/60">
-          <span>{timeAgo}</span>
-          <span>•</span>
-          <span className="capitalize">{activity.entityType}</span>
+        {/* Content */}
+        <div className="min-w-0 flex-1">
+          <p className="text-sm text-foreground">
+            {formatAction(activity.action, activity.metadata)}
+          </p>
+          <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground/60">
+            <span>{timeAgo}</span>
+            <span>•</span>
+            <span className="capitalize">{activity.entityType}</span>
+          </div>
         </div>
       </div>
+
+      {/* Action Button */}
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={onClick}
+        className="shrink-0 text-muted-foreground hover:text-foreground hover:bg-accent/80"
+        title="View Details"
+      >
+        <Eye className="h-4.5 w-4.5" />
+      </Button>
     </div>
   );
 }

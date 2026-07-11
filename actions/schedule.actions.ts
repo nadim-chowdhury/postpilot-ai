@@ -339,7 +339,7 @@ export async function getSchedules(filters?: {
       pageName: s.fbPage.name,
       pageAvatarUrl: s.fbPage.avatarUrl,
       scheduledAt: s.scheduledAt,
-      status: s.status,
+      status: s.post.status === "POSTED" ? "COMPLETED" : s.status,
       retryCount: s.retryCount,
     }));
 

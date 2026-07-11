@@ -269,11 +269,8 @@ export async function publishPostNowInternal(
 ): Promise<ActionResult<{ fbPostId: string }>> {
   try {
     // Get the post with its target page
-    const post = await prisma.post.findFirst({
-      where: {
-        id: postId,
-        status: { in: ["DRAFT", "APPROVED", "SCHEDULED", "FAILED"] },
-      },
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
       include: {
         fbPage: { select: { id: true, name: true, metaPageId: true, accessToken: true, status: true } },
       },
@@ -282,8 +279,21 @@ export async function publishPostNowInternal(
     if (!post) {
       return {
         success: false,
-        error: "Post not found or already published",
+        error: "Post not found",
         code: ErrorCodes.NOT_FOUND,
+      };
+    }
+
+    if (post.status === "POSTED") {
+      // The post is already published! Return success (no-op)
+      return { success: true, data: { fbPostId: post.fbPostId || "" } };
+    }
+
+    if (!["DRAFT", "APPROVED", "SCHEDULED", "FAILED"].includes(post.status)) {
+      return {
+        success: false,
+        error: `Post cannot be published in its current status: ${post.status}`,
+        code: ErrorCodes.VALIDATION_ERROR,
       };
     }
 

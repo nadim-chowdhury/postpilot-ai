@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ActivityItem } from "@/components/activity/activity-item";
 import { getActivities } from "@/actions/activity.actions";
 import { Spinner } from "@/components/shared/spinner";
+import { ActivityDetailModal } from "@/components/activity/activity-detail-modal";
 import type { ActivityEntry } from "@/actions/activity.actions";
 
 export default function ActivityPage() {
@@ -14,6 +15,7 @@ export default function ActivityPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [selectedActivity, setSelectedActivity] = useState<ActivityEntry | null>(null);
 
   // Filters
   const [filterCategory, setFilterCategory] = useState("");
@@ -147,7 +149,11 @@ export default function ActivityPage() {
         <div className="rounded-xl border border-border/50 bg-card">
           <div className="divide-y divide-border/50 px-5">
             {activities.map((activity) => (
-              <ActivityItem key={activity.id} activity={activity} />
+              <ActivityItem
+                key={activity.id}
+                activity={activity}
+                onClick={() => setSelectedActivity(activity)}
+              />
             ))}
           </div>
 
@@ -188,6 +194,13 @@ export default function ActivityPage() {
           }
         />
       )}
+
+      {/* Detail Modal */}
+      <ActivityDetailModal
+        activity={selectedActivity}
+        open={!!selectedActivity}
+        onClose={() => setSelectedActivity(null)}
+      />
     </div>
   );
 }

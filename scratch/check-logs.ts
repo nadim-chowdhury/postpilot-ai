@@ -1,19 +1,15 @@
 import { prisma } from "../lib/prisma";
 
 async function main() {
-  const count = await prisma.activityLog.count();
-  console.log("ActivityLog Count:", count);
-  
-  const sample = await prisma.activityLog.findMany({
-    take: 5,
-    orderBy: { createdAt: "desc" }
+  const schedules = await prisma.schedule.findMany({
+    orderBy: { scheduledAt: "desc" },
+    include: {
+      post: true
+    }
   });
-  console.log("Sample logs:", JSON.stringify(sample, null, 2));
-
-  const users = await prisma.user.findMany({
-    select: { id: true, email: true }
-  });
-  console.log("Users in DB:", users);
+  console.log("Total schedules in DB:", schedules.length);
+  console.log("Schedules details:");
+  console.log(JSON.stringify(schedules, null, 2));
 }
 
 main()
