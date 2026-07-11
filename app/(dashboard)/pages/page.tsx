@@ -7,7 +7,14 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { PageCard } from "@/components/pages/page-card";
 import { ConnectPageDialog } from "@/components/pages/connect-page-dialog";
 import { EditPageDialog } from "@/components/pages/edit-page-dialog";
-import { getPages, togglePageStatus, disconnectPage, updatePage, fetchAvailablePages, connectPages } from "@/actions/page.actions";
+import {
+  getPages,
+  togglePageStatus,
+  disconnectPage,
+  updatePage,
+  fetchAvailablePages,
+  connectPages,
+} from "@/actions/page.actions";
 import type { PageSummary } from "@/types/page.types";
 
 export default function PagesPage() {
@@ -20,9 +27,10 @@ export default function PagesPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredPages = pages.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.topic?.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filteredPages = pages.filter(
+    (p) =>
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.topic?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const fetchPages = async () => {
@@ -45,14 +53,22 @@ export default function PagesPage() {
     if (result.success) {
       setAvailablePages(result.data);
     } else {
-      alert(result.error || "Failed to load pages from Facebook. Make sure you are logged in.");
+      alert(
+        result.error ||
+          "Failed to load pages from Facebook. Make sure you are logged in.",
+      );
       setConnectOpen(false);
     }
     setFetchingAvailable(false);
   };
 
   const handleConnectPages = async (
-    selectedPages: { metaPageId: string; name: string; topic: string; avatarUrl?: string }[],
+    selectedPages: {
+      metaPageId: string;
+      name: string;
+      topic: string;
+      avatarUrl?: string;
+    }[],
   ) => {
     setActionLoading(true);
     const result = await connectPages(selectedPages);
@@ -128,7 +144,7 @@ export default function PagesPage() {
       {/* Search Bar */}
       {pages.length > 0 && (
         <div className="rounded-xl border border-border/40 bg-card p-4 shadow-sm">
-          <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Search Pages
             </label>

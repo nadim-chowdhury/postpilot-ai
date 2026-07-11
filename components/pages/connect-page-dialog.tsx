@@ -111,7 +111,7 @@ export function ConnectPageDialog({
         </div>
 
         {/* Page list */}
-        <div className="max-h-72 space-y-2 overflow-y-auto">
+        <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
           {filteredPages.length === 0 && (
             <p className="py-8 text-center text-sm text-muted-foreground">
               {availablePages.length === 0
@@ -183,6 +183,21 @@ export function ConnectPageDialog({
               </div>
             );
           })}
+
+          {/* Troubleshooting Section */}
+          <div className="mt-4 rounded-lg bg-accent/40 p-3 border border-border/30 text-left">
+            <p className="text-[11px] font-semibold text-foreground uppercase tracking-wider mb-1">💡 Missing pages or Business Portfolio assets?</p>
+            <ol className="list-decimal pl-4 text-[10.5px] text-muted-foreground space-y-1">
+              <li>
+                <strong>Assign yourself to the Page:</strong> In your 
+                <a href="https://business.facebook.com/" target="_blank" rel="noreferrer" className="text-brand hover:underline mx-1">Meta Business Suite</a> 
+                go to <strong>Settings</strong> &gt; <strong>Business Assets</strong> &gt; <strong>Pages</strong>, select your page, and make sure your profile is added under <strong>People</strong> with full permission.
+              </li>
+              <li>
+                <strong>Reset App Permissions:</strong> Go to Facebook &gt; <strong>Settings & Privacy</strong> &gt; <strong>Settings</strong> &gt; <strong>Business Integrations</strong>. Remove this app, then click "Connect Page" again and check all requested Page permissions.
+              </li>
+            </ol>
+          </div>
         </div>
 
         {/* Footer */}
