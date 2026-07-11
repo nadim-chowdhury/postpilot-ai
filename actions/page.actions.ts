@@ -214,6 +214,90 @@ export async function connectPages(
 }
 
 /**
+ * Connect a page manually using a Meta Page ID and Page Access Token.
+ */
+export async function connectPageManually(data: {
+  metaPageId: string;
+  accessToken: string;
+  topic: string;
+}): Promise<ActionResult<{ id: string }>> {
+  try {
+    const userId = await requireUserId();
+
+    if (!data.metaPageId || !data.accessToken) {
+      throw new AppError(
+        ErrorCodes.VALIDATION_ERROR,
+        "Page ID and Access Token are required",
+        400,
+      );
+    }
+
+    // Call Meta API using the provided token to fetch details and verify it works
+    const version = process.env.META_GRAPH_API_VERSION ?? "v24.0";
+    const url = `https://graph.facebook.com/${version}/${data.metaPageId}?fields=name,category,picture{url}&access_token=${data.accessToken}`;
+
+    const response = await fetch(url);
+    const result = await response.json();
+
+    if (!response.ok || result.error) {
+      throw new AppError(
+        ErrorCodes.META_API_ERROR,
+        result.error?.message ?? "Invalid Page Access Token or Page ID",
+        response.status,
+      );
+    }
+
+    const name = result.name;
+    const category = result.category || "General";
+    const avatarUrl = result.picture?.data?.url ?? null;
+    const encryptedToken = encrypt(data.accessToken);
+
+    // Check if page already exists
+    const existing = await prisma.fbPage.findUnique({
+      where: { metaPageId: data.metaPageId },
+    });
+
+    let connectedPageId = "";
+
+    if (existing) {
+      const updated = await prisma.fbPage.update({
+        where: { metaPageId: data.metaPageId },
+        data: {
+          userId,
+          name,
+          accessToken: encryptedToken,
+          status: "ACTIVE",
+          avatarUrl,
+          topic: data.topic || existing.topic,
+        },
+      });
+      connectedPageId = updated.id;
+    } else {
+      const created = await prisma.fbPage.create({
+        data: {
+          userId,
+          metaPageId: data.metaPageId,
+          name,
+          accessToken: encryptedToken,
+          topic: data.topic || category,
+          avatarUrl,
+          status: "ACTIVE",
+        },
+      });
+      connectedPageId = created.id;
+    }
+
+    return { success: true, data: { id: connectedPageId } };
+  } catch (error) {
+    if (error instanceof AppError) {
+      return { success: false, error: error.message, code: error.code };
+    }
+    return { success: false, error: "Failed to connect page manually" };
+  }
+}
+
+
+/**
  * Update a page's topic, persona prompt, or status.
  */
 export async function updatePage(

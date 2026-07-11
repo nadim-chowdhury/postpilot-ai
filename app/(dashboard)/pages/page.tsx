@@ -14,6 +14,7 @@ import {
   updatePage,
   fetchAvailablePages,
   connectPages,
+  connectPageManually,
 } from "@/actions/page.actions";
 import type { PageSummary } from "@/types/page.types";
 
@@ -40,6 +41,24 @@ export default function PagesPage() {
       setPages(result.data);
     }
     setLoading(false);
+  };
+
+  const handleConnectManually = async (data: {
+    metaPageId: string;
+    accessToken: string;
+    topic: string;
+  }) => {
+    const result = await connectPageManually(data);
+    if (result.success) {
+      await fetchPages();
+      return true;
+    } else {
+      alert(
+        result.error ||
+          "Failed to connect page manually. Make sure Page ID and Page Access Token are correct.",
+      );
+      return false;
+    }
   };
 
   useEffect(() => {
@@ -203,6 +222,7 @@ export default function PagesPage() {
         onClose={() => setConnectOpen(false)}
         availablePages={availablePages}
         onConnect={handleConnectPages}
+        onConnectManually={handleConnectManually}
         loading={actionLoading || fetchingAvailable}
       />
 
