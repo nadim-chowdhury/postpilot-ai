@@ -324,6 +324,19 @@ export async function publishPostNowInternal(
         },
       });
 
+      // Also mark any associated schedules as COMPLETED
+      await prisma.schedule.updateMany({
+        where: {
+          postId,
+          status: { in: ["PENDING", "FAILED", "IN_PROGRESS"] },
+        },
+        data: {
+          status: "COMPLETED",
+          publishedAt: new Date(),
+          errorMessage: null,
+        },
+      });
+
       return { success: true, data: { fbPostId } };
     } catch (publishError) {
       // Mark as failed
