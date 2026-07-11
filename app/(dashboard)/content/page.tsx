@@ -144,7 +144,7 @@ export default function ContentPage() {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            className="gap-2 text-violet-400 border-violet-500/20 bg-violet-500/5 hover:bg-violet-500/10 hover:text-violet-300"
+            className="gap-2"
             onClick={() => setAiGenerateOpen(true)}
           >
             <Sparkles className="h-4 w-4" />
@@ -213,8 +213,12 @@ export default function ContentPage() {
           />
           <div className="relative z-10 w-full max-w-sm rounded-xl border border-border/50 bg-card p-6 shadow-2xl space-y-4">
             <div>
-              <h3 className="text-sm font-semibold text-foreground">Schedule Post</h3>
-              <p className="text-xs text-muted-foreground">Select a publication date and time.</p>
+              <h3 className="text-sm font-semibold text-foreground">
+                Schedule Post
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Select a publication date and time.
+              </p>
             </div>
             <div>
               <input
@@ -225,7 +229,11 @@ export default function ContentPage() {
               />
             </div>
             <div className="flex justify-end gap-2 border-t border-border/50 pt-3">
-              <Button variant="ghost" size="sm" onClick={() => setSchedulingPostId(null)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSchedulingPostId(null)}
+              >
                 Cancel
               </Button>
               <Button

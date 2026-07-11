@@ -1,7 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Globe, Calendar as CalendarIcon, Clock, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Globe,
+  Calendar as CalendarIcon,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  RefreshCw,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { ScheduleSummary } from "@/types/schedule.types";
@@ -18,7 +27,9 @@ export function CalendarView({
   onReschedule,
 }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedPost, setSelectedPost] = useState<ScheduleSummary | null>(null);
+  const [selectedPost, setSelectedPost] = useState<ScheduleSummary | null>(
+    null,
+  );
   const [rescheduleTime, setRescheduleTime] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -35,10 +46,7 @@ export function CalendarView({
     (_, i) => daysInPrevMonth - firstDayOfMonth + 1 + i,
   );
 
-  const currentMonthDays = Array.from(
-    { length: daysInMonth },
-    (_, i) => i + 1,
-  );
+  const currentMonthDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
   // Grid total slots (must be multiple of 7, usually 35 or 42)
   const totalSlots = Math.ceil((firstDayOfMonth + daysInMonth) / 7) * 7;
@@ -69,8 +77,18 @@ export function CalendarView({
   };
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const handleRescheduleSubmit = async () => {
@@ -99,7 +117,7 @@ export function CalendarView({
           <h3 className="text-sm font-semibold text-foreground">
             {monthNames[month]} {year}
           </h3>
-          <div className="flex gap-1.5">
+          <div className="flex items-center gap-1.5">
             <Button variant="ghost" size="icon-sm" onClick={handlePrevMonth}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -178,12 +196,14 @@ export function CalendarView({
                           s.status === "PENDING"
                             ? "bg-violet-500/10 text-violet-400 border-violet-500/20 hover:bg-violet-500/20"
                             : s.status === "COMPLETED"
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
-                            : "bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20"
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                              : "bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20"
                         }`}
                       >
                         <span className="h-1 w-1 rounded-full bg-current shrink-0" />
-                        <span className="truncate">{s.postTitle || s.postBody}</span>
+                        <span className="truncate">
+                          {s.postTitle || s.postBody}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -310,7 +330,9 @@ export function CalendarView({
         ) : (
           <div className="rounded-xl border border-dashed border-border/60 p-8 text-center text-xs text-muted-foreground bg-card/30 flex flex-col items-center justify-center min-h-[300px]">
             <CalendarIcon className="h-8 w-8 text-muted-foreground/40 mb-2" />
-            <p>Select a scheduled post in the calendar to view detail settings.</p>
+            <p>
+              Select a scheduled post in the calendar to view detail settings.
+            </p>
           </div>
         )}
       </div>
