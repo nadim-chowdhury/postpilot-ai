@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { generateObject } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { openai, createOpenAI } from "@ai-sdk/openai";
 import { prisma } from "@/lib/prisma";
 import { AppError, ErrorCodes } from "@/lib/errors";
 
@@ -19,6 +19,19 @@ export const GeneratedPostSchema = z.object({
 
 export type GeneratedPostType = z.infer<typeof GeneratedPostSchema>;
 
+// Helper to retrieve and rotate OpenAI API Keys from pool
+function getOpenAiApiKey(): string | null {
+  const keysEnv = process.env.OPENAI_API_KEYS;
+  if (keysEnv) {
+    const keys = keysEnv.split(",").map((k) => k.trim()).filter(Boolean);
+    if (keys.length > 0) {
+      const randomIndex = Math.floor(Math.random() * keys.length);
+      return keys[randomIndex];
+    }
+  }
+  return process.env.OPENAI_API_KEY || null;
+}
+
 // ─────────────────────────────────────────────
 // Core Services
 // ─────────────────────────────────────────────
@@ -33,10 +46,10 @@ export async function generatePostContent(params: {
   tone: "educational" | "inspirational" | "conversational" | "humorous";
   customInstructions?: string;
 }): Promise<GeneratedPostType> {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = getOpenAiApiKey();
 
   if (!apiKey) {
-    console.warn("OPENAI_API_KEY is not configured. Returning mock AI post.");
+    console.warn("No OpenAI API key found. Returning mock AI post.");
     return getMockAiPost(params);
   }
 
@@ -58,8 +71,9 @@ export async function generatePostContent(params: {
   ].filter(Boolean).join("\n");
 
   try {
+    const customOpenai = createOpenAI({ apiKey });
     const { object } = await generateObject({
-      model: openai("gpt-4o"),
+      model: customOpenai("gpt-4o"),
       schema: GeneratedPostSchema,
       system: systemInstructions,
       prompt: userPrompt,
