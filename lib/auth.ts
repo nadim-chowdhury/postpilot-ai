@@ -18,18 +18,21 @@ export const authOptions: AuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account }) {
-      if (!account || !user.email) return false;
+      if (!account) return false;
+
+      const email = user.email || `${account.providerAccountId}@facebook.com`;
+      user.email = email;
 
       // Upsert user in database on every sign-in
       try {
         await prisma.user.upsert({
-          where: { email: user.email },
+          where: { email },
           update: {
             name: user.name ?? undefined,
             image: user.image ?? undefined,
           },
           create: {
-            email: user.email,
+            email,
             name: user.name ?? null,
             image: user.image ?? null,
           },
