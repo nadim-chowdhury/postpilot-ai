@@ -1,6 +1,7 @@
 import type { AuthOptions } from "next-auth";
 import FacebookProvider from "next-auth/providers/facebook";
 import { metaApiConfig } from "@/config/meta-api";
+import { prisma } from "@/lib/prisma";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -15,6 +16,30 @@ export const authOptions: AuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      if (!account || !user.email) return false;
+
+      // Upsert user in database on every sign-in
+      try {
+        await prisma.user.upsert({
+          where: { email: user.email },
+          update: {
+            name: user.name ?? undefined,
+            image: user.image ?? undefined,
+          },
+          create: {
+            email: user.email,
+            name: user.name ?? null,
+            image: user.image ?? null,
+          },
+        });
+      } catch (error) {
+        console.error("Failed to upsert user:", error);
+        // Don't block sign-in if DB is unavailable
+      }
+
+      return true;
+    },
     async jwt({ token, account }) {
       // Persist the Meta access token in the JWT on initial sign-in
       if (account) {
@@ -24,9 +49,25 @@ export const authOptions: AuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      // Expose non-sensitive fields to the client session
+      // Expose user ID and check for DB user
       if (session.user) {
-        (session.user as Record<string, unknown>).id = token.sub;
+        const sessionUser = session.user as Record<string, unknown>;
+        sessionUser.id = token.sub;
+
+        // Look up internal user ID from database
+        if (token.email) {
+          try {
+            const dbUser = await prisma.user.findUnique({
+              where: { email: token.email as string },
+              select: { id: true },
+            });
+            if (dbUser) {
+              sessionUser.id = dbUser.id;
+            }
+          } catch {
+            // Fall back to token.sub if DB unavailable
+          }
+        }
       }
       return session;
     },
