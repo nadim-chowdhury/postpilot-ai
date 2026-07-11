@@ -103,6 +103,12 @@ export function BulkImportDialog({
     if (res.success) {
       setResult(res.data);
       onImported();
+      setTimeout(() => {
+        onClose();
+        // Reset state after closing
+        setResult(null);
+        setJsonInput("");
+      }, 1500);
     } else {
       setError(res.error || "Failed to import posts.");
     }
