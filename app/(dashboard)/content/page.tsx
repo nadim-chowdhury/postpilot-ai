@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, Plus } from "lucide-react";
+import { FileText, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PostComposer } from "@/components/content/post-composer";
 import { PostCard } from "@/components/content/post-card";
+import { AiGenerateDialog } from "@/components/content/ai-generate-dialog";
 import {
   getPosts,
   createPost,
@@ -21,6 +22,7 @@ export default function ContentPage() {
   const [pages, setPages] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [showComposer, setShowComposer] = useState(false);
+  const [aiGenerateOpen, setAiGenerateOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [schedulingPostId, setSchedulingPostId] = useState<string | null>(null);
   const [scheduleTime, setScheduleTime] = useState("");
@@ -139,13 +141,23 @@ export default function ContentPage() {
             Create and manage your content pool.
           </p>
         </div>
-        <Button
-          className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90"
-          onClick={() => setShowComposer(!showComposer)}
-        >
-          <Plus className="h-4 w-4" />
-          {showComposer ? "Hide Composer" : "Create Post"}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="gap-2 text-violet-400 border-violet-500/20 bg-violet-500/5 hover:bg-violet-500/10 hover:text-violet-300"
+            onClick={() => setAiGenerateOpen(true)}
+          >
+            <Sparkles className="h-4 w-4" />
+            Generate with AI
+          </Button>
+          <Button
+            className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90"
+            onClick={() => setShowComposer(!showComposer)}
+          >
+            <Plus className="h-4 w-4" />
+            {showComposer ? "Hide Composer" : "Create Post"}
+          </Button>
+        </div>
       </div>
 
       {/* Composer */}
@@ -228,6 +240,14 @@ export default function ContentPage() {
           </div>
         </div>
       )}
+
+      {/* AI Generate Dialog */}
+      <AiGenerateDialog
+        open={aiGenerateOpen}
+        onClose={() => setAiGenerateOpen(false)}
+        pages={pages}
+        onSaved={fetchData}
+      />
     </div>
   );
 }
