@@ -19,17 +19,46 @@ import type { PostSummary, PostDetail } from "@/types/post.types";
 export async function getPosts(filters?: {
   status?: string;
   fbPageId?: string;
+  fbPageIds?: string[];
+  startDate?: string;
+  endDate?: string;
+  search?: string;
   page?: number;
   pageSize?: number;
 }): Promise<ActionResult<{ items: PostSummary[]; total: number }>> {
   try {
     const userId = await requireUserId();
     const page = filters?.page ?? 1;
-    const pageSize = filters?.pageSize ?? 20;
+    const pageSize = filters?.pageSize ?? 50; // default to 50 for better list view
 
-    const where: Record<string, unknown> = { userId };
-    if (filters?.status) where.status = filters.status;
-    if (filters?.fbPageId) where.fbPageId = filters.fbPageId;
+    const where: any = { userId };
+    if (filters?.status && filters.status !== "ALL") {
+      where.status = filters.status;
+    }
+    if (filters?.fbPageId && filters.fbPageId !== "ALL") {
+      where.fbPageId = filters.fbPageId;
+    } else if (filters?.fbPageIds && filters.fbPageIds.length > 0) {
+      where.fbPageId = { in: filters.fbPageIds };
+    }
+
+    if (filters?.startDate || filters?.endDate) {
+      where.createdAt = {};
+      if (filters.startDate) {
+        where.createdAt.gte = new Date(filters.startDate);
+      }
+      if (filters.endDate) {
+        const end = new Date(filters.endDate);
+        end.setHours(23, 59, 59, 999);
+        where.createdAt.lte = end;
+      }
+    }
+
+    if (filters?.search) {
+      where.OR = [
+        { title: { contains: filters.search, mode: "insensitive" } },
+        { body: { contains: filters.search, mode: "insensitive" } },
+      ];
+    }
 
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
@@ -53,6 +82,7 @@ export async function getPosts(filters?: {
       aiGenerated: post.aiGenerated,
       pageName: post.fbPage.name,
       pageAvatarUrl: post.fbPage.avatarUrl,
+      fbPageId: post.fbPageId,
       createdAt: post.createdAt,
       publishedAt: post.publishedAt,
     }));

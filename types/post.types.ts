@@ -15,6 +15,7 @@ export interface PostSummary {
   aiGenerated: boolean;
   pageName: string;
   pageAvatarUrl: string | null;
+  fbPageId: string;
   createdAt: Date;
   publishedAt: Date | null;
 }

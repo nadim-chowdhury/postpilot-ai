@@ -30,10 +30,35 @@ export default function ContentPage() {
   const [schedulingPostId, setSchedulingPostId] = useState<string | null>(null);
   const [scheduleTime, setScheduleTime] = useState("");
 
+  // Filters State
+  const [filterPageId, setFilterPageId] = useState("ALL");
+  const [filterStatus, setFilterStatus] = useState("ALL");
+  const [filterStartDate, setFilterStartDate] = useState("");
+  const [filterEndDate, setFilterEndDate] = useState("");
+  const [filterSearch, setFilterSearch] = useState("");
+
+  const fetchPosts = async () => {
+    const postsResult = await getPosts({
+      fbPageId: filterPageId !== "ALL" ? filterPageId : undefined,
+      status: filterStatus !== "ALL" ? filterStatus : undefined,
+      startDate: filterStartDate || undefined,
+      endDate: filterEndDate || undefined,
+      search: filterSearch || undefined,
+    });
+    if (postsResult.success) {
+      setPosts(postsResult.data.items);
+    }
+  };
+
   const fetchData = async () => {
-    setLoading(true);
     const [postsResult, pagesResult] = await Promise.all([
-      getPosts(),
+      getPosts({
+        fbPageId: filterPageId !== "ALL" ? filterPageId : undefined,
+        status: filterStatus !== "ALL" ? filterStatus : undefined,
+        startDate: filterStartDate || undefined,
+        endDate: filterEndDate || undefined,
+        search: filterSearch || undefined,
+      }),
       getPages(),
     ]);
     if (postsResult.success) {
@@ -42,12 +67,25 @@ export default function ContentPage() {
     if (pagesResult.success) {
       setPages(pagesResult.data.map((p) => ({ id: p.id, name: p.name })));
     }
-    setLoading(false);
   };
 
+  // Fetch initial data
   useEffect(() => {
-    fetchData();
+    const init = async () => {
+      setLoading(true);
+      await fetchData();
+      setLoading(false);
+    };
+    init();
   }, []);
+
+  // Fetch updated posts when filters change
+  useEffect(() => {
+    // Skip first run when loading is true
+    if (!loading) {
+      fetchPosts();
+    }
+  }, [filterPageId, filterStatus, filterStartDate, filterEndDate, filterSearch]);
 
   const handleSaveDraft = async (data: {
     fbPageId: string;
@@ -172,6 +210,111 @@ export default function ContentPage() {
             )}
             {showComposer ? "Hide Composer" : "Create Post"}
           </Button>
+        </div>
+      </div>
+
+      {/* Filter Bar */}
+      <div className="rounded-xl border border-border/40 bg-card p-4 shadow-sm">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-5 items-end">
+          {/* Search */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Search Posts
+            </label>
+            <input
+              type="text"
+              placeholder="Search title, body..."
+              value={filterSearch}
+              onChange={(e) => setFilterSearch(e.target.value)}
+              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
+            />
+          </div>
+
+          {/* Page Filter */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Filter by Page
+            </label>
+            <select
+              value={filterPageId}
+              onChange={(e) => setFilterPageId(e.target.value)}
+              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+            >
+              <option value="ALL">All Pages</option>
+              {pages.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Status
+            </label>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="DRAFT">Draft</option>
+              <option value="APPROVED">Approved</option>
+              <option value="SCHEDULED">Scheduled</option>
+              <option value="PUBLISHING">Publishing</option>
+              <option value="POSTED">Posted</option>
+              <option value="FAILED">Failed</option>
+            </select>
+          </div>
+
+          {/* Start Date */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              From Date
+            </label>
+            <input
+              type="date"
+              value={filterStartDate}
+              onChange={(e) => setFilterStartDate(e.target.value)}
+              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+            />
+          </div>
+
+          {/* End Date & Reset */}
+          <div className="space-y-1.5 flex gap-2 items-end">
+            <div className="flex-1 space-y-1.5">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                To Date
+              </label>
+              <input
+                type="date"
+                value={filterEndDate}
+                onChange={(e) => setFilterEndDate(e.target.value)}
+                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+              />
+            </div>
+            {(filterPageId !== "ALL" ||
+              filterStatus !== "ALL" ||
+              filterStartDate ||
+              filterEndDate ||
+              filterSearch) && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setFilterPageId("ALL");
+                  setFilterStatus("ALL");
+                  setFilterStartDate("");
+                  setFilterEndDate("");
+                  setFilterSearch("");
+                }}
+                className="h-9 text-xs px-2 hover:bg-accent/80 hover:text-foreground text-muted-foreground"
+              >
+                Reset
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
