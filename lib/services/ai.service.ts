@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { generateObject } from "ai";
-import { openai, createOpenAI } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createAnthropic } from "@ai-sdk/anthropic";
 import { prisma } from "@/lib/prisma";
 import { AppError, ErrorCodes } from "@/lib/errors";
 
@@ -19,7 +21,61 @@ export const GeneratedPostSchema = z.object({
 
 export type GeneratedPostType = z.infer<typeof GeneratedPostSchema>;
 
-// Helper to retrieve and rotate OpenAI API Keys from pool
+// ─────────────────────────────────────────────
+// Multi-Provider Model Resolution
+// ─────────────────────────────────────────────
+
+type ProviderName = "google" | "anthropic" | "openai" | "mock";
+
+interface ResolvedModel {
+  provider: ProviderName;
+  model: ReturnType<typeof createGoogleGenerativeAI> extends (...args: any) => infer R ? any : any;
+  displayName: string;
+}
+
+/**
+ * Detect which AI provider to use based on available API keys.
+ * Priority: Google Gemini → Anthropic Claude → OpenAI → Mock fallback
+ */
+function resolveModel(): ResolvedModel {
+  // 1. Google Gemini (free tier available via AI Studio)
+  const geminiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY;
+  if (geminiKey) {
+    const google = createGoogleGenerativeAI({ apiKey: geminiKey });
+    return {
+      provider: "google",
+      model: google("gemini-2.5-flash"),
+      displayName: "Gemini 2.5 Flash",
+    };
+  }
+
+  // 2. Anthropic Claude
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (anthropicKey) {
+    const anthropic = createAnthropic({ apiKey: anthropicKey });
+    return {
+      provider: "anthropic",
+      model: anthropic("claude-sonnet-4-20250514"),
+      displayName: "Claude Sonnet 4",
+    };
+  }
+
+  // 3. OpenAI (with key pool rotation)
+  const openaiKey = getOpenAiApiKey();
+  if (openaiKey) {
+    const oai = createOpenAI({ apiKey: openaiKey });
+    return {
+      provider: "openai",
+      model: oai("gpt-4o"),
+      displayName: "GPT-4o",
+    };
+  }
+
+  // 4. No keys → mock fallback
+  return { provider: "mock", model: null, displayName: "Mock (No API Key)" };
+}
+
+/** Helper to retrieve and rotate OpenAI API Keys from pool */
 function getOpenAiApiKey(): string | null {
   const keysEnv = process.env.OPENAI_API_KEYS;
   if (keysEnv) {
@@ -37,7 +93,8 @@ function getOpenAiApiKey(): string | null {
 // ─────────────────────────────────────────────
 
 /**
- * Generate a structured post using OpenAI GPT-4o via Vercel AI SDK.
+ * Generate a structured post using whichever AI provider is configured.
+ * Priority: Google Gemini → Anthropic Claude → OpenAI → Mock fallback.
  */
 export async function generatePostContent(params: {
   pageName: string;
@@ -46,12 +103,14 @@ export async function generatePostContent(params: {
   tone: "educational" | "inspirational" | "conversational" | "humorous";
   customInstructions?: string;
 }): Promise<GeneratedPostType> {
-  const apiKey = getOpenAiApiKey();
+  const resolved = resolveModel();
 
-  if (!apiKey) {
-    console.warn("No OpenAI API key found. Returning mock AI post.");
+  if (resolved.provider === "mock") {
+    console.warn("No AI API key found. Returning mock AI post.");
     return getMockAiPost(params);
   }
+
+  console.log(`[AI] Using provider: ${resolved.displayName}`);
 
   const systemInstructions = [
     `You are an AI assistant writing social media posts for a Facebook Page named "${params.pageName}".`,
@@ -61,6 +120,7 @@ export async function generatePostContent(params: {
       : `Write in a high-quality, professional, engaging tone.`,
     `Tone constraint: write a post that is strictly "${params.tone}".`,
     `Do not include placeholders, bracketed text, or templates. Return complete, ready-to-publish copy.`,
+    `If you suggest an image (suggestImage=true), provide a descriptive imagePrompt for generating it. Otherwise set imagePrompt to an empty string.`,
   ].join("\n");
 
   const userPrompt = [
@@ -71,9 +131,8 @@ export async function generatePostContent(params: {
   ].filter(Boolean).join("\n");
 
   try {
-    const customOpenai = createOpenAI({ apiKey });
     const { object } = await generateObject({
-      model: customOpenai("gpt-4o"),
+      model: resolved.model,
       schema: GeneratedPostSchema,
       system: systemInstructions,
       prompt: userPrompt,
@@ -82,7 +141,7 @@ export async function generatePostContent(params: {
 
     return object;
   } catch (error: any) {
-    console.error("Vercel AI SDK generation failed:", error);
+    console.error(`[AI] ${resolved.displayName} generation failed:`, error);
     throw new AppError(
       ErrorCodes.AI_GENERATION_FAILED,
       `AI post generation failed: ${error.message || "Provider error"}`,
