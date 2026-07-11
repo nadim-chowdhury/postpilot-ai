@@ -136,7 +136,7 @@ export default function SettingsPage() {
                     <select
                       value={statuses[pageId] || "ACTIVE"}
                       onChange={(e) => setStatuses({ ...statuses, [pageId]: e.target.value })}
-                      className="h-8 rounded-lg border border-border/50 bg-background px-2.5 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+                      className="h-10 rounded-lg border border-border/50 bg-background px-2.5 text-xs text-foreground focus:border-brand/50 focus:outline-none"
                     >
                       <option value="ACTIVE">Active (Publishing Enabled)</option>
                       <option value="PAUSED">Paused (No Queue Publishing)</option>
@@ -163,12 +163,12 @@ export default function SettingsPage() {
                     <label className="block text-xs font-medium text-foreground">
                       Target Topic/Niche
                     </label>
-                    <input
-                      type="text"
+                    <textarea
                       value={topics[pageId] || ""}
                       onChange={(e) => setTopics({ ...topics, [pageId]: e.target.value })}
                       placeholder="e.g., Tactical football analysis, Indie gaming"
-                      className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
+                      rows={3}
+                      className="w-full resize-none rounded-lg border border-border/50 bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
                     />
                     <p className="text-[11px] text-muted-foreground">
                       This is parsed by the AI Content generator to construct contextual copy and hashtags.
