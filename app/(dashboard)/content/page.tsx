@@ -13,6 +13,7 @@ import {
   deletePost,
 } from "@/actions/post.actions";
 import { getPages } from "@/actions/page.actions";
+import { schedulePost } from "@/actions/schedule.actions";
 import type { PostSummary } from "@/types/post.types";
 
 export default function ContentPage() {
@@ -21,6 +22,8 @@ export default function ContentPage() {
   const [loading, setLoading] = useState(true);
   const [showComposer, setShowComposer] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [schedulingPostId, setSchedulingPostId] = useState<string | null>(null);
+  const [scheduleTime, setScheduleTime] = useState("");
 
   const fetchData = async () => {
     setLoading(true);
@@ -104,6 +107,20 @@ export default function ContentPage() {
     setActionLoading(false);
   };
 
+  const handleScheduleSubmit = async () => {
+    if (!schedulingPostId || !scheduleTime) return;
+    setActionLoading(true);
+    const result = await schedulePost(schedulingPostId, new Date(scheduleTime));
+    if (result.success) {
+      setSchedulingPostId(null);
+      setScheduleTime("");
+      await fetchData();
+    } else {
+      alert(result.error || "Failed to schedule post");
+    }
+    setActionLoading(false);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -149,6 +166,7 @@ export default function ContentPage() {
               key={post.id}
               post={post}
               onPublish={handlePublishExisting}
+              onSchedule={setSchedulingPostId}
               onDelete={handleDelete}
             />
           ))}
@@ -172,6 +190,43 @@ export default function ContentPage() {
             }
           />
         )
+      )}
+
+      {/* Scheduling Modal */}
+      {schedulingPostId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setSchedulingPostId(null)}
+          />
+          <div className="relative z-10 w-full max-w-sm rounded-xl border border-border/50 bg-card p-6 shadow-2xl space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">Schedule Post</h3>
+              <p className="text-xs text-muted-foreground">Select a publication date and time.</p>
+            </div>
+            <div>
+              <input
+                type="datetime-local"
+                value={scheduleTime}
+                onChange={(e) => setScheduleTime(e.target.value)}
+                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-brand/30"
+              />
+            </div>
+            <div className="flex justify-end gap-2 border-t border-border/50 pt-3">
+              <Button variant="ghost" size="sm" onClick={() => setSchedulingPostId(null)}>
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                className="bg-brand text-brand-foreground hover:bg-brand/90"
+                onClick={handleScheduleSubmit}
+                disabled={!scheduleTime || actionLoading}
+              >
+                Schedule
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
