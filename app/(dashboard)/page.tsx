@@ -5,7 +5,6 @@ import { Globe, FileText, CalendarDays, AlertTriangle, Clock } from "lucide-reac
 import { StatCard } from "@/components/shared/stat-card";
 import { ActivityItem } from "@/components/activity/activity-item";
 import { getDashboardStats } from "@/actions/dashboard.actions";
-import { StatusBadge } from "@/components/shared/status-badge";
 import { Spinner } from "@/components/shared/spinner";
 import type { DashboardStats } from "@/actions/dashboard.actions";
 
@@ -121,6 +120,7 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted/50">
                       {item.pageAvatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={item.pageAvatarUrl}
                           alt={item.pageName}

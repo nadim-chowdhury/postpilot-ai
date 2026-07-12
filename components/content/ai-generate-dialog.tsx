@@ -1,8 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { X, Sparkles, AlertCircle, RefreshCw, Save } from "lucide-react";
+import { Sparkles, AlertCircle, RefreshCw, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/shared/spinner";
 import { generateSinglePost } from "@/actions/ai.actions";
 import { createPost } from "@/actions/post.actions";
@@ -75,30 +86,17 @@ export function AiGenerateDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Dialog card */}
-      <div className="relative z-10 w-full max-w-lg rounded-xl border border-border/50 bg-card p-6 shadow-2xl space-y-4">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-border/50 pb-3">
-          <div className="flex items-center gap-2 text-brand">
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader className="mb-2">
+          <DialogTitle className="flex items-center gap-2 text-brand">
             <Sparkles className="h-5 w-5" />
-            <h2 className="text-base font-semibold text-foreground">
-              Generate Post with AI
-            </h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+            Generate Post with AI
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Generate content for your post using AI.
+          </DialogDescription>
+        </DialogHeader>
 
         {error && (
           <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-xs text-destructive border border-destructive/20">
@@ -115,20 +113,20 @@ export function AiGenerateDialog({
               <label className="mb-1.5 block text-xs font-medium text-foreground">
                 Target Page
               </label>
-              <select
-                value={fbPageId}
-                onChange={(e) => setFbPageId(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground focus:border-brand/50 focus:outline-none"
-              >
-                <option value="" disabled>
-                  Select a page…
-                </option>
-                {pages.map((page) => (
-                  <option key={page.id} value={page.id}>
-                    {page.name}
-                  </option>
-                ))}
-              </select>
+              <Select value={fbPageId} onValueChange={(val) => setFbPageId(val as string)}>
+                <SelectTrigger className="h-9 w-full">
+                  <SelectValue placeholder="Select a page…">
+                    {fbPageId ? pages.find((p) => p.id === fbPageId)?.name : "Select a page…"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {pages.map((page) => (
+                    <SelectItem key={page.id} value={page.id}>
+                      {page.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Tone selector */}
@@ -136,16 +134,17 @@ export function AiGenerateDialog({
               <label className="mb-1.5 block text-xs font-medium text-foreground">
                 Tone
               </label>
-              <select
-                value={tone}
-                onChange={(e) => setTone(e.target.value as any)}
-                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground focus:border-brand/50 focus:outline-none"
-              >
-                <option value="educational">Educational</option>
-                <option value="inspirational">Inspirational</option>
-                <option value="conversational">Conversational</option>
-                <option value="humorous">Humorous</option>
-              </select>
+              <Select value={tone} onValueChange={(val: "educational" | "inspirational" | "conversational" | "humorous") => setTone(val)}>
+                <SelectTrigger className="h-9 w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="educational">Educational</SelectItem>
+                  <SelectItem value="inspirational">Inspirational</SelectItem>
+                  <SelectItem value="conversational">Conversational</SelectItem>
+                  <SelectItem value="humorous">Humorous</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Custom instruction */}
@@ -154,17 +153,16 @@ export function AiGenerateDialog({
                 Custom Instructions{" "}
                 <span className="text-muted-foreground">(optional)</span>
               </label>
-              <textarea
+              <Textarea
                 value={customInstructions}
                 onChange={(e) => setCustomInstructions(e.target.value)}
                 placeholder="E.g., Focus on React 19 compiler benefits, keep it concise, ask a question at the end."
                 rows={4}
-                className="w-full resize-none rounded-lg border border-border/50 bg-background px-3 py-2 text-sm text-foreground focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
               />
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end gap-2 border-t border-border/50 pt-3">
+            <DialogFooter className="mt-4 border-t-0 bg-transparent p-0 sm:justify-end border-t border-border/50 pt-3">
               <Button variant="ghost" size="sm" onClick={onClose}>
                 Cancel
               </Button>
@@ -186,7 +184,7 @@ export function AiGenerateDialog({
                   </>
                 )}
               </Button>
-            </div>
+            </DialogFooter>
           </div>
         ) : (
           // AI Post Preview & Edit View
@@ -196,11 +194,10 @@ export function AiGenerateDialog({
               <label className="mb-1 block text-[10px] uppercase font-semibold text-muted-foreground">
                 Draft Title
               </label>
-              <input
+              <Input
                 type="text"
                 value={editedTitle}
                 onChange={(e) => setEditedTitle(e.target.value)}
-                className="h-8 w-full rounded-md border border-border/50 bg-background px-2.5 text-xs text-foreground focus:border-brand/50 focus:outline-none"
               />
             </div>
 
@@ -209,11 +206,10 @@ export function AiGenerateDialog({
               <label className="mb-1 block text-[10px] uppercase font-semibold text-muted-foreground">
                 Draft Body Text
               </label>
-              <textarea
+              <Textarea
                 value={editedBody}
                 onChange={(e) => setEditedBody(e.target.value)}
                 rows={6}
-                className="w-full resize-none rounded-md border border-border/50 bg-background px-3 py-2 text-xs leading-relaxed text-foreground focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
               />
             </div>
 
@@ -230,7 +226,7 @@ export function AiGenerateDialog({
             )}
 
             {/* Actions */}
-            <div className="flex justify-between items-center border-t border-border/50 pt-3">
+            <DialogFooter className="flex-row items-center justify-between mt-4 border-t-0 bg-transparent p-0 sm:justify-between border-t border-border/50 pt-3">
               <Button
                 variant="outline"
                 size="sm"
@@ -259,10 +255,10 @@ export function AiGenerateDialog({
                   Save Draft
                 </Button>
               </div>
-            </div>
+            </DialogFooter>
           </div>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

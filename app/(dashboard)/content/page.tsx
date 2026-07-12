@@ -12,12 +12,14 @@ import { PostListItem } from "@/components/content/post-list-item";
 import { AiGenerateDialog } from "@/components/content/ai-generate-dialog";
 import { BulkImportDialog } from "@/components/content/bulk-import-dialog";
 import { EditPostDialog } from "@/components/content/edit-post-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
 import {
   getPosts,
   createPost,
   publishPostNow,
   deletePost,
-  updatePost,
 } from "@/actions/post.actions";
 import { getPages } from "@/actions/page.actions";
 import { schedulePost } from "@/actions/schedule.actions";
@@ -83,14 +85,17 @@ export default function ContentPage() {
       setLoading(false);
     };
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch updated posts when filters change
   useEffect(() => {
     // Skip first run when loading is true
     if (!loading) {
+      // eslint-disable-next-line
       fetchPosts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterPageId, filterStatus, filterStartDate, filterEndDate, filterSearch]);
 
   const handleSaveDraft = async (data: {
@@ -227,12 +232,11 @@ export default function ContentPage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Search Posts
             </label>
-            <input
+            <Input
               type="text"
               placeholder="Search title, body..."
               value={filterSearch}
               onChange={(e) => setFilterSearch(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
             />
           </div>
 
@@ -241,18 +245,21 @@ export default function ContentPage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Filter by Page
             </label>
-            <select
-              value={filterPageId}
-              onChange={(e) => setFilterPageId(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
-            >
-              <option value="ALL">All Pages</option>
-              {pages.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+            <Select value={filterPageId} onValueChange={(val) => setFilterPageId(val as string)}>
+              <SelectTrigger className="h-9 w-full mb-0">
+                <SelectValue placeholder="All Pages">
+                  {filterPageId === "ALL" ? "All Pages" : pages.find((p) => p.id === filterPageId)?.name}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Pages</SelectItem>
+                {pages.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Status Filter */}
@@ -260,19 +267,22 @@ export default function ContentPage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Status
             </label>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="DRAFT">Draft</option>
-              <option value="APPROVED">Approved</option>
-              <option value="SCHEDULED">Scheduled</option>
-              <option value="PUBLISHING">Publishing</option>
-              <option value="POSTED">Posted</option>
-              <option value="FAILED">Failed</option>
-            </select>
+            <Select value={filterStatus} onValueChange={(val) => setFilterStatus(val as string)}>
+              <SelectTrigger className="h-9 w-full mb-0">
+                <SelectValue placeholder="All Statuses">
+                  {filterStatus === "ALL" ? "All Statuses" : filterStatus.charAt(0) + filterStatus.slice(1).toLowerCase()}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Statuses</SelectItem>
+                <SelectItem value="DRAFT">Draft</SelectItem>
+                <SelectItem value="APPROVED">Approved</SelectItem>
+                <SelectItem value="SCHEDULED">Scheduled</SelectItem>
+                <SelectItem value="PUBLISHING">Publishing</SelectItem>
+                <SelectItem value="POSTED">Posted</SelectItem>
+                <SelectItem value="FAILED">Failed</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Start Date */}
@@ -280,11 +290,10 @@ export default function ContentPage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               From Date
             </label>
-            <input
-              type="date"
+            <DatePicker
               value={filterStartDate}
-              onChange={(e) => setFilterStartDate(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+              onChange={setFilterStartDate}
+              placeholder="Pick a date"
             />
           </div>
 
@@ -294,11 +303,10 @@ export default function ContentPage() {
               <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 To Date
               </label>
-              <input
-                type="date"
+              <DatePicker
                 value={filterEndDate}
-                onChange={(e) => setFilterEndDate(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+                onChange={setFilterEndDate}
+                placeholder="Pick a date"
               />
             </div>
             {(filterPageId !== "ALL" ||
@@ -322,7 +330,7 @@ export default function ContentPage() {
             )}
           </div>
         </div>
-        <div className="flex justify-end pt-3 border-t border-border/30">
+        <div className="flex justify-end pt-3">
           <ViewModeToggle mode={viewMode} onModeChange={setViewMode} />
         </div>
       </div>
@@ -404,11 +412,10 @@ export default function ContentPage() {
               </p>
             </div>
             <div>
-              <input
+              <Input
                 type="datetime-local"
                 value={scheduleTime}
                 onChange={(e) => setScheduleTime(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-brand/30"
               />
             </div>
             <div className="flex justify-end gap-2 border-t border-border/50 pt-3">

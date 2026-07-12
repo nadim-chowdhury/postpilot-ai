@@ -1,0 +1,96 @@
+
+/home/user/projects/postpilot-ai/actions/activity.actions.ts
+  70:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/user/projects/postpilot-ai/actions/analytics.actions.ts
+   81:122  error    Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+  144:12   warning  'error' is defined but never used            @typescript-eslint/no-unused-vars
+  154:11   warning  'userId' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/user/projects/postpilot-ai/actions/page.actions.ts
+  8:3  warning  'exchangeForLongLivedToken' is defined but never used  @typescript-eslint/no-unused-vars
+  9:3  warning  'verifyPageToken' is defined but never used            @typescript-eslint/no-unused-vars
+
+/home/user/projects/postpilot-ai/actions/post.actions.ts
+  35:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/user/projects/postpilot-ai/actions/schedule.actions.ts
+    9:32  warning  'ScheduleDetail' is defined but never used  @typescript-eslint/no-unused-vars
+  295:18  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  408:21  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  427:19  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  441:17  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  483:19  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+
+/home/user/projects/postpilot-ai/app/(dashboard)/activity/page.tsx
+  50:5  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/user/projects/postpilot-ai/app/(dashboard)/activity/page.tsx:50:5
+  48 |
+  49 |   useEffect(() => {
+> 50 |     fetchActivities(page);
+     |     ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  51 |   }, [page]);
+  52 |
+  53 |   // Re-fetch when filters change (reset to page 1)                                                               react-hooks/set-state-in-effect
+  51:6  warning  React Hook useEffect has a missing dependency: 'fetchActivities'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                react-hooks/exhaustive-deps
+  55:5  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/user/projects/postpilot-ai/app/(dashboard)/activity/page.tsx:55:5
+  53 |   // Re-fetch when filters change (reset to page 1)
+  54 |   useEffect(() => {
+> 55 |     setPage(1);
+     |     ^^^^^^^ Avoid calling setState() directly within an effect
+  56 |     fetchActivities(1);
+  57 |   }, [filterCategory, filterAction, filterStartDate, filterEndDate]);
+  58 |  react-hooks/set-state-in-effect
+  57:6  warning  React Hook useEffect has a missing dependency: 'fetchActivities'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                react-hooks/exhaustive-deps
+
+/home/user/projects/postpilot-ai/app/(dashboard)/analytics/AnalyticsClient.tsx
+  45:61  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  48:42  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  56:7   error  Error: Cannot access variable before it is declared
+
+`loadData` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/user/projects/postpilot-ai/app/(dashboard)/analytics/AnalyticsClient.tsx:56:7
+  54 |   useEffect(() => {
+  55 |     if (selectedPage) {
+> 56 |       loadData(selectedPage);
+     |       ^^^^^^^^ `loadData` accessed before it is declared
+  57 |     }
+  58 |   }, [selectedPage]);
+  59 |
+
+/home/user/projects/postpilot-ai/app/(dashboard)/analytics/AnalyticsClient.tsx:60:3
+  58 |   }, [selectedPage]);
+  59 |
+> 60 |   const loadData = async (pageId: string) => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 61 |     setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 62 |     setAiSuggestion("");
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 73 |     }
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 74 |   };
+     | ^^^^^ `loadData` is declared here
+  75 |
+  76 |   const handleSync = async () => {
+  77 |     if (!selectedPage) return;  react-hooks/immutability
+
+✖ 20 problems (13 errors, 7 warnings)
+

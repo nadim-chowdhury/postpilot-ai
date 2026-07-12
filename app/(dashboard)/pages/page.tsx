@@ -24,6 +24,7 @@ export default function PagesPage() {
   const [pages, setPages] = useState<PageSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [connectOpen, setConnectOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [availablePages, setAvailablePages] = useState<any[]>([]);
   const [fetchingAvailable, setFetchingAvailable] = useState(false);
   const [editPage, setEditPage] = useState<PageSummary | null>(null);
@@ -65,6 +66,7 @@ export default function PagesPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line
     fetchPages();
   }, []);
 

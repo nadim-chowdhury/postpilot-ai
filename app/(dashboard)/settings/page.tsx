@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { getPages, updatePage } from "@/actions/page.actions";
 import { Spinner } from "@/components/shared/spinner";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { PageSummary } from "@/types/page.types";
 
 export default function SettingsPage() {
@@ -69,6 +70,7 @@ export default function SettingsPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line
     loadPageSettings();
   }, []);
 
@@ -171,6 +173,7 @@ export default function SettingsPage() {
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
                       {page.avatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={page.avatarUrl}
                           alt={page.name}
@@ -192,26 +195,17 @@ export default function SettingsPage() {
 
                   <div className="flex items-center gap-3">
                     {/* Status Toggle */}
-                    <select
-                      value={statuses[pageId] || "ACTIVE"}
-                      onChange={(e) =>
-                        setStatuses({ ...statuses, [pageId]: e.target.value })
-                      }
-                      className="h-8 rounded-lg border border-border/50 bg-background px-2.5 text-xs text-foreground focus:border-brand/50 focus:outline-none"
-                    >
-                      <option value="ACTIVE">
-                        Active (Publishing Enabled)
-                      </option>
-                      <option value="PAUSED">
-                        Paused (No Queue Publishing)
-                      </option>
-                      <option value="TOKEN_EXPIRING">
-                        Token Expiring Warning
-                      </option>
-                      <option value="DISCONNECTED">
-                        Disconnected (Requires Reconnect)
-                      </option>
-                    </select>
+                    <Select value={statuses[pageId] || "ACTIVE"} onValueChange={(val) => setStatuses({ ...statuses, [pageId]: val as string })}>
+                      <SelectTrigger className="h-8 w-[240px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ACTIVE">Active (Publishing Enabled)</SelectItem>
+                        <SelectItem value="PAUSED">Paused (No Queue Publishing)</SelectItem>
+                        <SelectItem value="TOKEN_EXPIRING">Token Expiring Warning</SelectItem>
+                        <SelectItem value="DISCONNECTED">Disconnected (Requires Reconnect)</SelectItem>
+                      </SelectContent>
+                    </Select>
 
                     <Button
                       size="sm"
@@ -279,98 +273,98 @@ export default function SettingsPage() {
                       Assigned Game
                     </label>
                   </div>
-                  <select
-                    value={games[pageId] || ""}
-                    onChange={(e) =>
-                      setGames({ ...games, [pageId]: e.target.value })
-                    }
-                    className="h-9 w-full max-w-sm rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
-                  >
-                    <option value="">— No Game Assigned —</option>
-                    <option value="Among Us">Among Us</option>
-                    <option value="Apex Legends">Apex Legends</option>
+                  <Select value={games[pageId] || ""} onValueChange={(val) => setGames({ ...games, [pageId]: val as string })}>
+                    <SelectTrigger className="h-9 w-full max-w-sm">
+                      <SelectValue placeholder="— No Game Assigned —" />
+                    </SelectTrigger>
+                    <SelectContent>
+
+                    <SelectItem value="">— No Game Assigned —</SelectItem>
+                    <SelectItem value="Among Us">Among Us</SelectItem>
+                    <SelectItem value="Apex Legends">Apex Legends</SelectItem>
                     <option value="ARK: Survival Ascended">
                       ARK: Survival Ascended
                     </option>
-                    <option value="Assassin's Creed">Assassin's Creed</option>
-                    <option value="Assetto Corsa">Assetto Corsa</option>
-                    <option value="Baldur's Gate 3">Baldur's Gate 3</option>
-                    <option value="BGMI">BGMI</option>
+                    <SelectItem value="Assassin's Creed">Assassin&apos;s Creed</SelectItem>
+                    <SelectItem value="Assetto Corsa">Assetto Corsa</SelectItem>
+                    <SelectItem value="Baldur's Gate 3">Baldur&apos;s Gate 3</SelectItem>
+                    <SelectItem value="BGMI">BGMI</SelectItem>
                     <option value="Call of Duty Mobile">
                       Call of Duty Mobile
                     </option>
                     <option value="Call of Duty: Warzone">
                       Call of Duty: Warzone
                     </option>
-                    <option value="Counter-Strike 2">Counter-Strike 2</option>
-                    <option value="Cyberpunk 2077">Cyberpunk 2077</option>
-                    <option value="DayZ">DayZ</option>
-                    <option value="Dead by Daylight">Dead by Daylight</option>
-                    <option value="Dota 2">Dota 2</option>
-                    <option value="EA Sports FC">EA Sports FC</option>
-                    <option value="eFootball">eFootball</option>
-                    <option value="Elden Ring">Elden Ring</option>
+                    <SelectItem value="Counter-Strike 2">Counter-Strike 2</SelectItem>
+                    <SelectItem value="Cyberpunk 2077">Cyberpunk 2077</SelectItem>
+                    <SelectItem value="DayZ">DayZ</SelectItem>
+                    <SelectItem value="Dead by Daylight">Dead by Daylight</SelectItem>
+                    <SelectItem value="Dota 2">Dota 2</SelectItem>
+                    <SelectItem value="EA Sports FC">EA Sports FC</SelectItem>
+                    <SelectItem value="eFootball">eFootball</SelectItem>
+                    <SelectItem value="Elden Ring">Elden Ring</SelectItem>
                     <option value="Euro Truck Simulator 2">
                       Euro Truck Simulator 2
                     </option>
-                    <option value="Fall Guys">Fall Guys</option>
-                    <option value="Fortnite">Fortnite</option>
-                    <option value="Forza Horizon 4">Forza Horizon 4</option>
-                    <option value="Forza Horizon 5">Forza Horizon 5</option>
-                    <option value="Forza Horizon 6">Forza Horizon 6</option>
-                    <option value="Free Fire">Free Fire</option>
-                    <option value="Free Fire MAX">Free Fire MAX</option>
-                    <option value="Genshin Impact">Genshin Impact</option>
-                    <option value="Ghost of Tsushima">Ghost of Tsushima</option>
+                    <SelectItem value="Fall Guys">Fall Guys</SelectItem>
+                    <SelectItem value="Fortnite">Fortnite</SelectItem>
+                    <SelectItem value="Forza Horizon 4">Forza Horizon 4</SelectItem>
+                    <SelectItem value="Forza Horizon 5">Forza Horizon 5</SelectItem>
+                    <SelectItem value="Forza Horizon 6">Forza Horizon 6</SelectItem>
+                    <SelectItem value="Free Fire">Free Fire</SelectItem>
+                    <SelectItem value="Free Fire MAX">Free Fire MAX</SelectItem>
+                    <SelectItem value="Genshin Impact">Genshin Impact</SelectItem>
+                    <SelectItem value="Ghost of Tsushima">Ghost of Tsushima</SelectItem>
                     <option value="God of War Ragnarök">
                       God of War Ragnarök
                     </option>
-                    <option value="Gran Turismo">Gran Turismo</option>
-                    <option value="GTA III">GTA III</option>
-                    <option value="GTA IV">GTA IV</option>
-                    <option value="GTA Online">GTA Online</option>
-                    <option value="GTA San Andreas">GTA San Andreas</option>
-                    <option value="GTA V">GTA V</option>
-                    <option value="GTA VI">GTA VI</option>
-                    <option value="GTA Vice City">GTA Vice City</option>
-                    <option value="Hogwarts Legacy">Hogwarts Legacy</option>
-                    <option value="Honkai: Star Rail">Honkai: Star Rail</option>
-                    <option value="League of Legends">League of Legends</option>
-                    <option value="Lethal Company">Lethal Company</option>
+                    <SelectItem value="Gran Turismo">Gran Turismo</SelectItem>
+                    <SelectItem value="GTA III">GTA III</SelectItem>
+                    <SelectItem value="GTA IV">GTA IV</SelectItem>
+                    <SelectItem value="GTA Online">GTA Online</SelectItem>
+                    <SelectItem value="GTA San Andreas">GTA San Andreas</SelectItem>
+                    <SelectItem value="GTA V">GTA V</SelectItem>
+                    <SelectItem value="GTA VI">GTA VI</SelectItem>
+                    <SelectItem value="GTA Vice City">GTA Vice City</SelectItem>
+                    <SelectItem value="Hogwarts Legacy">Hogwarts Legacy</SelectItem>
+                    <SelectItem value="Honkai: Star Rail">Honkai: Star Rail</SelectItem>
+                    <SelectItem value="League of Legends">League of Legends</SelectItem>
+                    <SelectItem value="Lethal Company">Lethal Company</SelectItem>
                     <option value="Marvel's Spider-Man">
-                      Marvel's Spider-Man
+                      Marvel&apos;s Spider-Man
                     </option>
-                    <option value="Minecraft">Minecraft</option>
-                    <option value="Mobile Legends">Mobile Legends</option>
-                    <option value="NBA 2K">NBA 2K</option>
-                    <option value="Need for Speed">Need for Speed</option>
-                    <option value="Other">Other</option>
-                    <option value="Overwatch 2">Overwatch 2</option>
-                    <option value="Palworld">Palworld</option>
-                    <option value="Phasmophobia">Phasmophobia</option>
-                    <option value="PUBG Mobile">PUBG Mobile</option>
+                    <SelectItem value="Minecraft">Minecraft</SelectItem>
+                    <SelectItem value="Mobile Legends">Mobile Legends</SelectItem>
+                    <SelectItem value="NBA 2K">NBA 2K</SelectItem>
+                    <SelectItem value="Need for Speed">Need for Speed</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                    <SelectItem value="Overwatch 2">Overwatch 2</SelectItem>
+                    <SelectItem value="Palworld">Palworld</SelectItem>
+                    <SelectItem value="Phasmophobia">Phasmophobia</SelectItem>
+                    <SelectItem value="PUBG Mobile">PUBG Mobile</SelectItem>
                     <option value="PUBG: Battlegrounds">
                       PUBG: Battlegrounds
                     </option>
-                    <option value="Rainbow Six Siege">Rainbow Six Siege</option>
+                    <SelectItem value="Rainbow Six Siege">Rainbow Six Siege</SelectItem>
                     <option value="Red Dead Redemption 2">
                       Red Dead Redemption 2
                     </option>
-                    <option value="Resident Evil">Resident Evil</option>
-                    <option value="Roblox">Roblox</option>
-                    <option value="Rust">Rust</option>
-                    <option value="Silent Hill">Silent Hill</option>
-                    <option value="Stardew Valley">Stardew Valley</option>
-                    <option value="Terraria">Terraria</option>
+                    <SelectItem value="Resident Evil">Resident Evil</SelectItem>
+                    <SelectItem value="Roblox">Roblox</SelectItem>
+                    <SelectItem value="Rust">Rust</SelectItem>
+                    <SelectItem value="Silent Hill">Silent Hill</SelectItem>
+                    <SelectItem value="Stardew Valley">Stardew Valley</SelectItem>
+                    <SelectItem value="Terraria">Terraria</SelectItem>
                     <option value="The Elder Scrolls V: Skyrim">
                       The Elder Scrolls V: Skyrim
                     </option>
-                    <option value="The Witcher 3">The Witcher 3</option>
-                    <option value="Valorant">Valorant</option>
-                    <option value="Wuthering Waves">Wuthering Waves</option>
-                    <option value="WWE 2K">WWE 2K</option>
-                    <option value="Zenless Zone Zero">Zenless Zone Zero</option>
-                  </select>
+                    <SelectItem value="The Witcher 3">The Witcher 3</SelectItem>
+                    <SelectItem value="Valorant">Valorant</SelectItem>
+                    <SelectItem value="Wuthering Waves">Wuthering Waves</SelectItem>
+                    <SelectItem value="WWE 2K">WWE 2K</SelectItem>
+                    <SelectItem value="Zenless Zone Zero">Zenless Zone Zero</SelectItem>
+                                      </SelectContent>
+                  </Select>
                   <p className="text-[11px] text-muted-foreground">
                     Assign a game for visibility. This label is displayed on the
                     page card for easy identification.

@@ -113,7 +113,7 @@ export async function GET(request: Request) {
           });
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(`[Token Expiry Checker] Failed to check page ${page.name}:`, err);
     }
     processed++;

@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { usePathname } from "next/navigation";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -8,6 +9,12 @@ import { navConfig } from "@/config/nav";
 export function Header() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    // eslint-disable-next-line
+    setMounted(true);
+  }, []);
 
   // Derive page title from nav config
   const allItems = navConfig.flatMap((g) => g.items);
@@ -29,9 +36,9 @@ export function Header() {
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          title={`Switch to ${mounted && theme === "dark" ? "light" : "dark"} mode`}
         >
-          {theme === "dark" ? (
+          {mounted && theme === "dark" ? (
             <Sun className="h-4 w-4" />
           ) : (
             <Moon className="h-4 w-4" />

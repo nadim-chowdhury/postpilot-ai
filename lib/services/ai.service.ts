@@ -29,7 +29,8 @@ type ProviderName = "google" | "anthropic" | "openai" | "mock";
 
 interface ResolvedModel {
   provider: ProviderName;
-  model: ReturnType<typeof createGoogleGenerativeAI> extends (...args: any) => infer R ? any : any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  model: any;
   displayName: string;
 }
 
@@ -140,11 +141,11 @@ export async function generatePostContent(params: {
     });
 
     return object;
-  } catch (error: any) {
+  } catch (error) {
     console.error(`[AI] ${resolved.displayName} generation failed:`, error);
     throw new AppError(
       ErrorCodes.AI_GENERATION_FAILED,
-      `AI post generation failed: ${error.message || "Provider error"}`,
+      `AI post generation failed: ${(error as Error).message || "Provider error"}`,
       500,
     );
   }
@@ -217,7 +218,7 @@ function getMockAiPost(params: {
     title: `AI generated post about ${params.topic.substring(0, 30)}`,
     body: `Here is an automated ${params.tone} post about our favorite topic: ${params.topic}! We are discussing this today${details}. Follow for more updates! #AI #Automation`,
     hashtags: ["ai", "automation", params.tone],
-    tone: params.tone as any,
+    tone: params.tone as "educational" | "inspirational" | "conversational" | "humorous",
     suggestImage: true,
     imagePrompt: `A beautiful high-quality editorial photograph illustrating ${params.topic}`,
   };

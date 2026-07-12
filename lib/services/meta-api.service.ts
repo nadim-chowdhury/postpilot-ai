@@ -59,6 +59,12 @@ export interface MetaPage {
   avatarUrl: string | null;
 }
 
+export interface MetaPostInsights {
+  likesCount: number;
+  commentsCount: number;
+  sharesCount: number;
+}
+
 export interface PublishPostPayload {
   message: string;
   link?: string;
@@ -275,4 +281,23 @@ export async function verifyPageToken(
   } catch {
     return false;
   }
+}
+
+/**
+ * Fetch insights (likes, comments, shares) for a given post.
+ */
+export async function fetchPostInsights(
+  pageAccessToken: string,
+  fbPostId: string,
+): Promise<MetaPostInsights> {
+  const endpoint = `/${fbPostId}?fields=likes.summary(true),comments.summary(true),shares`;
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const response = await metaFetch<any>(endpoint, pageAccessToken);
+  
+  return {
+    likesCount: response.likes?.summary?.total_count ?? 0,
+    commentsCount: response.comments?.summary?.total_count ?? 0,
+    sharesCount: response.shares?.count ?? 0,
+  };
 }

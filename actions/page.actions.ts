@@ -5,8 +5,6 @@ import { requireUserId, requireUserAccessToken } from "@/lib/session";
 import { encrypt, decrypt } from "@/lib/services/encryption.service";
 import {
   fetchUserPages,
-  exchangeForLongLivedToken,
-  verifyPageToken,
 } from "@/lib/services/meta-api.service";
 import { AppError, ErrorCodes } from "@/lib/errors";
 import type { ActionResult } from "@/types/api.types";

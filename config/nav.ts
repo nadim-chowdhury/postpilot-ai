@@ -6,6 +6,7 @@ import {
   Activity,
   Settings,
   Globe,
+  LineChart,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -43,6 +44,11 @@ export const navConfig: NavGroup[] = [
         label: "Calendar",
         href: "/calendar",
         icon: CalendarDays,
+      },
+      {
+        label: "Analytics",
+        href: "/analytics",
+        icon: LineChart,
       },
       {
         label: "Queue",

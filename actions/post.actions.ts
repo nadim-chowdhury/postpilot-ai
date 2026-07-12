@@ -32,6 +32,7 @@ export async function getPosts(filters?: {
     const page = filters?.page ?? 1;
     const pageSize = filters?.pageSize ?? 50; // default to 50 for better list view
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = { userId };
     if (filters?.status && filters.status !== "ALL") {
       where.status = filters.status;

@@ -20,6 +20,7 @@ export default function CalendarPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line
     fetchSchedules();
   }, []);
 

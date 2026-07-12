@@ -111,6 +111,11 @@ model Post {
   aiGenerated Boolean    @default(false) @map("ai_generated")
   aiModel     String?    @map("ai_model")
 
+  likesCount  Int?      @default(0) @map("likes_count")
+  commentsCount Int?    @default(0) @map("comments_count")
+  sharesCount Int?      @default(0) @map("shares_count")
+  insightsLastSync DateTime? @map("insights_last_sync")
+
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   fbPage    FbPage     @relation(fields: [fbPageId], references: [id], onDelete: Cascade)
   schedules Schedule[]

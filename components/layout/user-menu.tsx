@@ -36,6 +36,7 @@ export function UserMenu({ collapsed }: UserMenuProps) {
       {/* Avatar */}
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
         {user.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={user.image}
             alt={user.name || "User Avatar"}

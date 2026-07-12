@@ -7,11 +7,10 @@ import {
   Globe,
   Calendar as CalendarIcon,
   Clock,
-  CheckCircle,
-  AlertCircle,
   RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { ScheduleSummary } from "@/types/schedule.types";
 
@@ -233,6 +232,7 @@ export function CalendarView({
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted/50">
                   {selectedPost.pageAvatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={selectedPost.pageAvatarUrl}
                       alt={selectedPost.pageName}
@@ -251,6 +251,7 @@ export function CalendarView({
                   </span>
                 </div>
               </div>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <StatusBadge status={selectedPost.status.toLowerCase() as any} />
             </div>
 
@@ -294,11 +295,11 @@ export function CalendarView({
                   Reschedule Post
                 </span>
                 <div className="flex items-center gap-2">
-                  <input
+                  <Input
                     type="datetime-local"
                     value={rescheduleTime}
                     onChange={(e) => setRescheduleTime(e.target.value)}
-                    className="h-8 flex-1 rounded-md border border-border/50 bg-background px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-brand/30"
+                    className="h-8 flex-1"
                   />
                   <Button
                     size="xs"

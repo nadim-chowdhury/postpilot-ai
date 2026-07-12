@@ -7,8 +7,10 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ViewModeToggle, type ViewMode } from "@/components/shared/view-mode-toggle";
 import { QueueCard } from "@/components/queue/queue-card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
 import { getSchedules, cancelSchedule, reschedulePost, triggerQueueSweeper, forcePublishSchedule } from "@/actions/schedule.actions";
-import { publishPostNow } from "@/actions/post.actions";
 import { getPages } from "@/actions/page.actions";
 import type { ScheduleSummary } from "@/types/schedule.types";
 
@@ -43,6 +45,7 @@ export default function QueuePage() {
 
   const fetchQueue = async () => {
     const result = await getSchedules({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       status: filterStatus as any,
       fbPageId: filterPageId !== "ALL" ? filterPageId : undefined,
       startDate: filterStartDate || undefined,
@@ -58,6 +61,7 @@ export default function QueuePage() {
   const fetchData = async () => {
     const [queueResult, pagesResult] = await Promise.all([
       getSchedules({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         status: filterStatus as any,
         fbPageId: filterPageId !== "ALL" ? filterPageId : undefined,
         startDate: filterStartDate || undefined,
@@ -83,15 +87,17 @@ export default function QueuePage() {
       setLoading(false);
     };
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (!loading) {
       fetchQueue();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterPageId, filterStatus, filterStartDate, filterEndDate, filterSearch]);
 
-  const handleForcePublish = async (scheduleId: string, postId: string) => {
+  const handleForcePublish = async (scheduleId: string) => {
     if (!confirm("Are you sure you want to force publish this post right now?")) return;
     setActionLoading(scheduleId);
     
@@ -171,12 +177,11 @@ export default function QueuePage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Search Queue
             </label>
-            <input
+            <Input
               type="text"
               placeholder="Search title, body..."
               value={filterSearch}
               onChange={(e) => setFilterSearch(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
             />
           </div>
 
@@ -185,18 +190,21 @@ export default function QueuePage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Filter by Page
             </label>
-            <select
-              value={filterPageId}
-              onChange={(e) => setFilterPageId(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
-            >
-              <option value="ALL">All Pages</option>
-              {pages.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+            <Select value={filterPageId} onValueChange={(val) => setFilterPageId(val as string)}>
+              <SelectTrigger className="h-9 w-full mb-0">
+                <SelectValue placeholder="All Pages">
+                  {filterPageId === "ALL" ? "All Pages" : pages.find((p) => p.id === filterPageId)?.name}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Pages</SelectItem>
+                {pages.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Status Filter */}
@@ -204,18 +212,21 @@ export default function QueuePage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Queue Status
             </label>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="PENDING">Pending (Scheduled)</option>
-              <option value="IN_PROGRESS">Publishing</option>
-              <option value="COMPLETED">Completed (Posted)</option>
-              <option value="FAILED">Failed</option>
-              <option value="CANCELLED">Cancelled</option>
-            </select>
+            <Select value={filterStatus} onValueChange={(val) => setFilterStatus(val as string)}>
+              <SelectTrigger className="h-9 w-full mb-0">
+                <SelectValue placeholder="All Statuses">
+                  {filterStatus === "ALL" ? "All Statuses" : filterStatus === "IN_PROGRESS" ? "Publishing" : filterStatus.charAt(0) + filterStatus.slice(1).toLowerCase()}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Statuses</SelectItem>
+                <SelectItem value="PENDING">Pending (Scheduled)</SelectItem>
+                <SelectItem value="IN_PROGRESS">Publishing</SelectItem>
+                <SelectItem value="COMPLETED">Completed (Posted)</SelectItem>
+                <SelectItem value="FAILED">Failed</SelectItem>
+                <SelectItem value="CANCELLED">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Start Date */}
@@ -223,11 +234,10 @@ export default function QueuePage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               From Date
             </label>
-            <input
-              type="date"
+            <DatePicker
               value={filterStartDate}
-              onChange={(e) => setFilterStartDate(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+              onChange={setFilterStartDate}
+              placeholder="Pick a date"
             />
           </div>
 
@@ -237,11 +247,10 @@ export default function QueuePage() {
               <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 To Date
               </label>
-              <input
-                type="date"
+              <DatePicker
                 value={filterEndDate}
-                onChange={(e) => setFilterEndDate(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+                onChange={setFilterEndDate}
+                placeholder="Pick a date"
               />
             </div>
             {(filterPageId !== "ALL" ||
@@ -265,7 +274,7 @@ export default function QueuePage() {
             )}
           </div>
         </div>
-        <div className="flex justify-end pt-3 border-t border-border/30">
+        <div className="flex justify-end pt-3">
           <ViewModeToggle mode={viewMode} onModeChange={setViewMode} />
         </div>
       </div>
@@ -288,6 +297,7 @@ export default function QueuePage() {
                     {/* Page avatar */}
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
                       {item.pageAvatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={item.pageAvatarUrl}
                           alt={item.pageName}
@@ -313,6 +323,7 @@ export default function QueuePage() {
                             minute: "2-digit",
                           })}
                         </span>
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         <StatusBadge status={item.status.toLowerCase() as any} className="py-0 h-4 text-[9px]" />
                       </div>
 
@@ -331,11 +342,10 @@ export default function QueuePage() {
                   <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
                     {isEditing ? (
                       <div className="flex items-center gap-2">
-                        <input
+                        <Input
                           type="datetime-local"
                           value={rescheduleTime}
                           onChange={(e) => setRescheduleTime(e.target.value)}
-                          className="h-8 rounded-md border border-border/50 bg-background px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-brand/30"
                         />
                         <Button
                           size="xs"
@@ -374,7 +384,7 @@ export default function QueuePage() {
                               variant="outline"
                               size="xs"
                               className="gap-1 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/5"
-                              onClick={() => handleForcePublish(item.id, item.postId)}
+                              onClick={() => handleForcePublish(item.id)}
                               disabled={isLoading}
                             >
                               <Send className="h-3 w-3" /> Publish Now

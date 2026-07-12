@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { Send, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface PostComposerProps {
   pages: { id: string; name: string }[];
@@ -60,20 +63,20 @@ export function PostComposer({
           <label className="mb-1.5 block text-xs font-medium text-foreground">
             Target Page
           </label>
-          <select
-            value={fbPageId}
-            onChange={(e) => setFbPageId(e.target.value)}
-            className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
-          >
-            <option value="" disabled>
-              Select a page…
-            </option>
-            {pages.map((page) => (
-              <option key={page.id} value={page.id}>
-                {page.name}
-              </option>
-            ))}
-          </select>
+          <Select value={fbPageId} onValueChange={(val) => setFbPageId(val as string)}>
+            <SelectTrigger className="h-9 w-full">
+              <SelectValue placeholder="Select a page…">
+                {fbPageId ? pages.find((p) => p.id === fbPageId)?.name : "Select a page…"}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {pages.map((page) => (
+                <SelectItem key={page.id} value={page.id}>
+                  {page.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Title */}
@@ -81,12 +84,11 @@ export function PostComposer({
           <label className="mb-1.5 block text-xs font-medium text-foreground">
             Title <span className="text-muted-foreground">(optional)</span>
           </label>
-          <input
+          <Input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Post title or headline"
-            className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
           />
         </div>
 
@@ -98,12 +100,11 @@ export function PostComposer({
               {charCount} characters
             </span>
           </label>
-          <textarea
+          <Textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder="Write your post content here..."
             rows={6}
-            className="w-full resize-none rounded-lg border border-border/50 bg-background px-3 py-2.5 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/50 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
           />
         </div>
 
@@ -114,12 +115,11 @@ export function PostComposer({
               Media URL{" "}
               <span className="text-muted-foreground">(optional)</span>
             </label>
-            <input
+            <Input
               type="url"
               value={mediaUrl}
               onChange={(e) => setMediaUrl(e.target.value)}
               placeholder="https://..."
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
             />
           </div>
           {mediaUrl && (
@@ -127,16 +127,15 @@ export function PostComposer({
               <label className="mb-1.5 block text-xs font-medium text-foreground">
                 Type
               </label>
-              <select
-                value={mediaType}
-                onChange={(e) =>
-                  setMediaType(e.target.value as "IMAGE" | "LINK")
-                }
-                className="h-9 w-full rounded-lg border border-border/50 bg-background px-2 text-sm text-foreground focus:border-brand/50 focus:outline-none"
-              >
-                <option value="IMAGE">Image</option>
-                <option value="LINK">Link</option>
-              </select>
+              <Select value={mediaType} onValueChange={(val: "NONE" | "IMAGE" | "LINK") => setMediaType(val)}>
+                <SelectTrigger className="h-9 w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="IMAGE">Image</SelectItem>
+                  <SelectItem value="LINK">Link</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           )}
         </div>

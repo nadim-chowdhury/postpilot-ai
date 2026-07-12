@@ -1,8 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { X, Globe, Check, Search, Cpu, Key } from "lucide-react";
+import { Globe, Check, Search, Cpu, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Spinner } from "@/components/shared/spinner";
 
 interface AvailablePage {
@@ -110,32 +119,14 @@ export function ConnectPageDialog({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Dialog */}
-      <div className="relative z-10 w-full max-w-lg rounded-xl border border-border/50 bg-card p-6 shadow-2xl">
-        {/* Header */}
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-foreground">
-              Connect Pages
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Connect your Facebook Pages to publish content.
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader className="mb-2">
+          <DialogTitle>Connect Pages</DialogTitle>
+          <DialogDescription>
+            Connect your Facebook Pages to publish content.
+          </DialogDescription>
+        </DialogHeader>
 
         {/* Tabs Control */}
         <div className="mb-4 flex rounded-lg bg-muted p-1">
@@ -168,12 +159,12 @@ export function ConnectPageDialog({
             {/* Search bar */}
             <div className="relative mb-4">
               <Search className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/60" />
-              <input
+              <Input
                 type="text"
                 placeholder="Search pages by name or category..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border/50 bg-background pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
+                className="pl-9"
               />
             </div>
 
@@ -214,6 +205,7 @@ export function ConnectPageDialog({
                       {/* Avatar */}
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted/50">
                         {page.avatarUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={page.avatarUrl}
                             alt={page.name}
@@ -238,12 +230,12 @@ export function ConnectPageDialog({
                     {/* Topic input */}
                     {isSelected && (
                       <div className="mt-2 ml-8">
-                        <input
+                        <Input
                           type="text"
                           value={selected.get(page.id)?.topic ?? ""}
                           onChange={(e) => setTopic(page.id, e.target.value)}
                           placeholder={`Topic (default: ${page.category})`}
-                          className="h-8 w-full rounded-md border border-border/50 bg-background px-2.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
+                          className="h-8"
                         />
                       </div>
                     )}
@@ -261,14 +253,14 @@ export function ConnectPageDialog({
                     go to <strong>Settings</strong> &gt; <strong>Business Assets</strong> &gt; <strong>Pages</strong>, select your page, and make sure your profile is added under <strong>People</strong> with full permission.
                   </li>
                   <li>
-                    <strong>Reset App Permissions:</strong> Go to Facebook &gt; <strong>Settings & Privacy</strong> &gt; <strong>Settings</strong> &gt; <strong>Business Integrations</strong>. Remove this app, then click "Connect Page" again and check all requested Page permissions.
+                    <strong>Reset App Permissions:</strong> Go to Facebook &gt; <strong>Settings & Privacy</strong> &gt; <strong>Settings</strong> &gt; <strong>Business Integrations</strong>. Remove this app, then click &quot;Connect Page&quot; again and check all requested Page permissions.
                   </li>
                 </ol>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="mt-5 flex items-center justify-between border-t border-border/50 pt-4">
+            <DialogFooter className="mt-4 border-t-0 bg-transparent p-0 sm:justify-between border-t border-border/50 pt-4 flex-row items-center justify-between">
               <p className="text-xs text-muted-foreground">
                 {selected.size} page{selected.size !== 1 ? "s" : ""} selected
               </p>
@@ -286,7 +278,7 @@ export function ConnectPageDialog({
                   {loading ? "Connecting…" : "Connect"}
                 </Button>
               </div>
-            </div>
+            </DialogFooter>
           </>
         ) : (
           <form onSubmit={handleManualSubmit} className="space-y-4">
@@ -295,13 +287,12 @@ export function ConnectPageDialog({
               <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Meta Page ID
               </label>
-              <input
+              <Input
                 type="text"
                 placeholder="e.g. 1048203859203"
                 value={manualPageId}
                 onChange={(e) => setManualPageId(e.target.value)}
                 required
-                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
               />
             </div>
 
@@ -310,13 +301,12 @@ export function ConnectPageDialog({
               <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Page Access Token
               </label>
-              <input
+              <Input
                 type="password"
                 placeholder="Paste EAAB... token here"
                 value={manualToken}
                 onChange={(e) => setManualToken(e.target.value)}
                 required
-                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
               />
             </div>
 
@@ -325,12 +315,11 @@ export function ConnectPageDialog({
               <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Topic / Category
               </label>
-              <input
+              <Input
                 type="text"
                 placeholder="e.g. Gaming, Tech News"
                 value={manualTopic}
                 onChange={(e) => setManualTopic(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
               />
             </div>
 
@@ -352,7 +341,7 @@ export function ConnectPageDialog({
             </div>
 
             {/* Footer */}
-            <div className="mt-5 flex items-center justify-end gap-2 border-t border-border/50 pt-4">
+            <DialogFooter className="mt-5 border-t-0 bg-transparent p-0 sm:justify-end border-t border-border/50 pt-4">
               <Button variant="ghost" size="sm" type="button" onClick={onClose} disabled={manualLoading}>
                 Cancel
               </Button>
@@ -365,10 +354,10 @@ export function ConnectPageDialog({
                 {manualLoading && <Spinner size="sm" className="border-t-current" />}
                 {manualLoading ? "Connecting…" : "Connect Manually"}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

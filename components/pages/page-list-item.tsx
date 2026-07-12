@@ -33,12 +33,13 @@ export function PageListItem({
   return (
     <div className="flex items-center gap-4 rounded-xl border border-border/50 bg-card px-4 py-3.5 transition-all duration-200 hover:border-border hover:shadow-sm">
       {/* Avatar */}
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand overflow-hidden">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
         {page.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={page.avatarUrl}
             alt={page.name}
-            className="h-9 w-9 rounded-full object-cover"
+            className="h-10 w-10 rounded-full object-cover"
           />
         ) : (
           <Globe className="h-4.5 w-4.5" />

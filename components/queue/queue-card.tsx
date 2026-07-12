@@ -37,6 +37,7 @@ export function QueueCard({
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
             {item.pageAvatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={item.pageAvatarUrl}
                 alt={item.pageName}
@@ -51,6 +52,7 @@ export function QueueCard({
           </span>
         </div>
         <StatusBadge
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           status={item.status.toLowerCase() as any}
           className="py-0 h-4 text-[9px]"
         />
@@ -86,7 +88,7 @@ export function QueueCard({
                 type="datetime-local"
                 value={rescheduleTime}
                 onChange={(e) => onRescheduleTimeChange(e.target.value)}
-                className="h-8 w-full rounded-md border border-border/50 bg-background px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-brand/30"
+                className="flex h-9 w-full rounded-lg border border-border/50 bg-background px-3 py-2 text-xs text-foreground transition-colors outline-none focus-visible:border-brand/50 focus-visible:ring-1 focus-visible:ring-brand/30"
               />
               <div className="flex items-center gap-1.5">
                 <Button

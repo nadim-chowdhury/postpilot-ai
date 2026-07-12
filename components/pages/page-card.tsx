@@ -2,7 +2,6 @@
 
 import {
   Globe,
-  MoreHorizontal,
   Pause,
   Play,
   Unplug,
@@ -38,6 +37,7 @@ export function PageCard({
         {/* Avatar */}
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
           {page.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={page.avatarUrl}
               alt={page.name}

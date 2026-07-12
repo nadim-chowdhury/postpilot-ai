@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { publishPostNowInternal } from "@/actions/post.actions";
-import { logActivity } from "@/actions/activity.actions";
 import { limitRequest } from "@/lib/services/rate-limit.service";
 
 export async function GET(request: Request) {
@@ -72,7 +71,7 @@ export async function GET(request: Request) {
       } else {
         throw new Error(result.error || "Publishing action failed");
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(`[Safety Sweeper] Failed to recover schedule ${schedule.id}:`, err);
       
       await prisma.$transaction([
@@ -80,7 +79,7 @@ export async function GET(request: Request) {
           where: { id: schedule.id },
           data: {
             status: "FAILED",
-            errorMessage: `Sweeper recovery failed: ${err.message || "Unknown error"}`,
+            errorMessage: `Sweeper recovery failed: ${(err as Error).message || "Unknown error"}`,
           },
         }),
         prisma.post.update({

@@ -37,12 +37,13 @@ export function PostListItem({
   return (
     <div className="flex items-center gap-4 rounded-xl border border-border/50 bg-card px-4 py-3.5 transition-all duration-200 hover:border-border hover:shadow-sm">
       {/* Page Avatar */}
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
         {post.pageAvatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={post.pageAvatarUrl}
             alt={post.pageName}
-            className="h-full w-full object-cover"
+            className="h-10 w-10 rounded-full object-cover"
           />
         ) : (
           <Globe className="h-3.5 w-3.5 text-muted-foreground" />

@@ -336,7 +336,7 @@ function DetailRow({
       await navigator.clipboard.writeText(value);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (_) {}
+    } catch {}
   };
 
   return (

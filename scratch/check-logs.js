@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // load env variables first since Prisma Pg adapter connection string requires DATABASE_URL
 require("dotenv").config();
 

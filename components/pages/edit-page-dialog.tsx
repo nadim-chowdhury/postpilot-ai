@@ -28,6 +28,7 @@ export function EditPageDialog({
 
   useEffect(() => {
     if (page) {
+      // eslint-disable-next-line
       setTopic(page.topic ?? "");
       setPersonaPrompt(page.personaPrompt ?? "");
     }

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { Receiver } from "@upstash/qstash";
 import { prisma } from "@/lib/prisma";
 import { publishPostNowInternal } from "@/actions/post.actions";
-import { logActivity } from "@/actions/activity.actions";
 import { MAX_RETRY_ATTEMPTS } from "@/lib/constants";
 
 // Lazy initialize QStash Receiver to avoid crashes if variables are missing
@@ -46,7 +45,7 @@ export async function POST(request: Request) {
     const payload = JSON.parse(bodyText);
     scheduleId = payload.scheduleId;
     if (!scheduleId) throw new Error("Missing scheduleId in payload");
-  } catch (err) {
+  } catch {
     return NextResponse.json({ success: false, error: "Invalid payload" }, { status: 400 });
   }
 
@@ -90,10 +89,10 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, fbPostId: publishResult.data.fbPostId });
-  } catch (error: any) {
+  } catch (error) {
     console.error(`Error executing scheduled job ${scheduleId}:`, error);
 
-    const errorMessage = error.message || "Unknown publishing error";
+    const errorMessage = (error as Error).message || "Unknown publishing error";
     const nextRetryAttempt = schedule.retryCount + 1;
 
     // Retry handling policy

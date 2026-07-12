@@ -67,6 +67,7 @@ export async function getActivities(filters?: {
     const page = filters?.page ?? 1;
     const pageSize = filters?.pageSize ?? 30;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = { userId };
     if (filters?.entityType) where.entityType = filters.entityType;
     if (filters?.action) {

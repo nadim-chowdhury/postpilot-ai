@@ -6,7 +6,7 @@ import { publishPostSchedule, cancelPostSchedule } from "@/lib/services/qstash.s
 import { logActivity } from "@/actions/activity.actions";
 import { AppError, ErrorCodes } from "@/lib/errors";
 import type { ActionResult } from "@/types/api.types";
-import type { ScheduleSummary, ScheduleDetail } from "@/types/schedule.types";
+import type { ScheduleSummary } from "@/types/schedule.types";
 
 // ─────────────────────────────────────────────
 // Mutations
@@ -292,6 +292,7 @@ export async function getSchedules(filters?: {
     const page = filters?.page ?? 1;
     const pageSize = filters?.pageSize ?? 50; // default to 50 for queue list
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = { userId };
     if (filters?.status && filters.status !== "ALL") {
       where.status = filters.status;
@@ -405,7 +406,7 @@ export async function triggerQueueSweeper(): Promise<ActionResult<{ processed: n
         } else {
           throw new Error(result.error || "Publishing failed");
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error(`[Manual Sweeper] Failed recovery for schedule ${schedule.id}:`, err);
         await prisma.$transaction([
           prisma.schedule.update({
@@ -424,7 +425,7 @@ export async function triggerQueueSweeper(): Promise<ActionResult<{ processed: n
     }
 
     return { success: true, data: { processed } };
-  } catch (error: any) {
+  } catch {
     if (error instanceof AppError) {
       return { success: false, error: error.message, code: error.code };
     }
@@ -438,6 +439,7 @@ export async function triggerQueueSweeper(): Promise<ActionResult<{ processed: n
 export async function forcePublishSchedule(
   scheduleId: string,
 ): Promise<ActionResult<{ fbPostId: string }>> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let schedule: any = null;
   try {
     const userId = await requireUserId();
@@ -480,7 +482,7 @@ export async function forcePublishSchedule(
     } else {
       throw new Error(result.error || "Publishing action failed");
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error(`[Force Publish] Failed for schedule ${scheduleId}:`, error);
     
     // Restore schedule to FAILED

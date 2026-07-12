@@ -36,6 +36,7 @@ export function PostCard({
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
             {post.pageAvatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={post.pageAvatarUrl}
                 alt={post.pageName}

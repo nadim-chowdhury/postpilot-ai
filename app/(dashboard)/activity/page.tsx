@@ -10,6 +10,9 @@ import { ActivityCard } from "@/components/activity/activity-card";
 import { getActivities } from "@/actions/activity.actions";
 import { Spinner } from "@/components/shared/spinner";
 import { ActivityDetailModal } from "@/components/activity/activity-detail-modal";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
 import type { ActivityEntry } from "@/actions/activity.actions";
 
 export default function ActivityPage() {
@@ -44,13 +47,17 @@ export default function ActivityPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line
     fetchActivities(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   // Re-fetch when filters change (reset to page 1)
   useEffect(() => {
+    // eslint-disable-next-line
     setPage(1);
     fetchActivities(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterCategory, filterAction, filterStartDate, filterEndDate]);
 
   const hasActiveFilters =
@@ -74,16 +81,19 @@ export default function ActivityPage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Category
             </label>
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
-            >
-              <option value="">All Categories</option>
-              <option value="page">Pages</option>
-              <option value="post">Posts</option>
-              <option value="schedule">Schedules</option>
-            </select>
+            <Select value={filterCategory} onValueChange={(val) => setFilterCategory(val as string)}>
+              <SelectTrigger className="h-9 w-full mb-0">
+                <SelectValue placeholder="All Categories">
+                  {filterCategory === "" ? "All Categories" : filterCategory.charAt(0).toUpperCase() + filterCategory.slice(1) + "s"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="page">Pages</SelectItem>
+                <SelectItem value="post">Posts</SelectItem>
+                <SelectItem value="schedule">Schedules</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Action search */}
@@ -91,12 +101,11 @@ export default function ActivityPage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Search Action
             </label>
-            <input
+            <Input
               type="text"
               placeholder="e.g. created, published..."
               value={filterAction}
               onChange={(e) => setFilterAction(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
             />
           </div>
 
@@ -105,11 +114,10 @@ export default function ActivityPage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               From Date
             </label>
-            <input
-              type="date"
+            <DatePicker
               value={filterStartDate}
-              onChange={(e) => setFilterStartDate(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+              onChange={setFilterStartDate}
+              placeholder="Pick a date"
             />
           </div>
 
@@ -119,11 +127,10 @@ export default function ActivityPage() {
               <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 To Date
               </label>
-              <input
-                type="date"
+              <DatePicker
                 value={filterEndDate}
-                onChange={(e) => setFilterEndDate(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+                onChange={setFilterEndDate}
+                placeholder="Pick a date"
               />
             </div>
             {hasActiveFilters && (
@@ -172,20 +179,22 @@ export default function ActivityPage() {
                   {Math.min(page * 30, total)} of {total}
                 </p>
                 <div className="flex gap-1">
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setPage(Math.max(1, page - 1))}
                     disabled={page === 1}
-                    className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
                   >
                     Previous
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setPage(page + 1)}
                     disabled={page * 30 >= total}
-                    className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
                   >
                     Next
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -210,20 +219,22 @@ export default function ActivityPage() {
                   {Math.min(page * 30, total)} of {total}
                 </p>
                 <div className="flex gap-1">
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setPage(Math.max(1, page - 1))}
                     disabled={page === 1}
-                    className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
                   >
                     Previous
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setPage(page + 1)}
                     disabled={page * 30 >= total}
-                    className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
                   >
                     Next
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}

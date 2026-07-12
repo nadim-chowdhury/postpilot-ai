@@ -1,8 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Save, AlertCircle } from "lucide-react";
+import { Save, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/shared/spinner";
 import { updatePost } from "@/actions/post.actions";
 import type { PostSummary } from "@/types/post.types";
@@ -33,6 +44,7 @@ export function EditPostDialog({
   // Initialize form fields when post changes
   useEffect(() => {
     if (post) {
+      // eslint-disable-next-line
       setFbPageId(post.fbPageId);
       setTitle(post.title || "");
       setBody(post.body || "");
@@ -75,28 +87,12 @@ export function EditPostDialog({
   const charCount = body.length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Dialog container */}
-      <div className="relative z-10 w-full max-w-lg rounded-xl border border-border/50 bg-card p-6 shadow-2xl space-y-4">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-border/40 pb-3">
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Edit Post</h3>
-            <p className="text-xs text-muted-foreground">Modify draft or scheduled post content.</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="max-w-lg space-y-2">
+        <DialogHeader>
+          <DialogTitle>Edit Post</DialogTitle>
+          <DialogDescription>Modify draft or scheduled post content.</DialogDescription>
+        </DialogHeader>
 
         {/* Content fields */}
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
@@ -105,17 +101,20 @@ export function EditPostDialog({
             <label className="mb-1.5 block text-xs font-medium text-foreground">
               Target Page
             </label>
-            <select
-              value={fbPageId}
-              onChange={(e) => setFbPageId(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
-            >
-              {pages.map((page) => (
-                <option key={page.id} value={page.id}>
-                  {page.name}
-                </option>
-              ))}
-            </select>
+            <Select value={fbPageId} onValueChange={(val) => setFbPageId(val as string)}>
+              <SelectTrigger className="h-9 w-full">
+                <SelectValue>
+                  {fbPageId ? pages.find((p) => p.id === fbPageId)?.name : ""}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {pages.map((page) => (
+                  <SelectItem key={page.id} value={page.id}>
+                    {page.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Title */}
@@ -123,12 +122,11 @@ export function EditPostDialog({
             <label className="mb-1.5 block text-xs font-medium text-foreground">
               Title <span className="text-muted-foreground">(optional)</span>
             </label>
-            <input
+            <Input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Post title or headline"
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
             />
           </div>
 
@@ -140,12 +138,11 @@ export function EditPostDialog({
                 {charCount} characters
               </span>
             </div>
-            <textarea
+            <Textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="What do you want to share?"
               rows={5}
-              className="w-full resize-y rounded-lg border border-border/50 bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
             />
           </div>
 
@@ -155,24 +152,23 @@ export function EditPostDialog({
               <label className="mb-1.5 block text-xs font-medium text-foreground">
                 Attachment Type
               </label>
-              <select
-                value={mediaType}
-                onChange={(e) =>
-                  setMediaType(e.target.value as "NONE" | "IMAGE" | "LINK")
-                }
-                className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-brand/30"
-              >
-                <option value="NONE">No Attachment</option>
-                <option value="IMAGE">Image</option>
-                <option value="LINK">Link</option>
-              </select>
+              <Select value={mediaType} onValueChange={(val: "NONE" | "IMAGE" | "LINK") => setMediaType(val)}>
+                <SelectTrigger className="h-9 w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NONE">No Attachment</SelectItem>
+                  <SelectItem value="IMAGE">Image</SelectItem>
+                  <SelectItem value="LINK">Link</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             {mediaType !== "NONE" && (
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-foreground">
                   Attachment URL
                 </label>
-                <input
+                <Input
                   type="url"
                   value={mediaUrl}
                   onChange={(e) => setMediaUrl(e.target.value)}
@@ -181,7 +177,6 @@ export function EditPostDialog({
                       ? "https://example.com/image.jpg"
                       : "https://example.com"
                   }
-                  className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-brand/30"
                 />
               </div>
             )}
@@ -197,7 +192,7 @@ export function EditPostDialog({
         </div>
 
         {/* Footer actions */}
-        <div className="flex justify-end gap-2 border-t border-border/40 pt-3">
+        <DialogFooter>
           <Button variant="ghost" size="sm" onClick={onClose}>
             Cancel
           </Button>
@@ -219,8 +214,8 @@ export function EditPostDialog({
               </>
             )}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

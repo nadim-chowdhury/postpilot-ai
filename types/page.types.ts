@@ -1,9 +1,4 @@
-import type {
-  PageStatus,
-  PostStatus,
-  ScheduleStatus,
-  MediaType,
-} from "@/lib/generated/prisma/enums";
+import type { PageStatus } from "@/lib/generated/prisma/enums";
 
 // ─────────────────────────────────────────────
 // Page Types

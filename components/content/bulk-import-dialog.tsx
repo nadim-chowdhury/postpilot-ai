@@ -1,8 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { X, Upload, Calendar, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Upload, Calendar, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Spinner } from "@/components/shared/spinner";
 import { bulkImportPosts } from "@/actions/post.actions";
 
@@ -126,50 +136,38 @@ export function BulkImportDialog({
   })();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-6 space-y-0">
+        <DialogHeader className="mb-5 border-b border-border/40 pb-4">
+          <DialogTitle className="flex items-center gap-2">
+            <Upload className="h-4 w-4 text-brand" />
+            Bulk Import Posts
+          </DialogTitle>
+          <DialogDescription>
+            Paste AI-generated posts as JSON and auto-schedule them.
+          </DialogDescription>
+        </DialogHeader>
 
-      <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-border/50 bg-card p-6 shadow-2xl">
-        {/* Header */}
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-              <Upload className="h-4 w-4 text-brand" />
-              Bulk Import Posts
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Paste AI-generated posts as JSON and auto-schedule them.
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto pr-2 pb-2">
           {/* Page Selection */}
           <div>
             <label className="mb-1.5 block text-xs font-medium text-foreground">
               Target Page
             </label>
-            <select
-              value={fbPageId}
-              onChange={(e) => setFbPageId(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border/50 bg-background px-3 text-sm text-foreground focus:border-brand/50 focus:outline-none"
-            >
-              <option value="">Choose a page</option>
-              {pages.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+            <Select value={fbPageId} onValueChange={(val) => setFbPageId(val as string)}>
+              <SelectTrigger className="h-9 w-full">
+                <SelectValue placeholder="Choose a page">
+                  {fbPageId ? pages.find((p) => p.id === fbPageId)?.name : "Choose a page"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {pages.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* JSON Input */}
@@ -187,7 +185,7 @@ export function BulkImportDialog({
                 Load sample
               </button>
             </div>
-            <textarea
+            <Textarea
               value={jsonInput}
               onChange={(e) => {
                 setJsonInput(e.target.value);
@@ -195,7 +193,7 @@ export function BulkImportDialog({
               }}
               placeholder='Paste your JSON array here. Each object needs at least a "body" field...'
               rows={8}
-              className="w-full resize-y rounded-lg border border-border/50 bg-background px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground/40 focus:border-brand/50 focus:outline-none focus:ring-1 focus:ring-brand/30"
+              className="font-mono"
             />
           </div>
 
@@ -225,39 +223,40 @@ export function BulkImportDialog({
                   <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
                     Start Date
                   </label>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="h-8 w-full rounded-md border border-border/50 bg-background px-2 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+                    onChange={setStartDate}
+                    placeholder="Pick start date"
+                    className="h-8 w-full"
                   />
                 </div>
                 <div>
                   <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
                     End Date
                   </label>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="h-8 w-full rounded-md border border-border/50 bg-background px-2 text-xs text-foreground focus:border-brand/50 focus:outline-none"
+                    onChange={setEndDate}
+                    placeholder="Pick end date"
+                    className="h-8 w-full"
                   />
                 </div>
                 <div>
                   <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
                     Posts per Day
                   </label>
-                  <select
-                    value={postsPerDay}
-                    onChange={(e) => setPostsPerDay(Number(e.target.value))}
-                    className="h-8 w-full rounded-md border border-border/50 bg-background px-2 text-xs text-foreground focus:border-brand/50 focus:outline-none"
-                  >
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <option key={n} value={n}>
-                        {n} post{n > 1 ? "s" : ""} / day
-                      </option>
-                    ))}
-                  </select>
+                  <Select value={postsPerDay.toString()} onValueChange={(val) => setPostsPerDay(Number(val as string))}>
+                    <SelectTrigger className="h-8 w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <SelectItem key={n} value={n.toString()}>
+                          {n} post{n > 1 ? "s" : ""} / day
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             )}
@@ -284,7 +283,7 @@ export function BulkImportDialog({
         </div>
 
         {/* Footer */}
-        <div className="mt-5 flex items-center justify-between border-t border-border/50 pt-4">
+        <div className="mt-2 flex items-center justify-between border-t border-border/50 pt-4">
           <p className="text-xs text-muted-foreground">
             {parsedCount > 0 ? `${parsedCount} post${parsedCount !== 1 ? "s" : ""} ready` : "Paste JSON above"}
           </p>
@@ -314,7 +313,7 @@ export function BulkImportDialog({
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
