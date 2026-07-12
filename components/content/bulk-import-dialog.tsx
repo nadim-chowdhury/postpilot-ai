@@ -11,7 +11,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Spinner } from "@/components/shared/spinner";
 import { bulkImportPosts } from "@/actions/post.actions";
@@ -48,7 +54,10 @@ export function BulkImportDialog({
   const [autoSchedule, setAutoSchedule] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ imported: number; scheduled: number } | null>(null);
+  const [result, setResult] = useState<{
+    imported: number;
+    scheduled: number;
+  } | null>(null);
 
   if (!open) return null;
 
@@ -154,10 +163,15 @@ export function BulkImportDialog({
             <label className="mb-1.5 block text-xs font-medium text-foreground">
               Target Page
             </label>
-            <Select value={fbPageId} onValueChange={(val) => setFbPageId(val as string)}>
+            <Select
+              value={fbPageId}
+              onValueChange={(val) => setFbPageId(val as string)}
+            >
               <SelectTrigger className="h-9 w-full">
                 <SelectValue placeholder="Choose a page">
-                  {fbPageId ? pages.find((p) => p.id === fbPageId)?.name : "Choose a page"}
+                  {fbPageId
+                    ? pages.find((p) => p.id === fbPageId)?.name
+                    : "Choose a page"}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -174,8 +188,11 @@ export function BulkImportDialog({
           <div>
             <div className="mb-1.5 flex items-center justify-between">
               <label className="text-xs font-medium text-foreground">
-                Posts JSON {parsedCount > 0 && (
-                  <span className="ml-1 text-brand">({parsedCount} posts detected)</span>
+                Posts JSON{" "}
+                {parsedCount > 0 && (
+                  <span className="ml-1 text-brand">
+                    ({parsedCount} posts detected)
+                  </span>
                 )}
               </label>
               <button
@@ -212,7 +229,8 @@ export function BulkImportDialog({
                   Auto-schedule posts across a date range
                 </span>
                 <p className="text-[10px] text-muted-foreground mt-0.5">
-                  Posts will be evenly distributed with randomized times (no two posts at the same time).
+                  Posts will be evenly distributed with randomized times (no two
+                  posts at the same time).
                 </p>
               </div>
             </label>
@@ -245,7 +263,12 @@ export function BulkImportDialog({
                   <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
                     Posts per Day
                   </label>
-                  <Select value={postsPerDay.toString()} onValueChange={(val) => setPostsPerDay(Number(val as string))}>
+                  <Select
+                    value={postsPerDay.toString()}
+                    onValueChange={(val) =>
+                      setPostsPerDay(Number(val as string))
+                    }
+                  >
                     <SelectTrigger className="h-8 w-full">
                       <SelectValue />
                     </SelectTrigger>
@@ -275,7 +298,8 @@ export function BulkImportDialog({
             <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-400">
               <CheckCircle2 className="h-4 w-4 shrink-0" />
               <span>
-                Successfully imported {result.imported} post{result.imported !== 1 ? "s" : ""}
+                Successfully imported {result.imported} post
+                {result.imported !== 1 ? "s" : ""}
                 {result.scheduled > 0 && ` and scheduled ${result.scheduled}`}!
               </span>
             </div>
@@ -285,7 +309,9 @@ export function BulkImportDialog({
         {/* Footer */}
         <div className="mt-2 flex items-center justify-between border-t border-border/50 pt-4">
           <p className="text-xs text-muted-foreground">
-            {parsedCount > 0 ? `${parsedCount} post${parsedCount !== 1 ? "s" : ""} ready` : "Paste JSON above"}
+            {parsedCount > 0
+              ? `${parsedCount} post${parsedCount !== 1 ? "s" : ""} ready`
+              : "Paste JSON above"}
           </p>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={onClose}>

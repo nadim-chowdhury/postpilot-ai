@@ -13,7 +13,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/shared/spinner";
 import { generateSinglePost } from "@/actions/ai.actions";
 import { createPost } from "@/actions/post.actions";
@@ -33,7 +39,9 @@ export function AiGenerateDialog({
   onSaved,
 }: AiGenerateDialogProps) {
   const [fbPageId, setFbPageId] = useState(pages[0]?.id ?? "");
-  const [tone, setTone] = useState<"educational" | "inspirational" | "conversational" | "humorous">("educational");
+  const [tone, setTone] = useState<
+    "educational" | "inspirational" | "conversational" | "humorous"
+  >("educational");
   const [customInstructions, setCustomInstructions] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -113,10 +121,15 @@ export function AiGenerateDialog({
               <label className="mb-1.5 block text-xs font-medium text-foreground">
                 Target Page
               </label>
-              <Select value={fbPageId} onValueChange={(val) => setFbPageId(val as string)}>
+              <Select
+                value={fbPageId}
+                onValueChange={(val) => setFbPageId(val as string)}
+              >
                 <SelectTrigger className="h-9 w-full">
                   <SelectValue placeholder="Select a page…">
-                    {fbPageId ? pages.find((p) => p.id === fbPageId)?.name : "Select a page…"}
+                    {fbPageId
+                      ? pages.find((p) => p.id === fbPageId)?.name
+                      : "Select a page…"}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -134,7 +147,10 @@ export function AiGenerateDialog({
               <label className="mb-1.5 block text-xs font-medium text-foreground">
                 Tone
               </label>
-              <Select value={tone} onValueChange={(val) => val && setTone(val as any)}>
+              <Select
+                value={tone}
+                onValueChange={(val) => val && setTone(val as any)}
+              >
                 <SelectTrigger className="h-9 w-full">
                   <SelectValue />
                 </SelectTrigger>

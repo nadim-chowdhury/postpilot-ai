@@ -84,15 +84,17 @@ function formatAction(
   action: string,
   metadata: Record<string, unknown> | null,
 ): string {
-  const pageName = (metadata?.name as string) ?? (metadata?.pageName as string) ?? "";
+  const pageName =
+    (metadata?.name as string) ?? (metadata?.pageName as string) ?? "";
   const postTitle = (metadata?.postTitle as string) ?? "";
   const postBody = (metadata?.postBody as string) ?? "";
 
-  const postInfo = postTitle && postTitle !== "Untitled"
-    ? `"${postTitle}"`
-    : postBody
-      ? `"${postBody.substring(0, 40)}${postBody.length > 40 ? "..." : ""}"`
-      : "";
+  const postInfo =
+    postTitle && postTitle !== "Untitled"
+      ? `"${postTitle}"`
+      : postBody
+        ? `"${postBody.substring(0, 40)}${postBody.length > 40 ? "..." : ""}"`
+        : "";
 
   const forPageStr = pageName ? ` for "${pageName}"` : "";
   const toPageStr = pageName ? ` to "${pageName}"` : "";

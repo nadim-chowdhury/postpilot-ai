@@ -5,14 +5,23 @@ import { FileText, Plus, Minus, Sparkles, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Spinner } from "@/components/shared/spinner";
-import { ViewModeToggle, type ViewMode } from "@/components/shared/view-mode-toggle";
+import {
+  ViewModeToggle,
+  type ViewMode,
+} from "@/components/shared/view-mode-toggle";
 import { PostComposer } from "@/components/content/post-composer";
 import { PostCard } from "@/components/content/post-card";
 import { PostListItem } from "@/components/content/post-list-item";
 import { AiGenerateDialog } from "@/components/content/ai-generate-dialog";
 import { BulkImportDialog } from "@/components/content/bulk-import-dialog";
 import { EditPostDialog } from "@/components/content/edit-post-dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import {
@@ -96,7 +105,13 @@ export default function ContentPage() {
       fetchPosts();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterPageId, filterStatus, filterStartDate, filterEndDate, filterSearch]);
+  }, [
+    filterPageId,
+    filterStatus,
+    filterStartDate,
+    filterEndDate,
+    filterSearch,
+  ]);
 
   const handleSaveDraft = async (data: {
     fbPageId: string;
@@ -245,10 +260,15 @@ export default function ContentPage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Filter by Page
             </label>
-            <Select value={filterPageId} onValueChange={(val) => setFilterPageId(val as string)}>
+            <Select
+              value={filterPageId}
+              onValueChange={(val) => setFilterPageId(val as string)}
+            >
               <SelectTrigger className="h-9 w-full mb-0">
                 <SelectValue placeholder="All Pages">
-                  {filterPageId === "ALL" ? "All Pages" : pages.find((p) => p.id === filterPageId)?.name}
+                  {filterPageId === "ALL"
+                    ? "All Pages"
+                    : pages.find((p) => p.id === filterPageId)?.name}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -267,10 +287,16 @@ export default function ContentPage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Status
             </label>
-            <Select value={filterStatus} onValueChange={(val) => setFilterStatus(val as string)}>
+            <Select
+              value={filterStatus}
+              onValueChange={(val) => setFilterStatus(val as string)}
+            >
               <SelectTrigger className="h-9 w-full mb-0">
                 <SelectValue placeholder="All Statuses">
-                  {filterStatus === "ALL" ? "All Statuses" : filterStatus.charAt(0) + filterStatus.slice(1).toLowerCase()}
+                  {filterStatus === "ALL"
+                    ? "All Statuses"
+                    : filterStatus.charAt(0) +
+                      filterStatus.slice(1).toLowerCase()}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>

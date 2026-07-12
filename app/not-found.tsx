@@ -14,10 +14,14 @@ export default function NotFound() {
             Page not found
           </h2>
           <p className="text-sm text-muted-foreground">
-            The page you&apos;re looking for doesn&apos;t exist or has been moved.
+            The page you&apos;re looking for doesn&apos;t exist or has been
+            moved.
           </p>
         </div>
-        <Link href="/" className={buttonVariants({ variant: "outline", size: "sm" })}>
+        <Link
+          href="/"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
           Back to Dashboard
         </Link>
       </div>

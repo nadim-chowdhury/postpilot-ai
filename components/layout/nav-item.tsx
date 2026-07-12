@@ -12,7 +12,8 @@ interface NavItemProps {
 
 export function NavItem({ item, collapsed }: NavItemProps) {
   const pathname = usePathname();
-  const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+  const isActive =
+    item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
   const Icon = item.icon;
 
   return (
@@ -34,13 +35,13 @@ export function NavItem({ item, collapsed }: NavItemProps) {
       <Icon
         className={cn(
           "h-[18px] w-[18px] shrink-0 transition-colors",
-          isActive ? "text-brand" : "text-muted-foreground group-hover:text-foreground",
+          isActive
+            ? "text-brand"
+            : "text-muted-foreground group-hover:text-foreground",
         )}
       />
 
-      {!collapsed && (
-        <span className="truncate">{item.label}</span>
-      )}
+      {!collapsed && <span className="truncate">{item.label}</span>}
 
       {!collapsed && item.badge && (
         <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand/10 px-1.5 text-[10px] font-semibold text-brand">

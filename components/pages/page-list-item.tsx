@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Globe,
-  Pencil,
-  Pause,
-  Play,
-  Unplug,
-  Gamepad2,
-} from "lucide-react";
+import { Globe, Pencil, Pause, Play, Unplug, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { PageSummary } from "@/types/page.types";

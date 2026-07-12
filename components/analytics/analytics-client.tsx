@@ -26,6 +26,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/shared/spinner";
+import { EmptyState } from "@/components/shared/empty-state";
 import {
   syncPostInsights,
   getDashboardAnalytics,
@@ -33,11 +35,12 @@ import {
   AnalyticsSummary,
 } from "@/actions/analytics.actions";
 import {
-  Loader2,
   RefreshCw,
   ThumbsUp,
   MessageCircle,
   Share2,
+  LineChart as LineChartIcon,
+  Sparkles,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
@@ -108,57 +111,70 @@ export default function AnalyticsClient({ pages }: { pages: any[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <Select
-          value={selectedPage}
-          onValueChange={(val) => {
-            if (val) setSelectedPage(val);
-          }}
-        >
-          <SelectTrigger className="min-w-[280px]">
-            <SelectValue placeholder="Select Facebook Page">
-              {pages.find((p) => p.id === selectedPage)?.name}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {pages.map((p) => (
-              <SelectItem key={p.id} value={p.id}>
-                {p.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Consistent Filter/Action Bar */}
+      <div className="rounded-xl border border-border/40 bg-card p-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end justify-between">
+          <div className="flex-1 max-w-sm space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Select Facebook Page
+            </label>
+            <Select
+              value={selectedPage}
+              onValueChange={(val) => {
+                if (val) setSelectedPage(val);
+              }}
+            >
+              <SelectTrigger className="h-9 w-full mb-0">
+                <SelectValue placeholder="Select Facebook Page">
+                  {pages.find((p) => p.id === selectedPage)?.name}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {pages.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <Button
-          onClick={handleSync}
-          disabled={syncing || !selectedPage}
-          variant="outline"
-          className="bg-brand text-brand-foreground hover:bg-brand/90"
-        >
-          {syncing ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <RefreshCw className="mr-2 h-4 w-4" />
-          )}
-          Sync Latest Data from Meta
-        </Button>
+          <Button
+            onClick={handleSync}
+            disabled={syncing || !selectedPage}
+            className="h-9 bg-brand text-brand-foreground hover:bg-brand/90 gap-2 shrink-0 self-stretch sm:self-auto"
+          >
+            {syncing ? (
+              <Spinner size="sm" className="border-t-brand-foreground" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            Sync Latest Data from Meta
+          </Button>
+        </div>
       </div>
 
       {loading ? (
-        <div className="flex h-[400px] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="flex items-center justify-center py-20">
+          <Spinner size="md" />
         </div>
       ) : data.length === 0 ? (
-        <Card className="ring-0 rounded-xl border border-border/50 hover:border-border hover:shadow-sm">
-          <CardContent className="flex flex-col items-center justify-center h-64 text-center">
-            <p className="text-muted-foreground mb-4">
-              No data available for the last 30 days.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Make sure you have published posts and click Sync.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={LineChartIcon}
+          title="No analytics data available"
+          description="We couldn't find any post activity for this page in the last 30 days. Try creating some posts or triggering a Sync to pull latest insights."
+          action={
+            <Button
+              onClick={handleSync}
+              disabled={syncing}
+              variant="outline"
+              className="mt-2"
+            >
+              {syncing && <Spinner size="sm" className="mr-2" />}
+              Sync Meta Data
+            </Button>
+          }
+        />
       ) : (
         <div className="grid gap-6 md:grid-cols-3">
           {/* Main Chart */}
@@ -207,6 +223,7 @@ export default function AnalyticsClient({ pages }: { pages: any[] }) {
                         border: "1px solid var(--color-border)",
                         backgroundColor: "var(--color-background)",
                         color: "var(--color-foreground)",
+                        fontSize: "12px",
                       }}
                     />
                     <Legend />
@@ -268,9 +285,9 @@ export default function AnalyticsClient({ pages }: { pages: any[] }) {
             )}
 
             <Card className="rounded-xl hover:shadow-sm relative overflow-hidden ring-0 border border-border/50 hover:border-border">
-              {/* <div className="absolute top-0 left-0 w-1 h-full bg-brand" /> */}
               <CardHeader>
-                <CardTitle className="text-lg flex items-center text-foreground">
+                <CardTitle className="text-lg flex items-center text-foreground gap-2">
+                  <Sparkles className="h-5 w-5 text-brand animate-pulse" />
                   AI Content Strategist
                 </CardTitle>
               </CardHeader>
@@ -279,12 +296,15 @@ export default function AnalyticsClient({ pages }: { pages: any[] }) {
                   <Button
                     onClick={handleGenerateAI}
                     disabled={aiLoading || !topPost}
-                    className="w-full bg-brand text-brand-foreground hover:bg-brand/90"
+                    className="w-full bg-brand text-brand-foreground hover:bg-brand/90 gap-2"
                     size="sm"
                   >
-                    {aiLoading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : null}
+                    {aiLoading && (
+                      <Spinner
+                        size="sm"
+                        className="border-t-brand-foreground"
+                      />
+                    )}
                     Analyze & Suggest Content
                   </Button>
                 ) : (
@@ -296,12 +316,12 @@ export default function AnalyticsClient({ pages }: { pages: any[] }) {
                         size="sm"
                         onClick={handleGenerateAI}
                         disabled={aiLoading}
-                        className="w-full text-xs h-8 mt-2"
+                        className="w-full text-xs h-8 mt-2 gap-2"
                       >
                         {aiLoading ? (
-                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          <Spinner size="sm" />
                         ) : (
-                          <RefreshCw className="mr-2 h-3 w-3" />
+                          <RefreshCw className="h-3 w-3" />
                         )}
                         Regenerate Strategy
                       </Button>

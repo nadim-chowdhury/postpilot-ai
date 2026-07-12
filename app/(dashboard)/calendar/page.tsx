@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSchedules, cancelSchedule, reschedulePost } from "@/actions/schedule.actions";
+import {
+  getSchedules,
+  cancelSchedule,
+  reschedulePost,
+} from "@/actions/schedule.actions";
 import { CalendarView } from "@/components/calendar/calendar-view";
 import { Spinner } from "@/components/shared/spinner";
 import type { ScheduleSummary } from "@/types/schedule.types";
@@ -25,7 +29,8 @@ export default function CalendarPage() {
   }, []);
 
   const handleCancel = async (scheduleId: string) => {
-    if (!confirm("Are you sure you want to cancel this scheduled post?")) return;
+    if (!confirm("Are you sure you want to cancel this scheduled post?"))
+      return;
     const result = await cancelSchedule(scheduleId);
     if (result.success) {
       await fetchSchedules();

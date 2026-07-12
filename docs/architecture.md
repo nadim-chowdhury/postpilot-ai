@@ -1185,60 +1185,60 @@ docs(architecture): add scheduling flow diagram
 
 > **Goal:** A working app where you can log in, connect Facebook Pages, and manually publish a single post.
 
-| Task                                                           | Status         |
-| -------------------------------------------------------------- | -------------- |
-| Project scaffolding (Next.js 16, TypeScript, Tailwind, shadcn) | ✅ Done        |
-| Database setup (Neon + Prisma schema + migrations)             | ✅ Done        |
-| NextAuth.js with Meta/Facebook OAuth provider                  | ✅ Done        |
-| Page connection flow (OAuth → fetch pages → save tokens)       | ✅ Done        |
-| Page management UI (list, pause, disconnect)                   | ✅ Done        |
-| Manual "Post Now" feature via Meta Graph API                   | ✅ Done        |
-| Activity logging foundation                                    | ✅ Done        |
+| Task                                                           | Status  |
+| -------------------------------------------------------------- | ------- |
+| Project scaffolding (Next.js 16, TypeScript, Tailwind, shadcn) | ✅ Done |
+| Database setup (Neon + Prisma schema + migrations)             | ✅ Done |
+| NextAuth.js with Meta/Facebook OAuth provider                  | ✅ Done |
+| Page connection flow (OAuth → fetch pages → save tokens)       | ✅ Done |
+| Page management UI (list, pause, disconnect)                   | ✅ Done |
+| Manual "Post Now" feature via Meta Graph API                   | ✅ Done |
+| Activity logging foundation                                    | ✅ Done |
 
 ### Phase 2 — Scheduling & Queue System
 
 > **Goal:** Schedule posts for future times. Posts auto-publish at the scheduled time with jitter.
 
-| Task                                                   | Status         |
-| ------------------------------------------------------ | -------------- |
-| Upstash QStash integration                             | ✅ Done        |
-| Schedule creation with jitter logic                    | ✅ Done        |
-| Background job: `publish-post`                         | ✅ Done        |
-| Retry mechanism (3 attempts + exponential backoff)     | ✅ Done        |
-| Vercel Cron: `process-queue` safety-net sweeper        | ✅ Done        |
-| Post queue UI (approve / reject / edit before publish) | ✅ Done        |
-| Calendar view UI                                       | ✅ Done        |
+| Task                                                   | Status  |
+| ------------------------------------------------------ | ------- |
+| Upstash QStash integration                             | ✅ Done |
+| Schedule creation with jitter logic                    | ✅ Done |
+| Background job: `publish-post`                         | ✅ Done |
+| Retry mechanism (3 attempts + exponential backoff)     | ✅ Done |
+| Vercel Cron: `process-queue` safety-net sweeper        | ✅ Done |
+| Post queue UI (approve / reject / edit before publish) | ✅ Done |
+| Calendar view UI                                       | ✅ Done |
 
 ### Phase 3 — AI Content Engine
 
 > **Goal:** Generate topic-aware, persona-driven content for any page via AI.
 
-| Task                                                      | Status         |
-| --------------------------------------------------------- | -------------- |
-| Vercel AI SDK integration (OpenAI provider)               | ✅ Done        |
-| Per-page persona system (CRUD for persona prompts)        | ✅ Done        |
-| Single post generation (one page, one post)               | ✅ Done        |
-| Bulk generation ("Generate Week's Content" for all pages) | ✅ Done        |
-| Content uniqueness validation                             | ✅ Done        |
-| AI generation UI (prompt input, preview, edit, save)      | ✅ Done        |
-| Image generation integration (DALL-E 3)                   | ✅ Done        |
+| Task                                                      | Status  |
+| --------------------------------------------------------- | ------- |
+| Vercel AI SDK integration (OpenAI provider)               | ✅ Done |
+| Per-page persona system (CRUD for persona prompts)        | ✅ Done |
+| Single post generation (one page, one post)               | ✅ Done |
+| Bulk generation ("Generate Week's Content" for all pages) | ✅ Done |
+| Content uniqueness validation                             | ✅ Done |
+| AI generation UI (prompt input, preview, edit, save)      | ✅ Done |
+| Image generation integration (DALL-E 3)                   | ✅ Done |
 
 ### Phase 4 — Polish & Production Hardening
 
 > **Goal:** A production-ready, reliable, and delightful experience.
 
-| Task                                                    | Status         |
-| ------------------------------------------------------- | -------------- |
-| Dashboard overview page (stats, health, upcoming posts) | ✅ Done        |
-| Activity log UI with filtering                          | ✅ Done        |
-| Token health monitoring (cron: check-token-expiry)      | ✅ Done        |
-| Error boundaries on every route segment                 | ✅ Done        |
-| Loading skeletons on every route segment                | ✅ Done        |
-| Sentry integration for error monitoring                 | ✅ Done        |
-| Rate limiting on all API routes                         | ✅ Done        |
-| Token encryption at rest                                | ✅ Done        |
-| Comprehensive `.env.example`                            | ✅ Done        |
-| Deployment to Vercel (production)                       | ✅ Done        |
+| Task                                                    | Status  |
+| ------------------------------------------------------- | ------- |
+| Dashboard overview page (stats, health, upcoming posts) | ✅ Done |
+| Activity log UI with filtering                          | ✅ Done |
+| Token health monitoring (cron: check-token-expiry)      | ✅ Done |
+| Error boundaries on every route segment                 | ✅ Done |
+| Loading skeletons on every route segment                | ✅ Done |
+| Sentry integration for error monitoring                 | ✅ Done |
+| Rate limiting on all API routes                         | ✅ Done |
+| Token encryption at rest                                | ✅ Done |
+| Comprehensive `.env.example`                            | ✅ Done |
+| Deployment to Vercel (production)                       | ✅ Done |
 
 ### Phase 5 — Future Enhancements (Backlog)
 

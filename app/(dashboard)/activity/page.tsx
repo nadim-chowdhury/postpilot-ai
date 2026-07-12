@@ -4,13 +4,22 @@ import { useState, useEffect } from "react";
 import { Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
-import { ViewModeToggle, type ViewMode } from "@/components/shared/view-mode-toggle";
+import {
+  ViewModeToggle,
+  type ViewMode,
+} from "@/components/shared/view-mode-toggle";
 import { ActivityItem } from "@/components/activity/activity-item";
 import { ActivityCard } from "@/components/activity/activity-card";
 import { getActivities } from "@/actions/activity.actions";
 import { Spinner } from "@/components/shared/spinner";
 import { ActivityDetailModal } from "@/components/activity/activity-detail-modal";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import type { ActivityEntry } from "@/actions/activity.actions";
@@ -20,7 +29,8 @@ export default function ActivityPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [selectedActivity, setSelectedActivity] = useState<ActivityEntry | null>(null);
+  const [selectedActivity, setSelectedActivity] =
+    useState<ActivityEntry | null>(null);
 
   // Filters
   const [filterCategory, setFilterCategory] = useState("");
@@ -81,10 +91,17 @@ export default function ActivityPage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Category
             </label>
-            <Select value={filterCategory} onValueChange={(val) => setFilterCategory(val as string)}>
+            <Select
+              value={filterCategory}
+              onValueChange={(val) => setFilterCategory(val as string)}
+            >
               <SelectTrigger className="h-9 w-full mb-0">
                 <SelectValue placeholder="All Categories">
-                  {filterCategory === "" ? "All Categories" : filterCategory.charAt(0).toUpperCase() + filterCategory.slice(1) + "s"}
+                  {filterCategory === ""
+                    ? "All Categories"
+                    : filterCategory.charAt(0).toUpperCase() +
+                      filterCategory.slice(1) +
+                      "s"}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -175,8 +192,8 @@ export default function ActivityPage() {
             {total > 30 && (
               <div className="flex items-center justify-between border-t border-border/50 px-5 py-3">
                 <p className="text-xs text-muted-foreground">
-                  Showing {(page - 1) * 30 + 1}–
-                  {Math.min(page * 30, total)} of {total}
+                  Showing {(page - 1) * 30 + 1}–{Math.min(page * 30, total)} of{" "}
+                  {total}
                 </p>
                 <div className="flex gap-1">
                   <Button
@@ -215,8 +232,8 @@ export default function ActivityPage() {
             {total > 30 && (
               <div className="flex items-center justify-between rounded-xl border border-border/50 bg-card px-5 py-3">
                 <p className="text-xs text-muted-foreground">
-                  Showing {(page - 1) * 30 + 1}–
-                  {Math.min(page * 30, total)} of {total}
+                  Showing {(page - 1) * 30 + 1}–{Math.min(page * 30, total)} of{" "}
+                  {total}
                 </p>
                 <div className="flex gap-1">
                   <Button

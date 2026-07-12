@@ -112,19 +112,17 @@ export function PostListItem({
             Schedule
           </Button>
         )}
-        {post.status !== "POSTED" &&
-          post.status !== "PUBLISHING" &&
-          onEdit && (
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              className="text-muted-foreground hover:text-foreground"
-              onClick={() => onEdit(post)}
-              title="Edit"
-            >
-              <Edit2 className="h-3.5 w-3.5" />
-            </Button>
-          )}
+        {post.status !== "POSTED" && post.status !== "PUBLISHING" && onEdit && (
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => onEdit(post)}
+            title="Edit"
+          >
+            <Edit2 className="h-3.5 w-3.5" />
+          </Button>
+        )}
         {onDelete && (
           <Button
             variant="ghost"

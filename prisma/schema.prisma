@@ -81,7 +81,7 @@ model FbPage {
   accessToken    String     @map("access_token")
   tokenExpiresAt DateTime?  @map("token_expires_at")
   topic          String
-  personaPrompt  String?    @db.Text @map("persona_prompt")
+  personaPrompt  String?    @map("persona_prompt") @db.Text
   status         PageStatus @default(ACTIVE)
   avatarUrl      String?    @map("avatar_url")
   game           String?
@@ -111,9 +111,9 @@ model Post {
   aiGenerated Boolean    @default(false) @map("ai_generated")
   aiModel     String?    @map("ai_model")
 
-  likesCount  Int?      @default(0) @map("likes_count")
-  commentsCount Int?    @default(0) @map("comments_count")
-  sharesCount Int?      @default(0) @map("shares_count")
+  likesCount       Int?      @default(0) @map("likes_count")
+  commentsCount    Int?      @default(0) @map("comments_count")
+  sharesCount      Int?      @default(0) @map("shares_count")
   insightsLastSync DateTime? @map("insights_last_sync")
 
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -155,10 +155,10 @@ model Schedule {
 }
 
 model ActivityLog {
-  id         String  @id @default(cuid())
-  userId     String  @map("user_id")
-  entityType String  @map("entity_type")
-  entityId   String  @map("entity_id")
+  id         String @id @default(cuid())
+  userId     String @map("user_id")
+  entityType String @map("entity_type")
+  entityId   String @map("entity_id")
   action     String
   metadata   Json?
 

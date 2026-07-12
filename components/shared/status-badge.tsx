@@ -38,7 +38,8 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, label, className }: StatusBadgeProps) {
-  const displayLabel = label ?? status.charAt(0).toUpperCase() + status.slice(1);
+  const displayLabel =
+    label ?? status.charAt(0).toUpperCase() + status.slice(1);
 
   return (
     <span

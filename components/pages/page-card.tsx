@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Globe,
-  Pause,
-  Play,
-  Unplug,
-  Pencil,
-  Gamepad2,
-} from "lucide-react";
+import { Globe, Pause, Play, Unplug, Pencil, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { PageSummary } from "@/types/page.types";
@@ -79,7 +72,7 @@ export function PageCard({
             {page.topic}
           </p>
         </div>
-        
+
         {page.personaPrompt && (
           <div>
             <span className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">

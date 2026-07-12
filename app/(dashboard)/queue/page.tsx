@@ -5,12 +5,27 @@ import { ListChecks, Clock, Send, Ban, RefreshCw, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { ViewModeToggle, type ViewMode } from "@/components/shared/view-mode-toggle";
+import {
+  ViewModeToggle,
+  type ViewMode,
+} from "@/components/shared/view-mode-toggle";
 import { QueueCard } from "@/components/queue/queue-card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
-import { getSchedules, cancelSchedule, reschedulePost, triggerQueueSweeper, forcePublishSchedule } from "@/actions/schedule.actions";
+import {
+  getSchedules,
+  cancelSchedule,
+  reschedulePost,
+  triggerQueueSweeper,
+  forcePublishSchedule,
+} from "@/actions/schedule.actions";
 import { getPages } from "@/actions/page.actions";
 import type { ScheduleSummary } from "@/types/schedule.types";
 
@@ -28,7 +43,9 @@ export default function QueuePage() {
     const result = await triggerQueueSweeper();
     setSweeperLoading(false);
     if (result.success) {
-      alert(`Queue sweeper ran successfully! Processed/Published ${result.data.processed} overdue post(s).`);
+      alert(
+        `Queue sweeper ran successfully! Processed/Published ${result.data.processed} overdue post(s).`,
+      );
       await fetchQueue();
     } else {
       alert(result.error || "Failed to execute queue sweeper");
@@ -95,12 +112,19 @@ export default function QueuePage() {
       fetchQueue();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterPageId, filterStatus, filterStartDate, filterEndDate, filterSearch]);
+  }, [
+    filterPageId,
+    filterStatus,
+    filterStartDate,
+    filterEndDate,
+    filterSearch,
+  ]);
 
   const handleForcePublish = async (scheduleId: string) => {
-    if (!confirm("Are you sure you want to force publish this post right now?")) return;
+    if (!confirm("Are you sure you want to force publish this post right now?"))
+      return;
     setActionLoading(scheduleId);
-    
+
     // Call the dedicated force publish action which handles pending/failed/cancelled states
     const result = await forcePublishSchedule(scheduleId);
     if (result.success) {
@@ -112,7 +136,8 @@ export default function QueuePage() {
   };
 
   const handleCancel = async (scheduleId: string) => {
-    if (!confirm("Cancel scheduling for this post and return it to drafts?")) return;
+    if (!confirm("Cancel scheduling for this post and return it to drafts?"))
+      return;
     setActionLoading(scheduleId);
     const result = await cancelSchedule(scheduleId);
     if (result.success) {
@@ -190,10 +215,15 @@ export default function QueuePage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Filter by Page
             </label>
-            <Select value={filterPageId} onValueChange={(val) => setFilterPageId(val as string)}>
+            <Select
+              value={filterPageId}
+              onValueChange={(val) => setFilterPageId(val as string)}
+            >
               <SelectTrigger className="h-9 w-full mb-0">
                 <SelectValue placeholder="All Pages">
-                  {filterPageId === "ALL" ? "All Pages" : pages.find((p) => p.id === filterPageId)?.name}
+                  {filterPageId === "ALL"
+                    ? "All Pages"
+                    : pages.find((p) => p.id === filterPageId)?.name}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -212,10 +242,18 @@ export default function QueuePage() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Queue Status
             </label>
-            <Select value={filterStatus} onValueChange={(val) => setFilterStatus(val as string)}>
+            <Select
+              value={filterStatus}
+              onValueChange={(val) => setFilterStatus(val as string)}
+            >
               <SelectTrigger className="h-9 w-full mb-0">
                 <SelectValue placeholder="All Statuses">
-                  {filterStatus === "ALL" ? "All Statuses" : filterStatus === "IN_PROGRESS" ? "Publishing" : filterStatus.charAt(0) + filterStatus.slice(1).toLowerCase()}
+                  {filterStatus === "ALL"
+                    ? "All Statuses"
+                    : filterStatus === "IN_PROGRESS"
+                      ? "Publishing"
+                      : filterStatus.charAt(0) +
+                        filterStatus.slice(1).toLowerCase()}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -313,18 +351,26 @@ export default function QueuePage() {
                         <span className="text-xs font-semibold text-foreground">
                           {item.pageName}
                         </span>
-                        <span className="text-muted-foreground text-[10px]">•</span>
+                        <span className="text-muted-foreground text-[10px]">
+                          •
+                        </span>
                         <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                           <Clock className="h-3 w-3 text-brand" />{" "}
-                          {new Date(item.scheduledAt).toLocaleString(undefined, {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {new Date(item.scheduledAt).toLocaleString(
+                            undefined,
+                            {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )}
                         </span>
                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        <StatusBadge status={item.status.toLowerCase() as any} className="py-0 h-4 text-[9px]" />
+                        <StatusBadge
+                          status={item.status.toLowerCase() as any}
+                          className="py-0 h-4 text-[9px]"
+                        />
                       </div>
 
                       {item.postTitle && (
@@ -373,7 +419,9 @@ export default function QueuePage() {
                               className="gap-1"
                               onClick={() => {
                                 setEditingId(item.id);
-                                const localIso = new Date(item.scheduledAt).toISOString().substring(0, 16);
+                                const localIso = new Date(item.scheduledAt)
+                                  .toISOString()
+                                  .substring(0, 16);
                                 setRescheduleTime(localIso);
                               }}
                               disabled={isLoading}
@@ -420,7 +468,9 @@ export default function QueuePage() {
                 onRescheduleTimeChange={setRescheduleTime}
                 onStartEdit={(id, scheduledAt) => {
                   setEditingId(id);
-                  const localIso = new Date(scheduledAt).toISOString().substring(0, 16);
+                  const localIso = new Date(scheduledAt)
+                    .toISOString()
+                    .substring(0, 16);
                   setRescheduleTime(localIso);
                 }}
                 onCancelEdit={() => setEditingId(null)}
@@ -435,20 +485,20 @@ export default function QueuePage() {
         <EmptyState
           icon={ListChecks}
           title={
-            (filterPageId !== "ALL" ||
+            filterPageId !== "ALL" ||
             filterStatus !== "PENDING" ||
             filterStartDate ||
             filterEndDate ||
-            filterSearch)
+            filterSearch
               ? "No matching queue items"
               : "Queue is empty"
           }
           description={
-            (filterPageId !== "ALL" ||
+            filterPageId !== "ALL" ||
             filterStatus !== "PENDING" ||
             filterStartDate ||
             filterEndDate ||
-            filterSearch)
+            filterSearch
               ? "Try adjusting your filter settings above to view other items."
               : "Posts scheduled for future times will appear here. Head over to Content to schedule a post."
           }

@@ -4,7 +4,10 @@ import { useState, useEffect } from "react";
 import { Globe, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
-import { ViewModeToggle, type ViewMode } from "@/components/shared/view-mode-toggle";
+import {
+  ViewModeToggle,
+  type ViewMode,
+} from "@/components/shared/view-mode-toggle";
 import { PageCard } from "@/components/pages/page-card";
 import { PageListItem } from "@/components/pages/page-list-item";
 import { ConnectPageDialog } from "@/components/pages/connect-page-dialog";

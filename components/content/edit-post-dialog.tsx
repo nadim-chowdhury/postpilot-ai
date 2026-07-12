@@ -13,7 +13,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/shared/spinner";
 import { updatePost } from "@/actions/post.actions";
 import type { PostSummary } from "@/types/post.types";
@@ -91,7 +97,9 @@ export function EditPostDialog({
       <DialogContent className="max-w-lg space-y-2">
         <DialogHeader>
           <DialogTitle>Edit Post</DialogTitle>
-          <DialogDescription>Modify draft or scheduled post content.</DialogDescription>
+          <DialogDescription>
+            Modify draft or scheduled post content.
+          </DialogDescription>
         </DialogHeader>
 
         {/* Content fields */}
@@ -101,7 +109,10 @@ export function EditPostDialog({
             <label className="mb-1.5 block text-xs font-medium text-foreground">
               Target Page
             </label>
-            <Select value={fbPageId} onValueChange={(val) => setFbPageId(val as string)}>
+            <Select
+              value={fbPageId}
+              onValueChange={(val) => setFbPageId(val as string)}
+            >
               <SelectTrigger className="h-9 w-full">
                 <SelectValue>
                   {fbPageId ? pages.find((p) => p.id === fbPageId)?.name : ""}
@@ -152,7 +163,10 @@ export function EditPostDialog({
               <label className="mb-1.5 block text-xs font-medium text-foreground">
                 Attachment Type
               </label>
-              <Select value={mediaType} onValueChange={(val) => val && setMediaType(val as any)}>
+              <Select
+                value={mediaType}
+                onValueChange={(val) => val && setMediaType(val as any)}
+              >
                 <SelectTrigger className="h-9 w-full">
                   <SelectValue />
                 </SelectTrigger>

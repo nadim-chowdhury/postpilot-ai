@@ -289,43 +289,48 @@ export function CalendarView({
             </div>
 
             {/* Reschedule forms */}
-            {(selectedPost.status === "PENDING" || selectedPost.status === "FAILED" || selectedPost.status === "CANCELLED") && onReschedule && (
-              <div className="space-y-3">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 block">
-                  Reschedule Post
-                </span>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="datetime-local"
-                    value={rescheduleTime}
-                    onChange={(e) => setRescheduleTime(e.target.value)}
-                    className="h-8 flex-1"
-                  />
-                  <Button
-                    size="xs"
-                    onClick={handleRescheduleSubmit}
-                    disabled={!rescheduleTime || actionLoading}
-                    className="bg-brand text-brand-foreground hover:bg-brand/90 gap-1"
-                  >
-                    <RefreshCw className="h-3 w-3" /> Save
-                  </Button>
+            {(selectedPost.status === "PENDING" ||
+              selectedPost.status === "FAILED" ||
+              selectedPost.status === "CANCELLED") &&
+              onReschedule && (
+                <div className="space-y-3">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 block">
+                    Reschedule Post
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="datetime-local"
+                      value={rescheduleTime}
+                      onChange={(e) => setRescheduleTime(e.target.value)}
+                      className="h-8 flex-1"
+                    />
+                    <Button
+                      size="xs"
+                      onClick={handleRescheduleSubmit}
+                      disabled={!rescheduleTime || actionLoading}
+                      className="bg-brand text-brand-foreground hover:bg-brand/90 gap-1"
+                    >
+                      <RefreshCw className="h-3 w-3" /> Save
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Action buttons */}
             <div className="flex justify-between items-center pt-2">
-              {(selectedPost.status === "PENDING" || selectedPost.status === "FAILED") && onCancelSchedule && (
-                <Button
-                  variant="destructive"
-                  size="xs"
-                  onClick={handleCancelClick}
-                  disabled={actionLoading}
-                  className="w-full"
-                >
-                  Cancel Schedule
-                </Button>
-              )}
+              {(selectedPost.status === "PENDING" ||
+                selectedPost.status === "FAILED") &&
+                onCancelSchedule && (
+                  <Button
+                    variant="destructive"
+                    size="xs"
+                    onClick={handleCancelClick}
+                    disabled={actionLoading}
+                    className="w-full"
+                  >
+                    Cancel Schedule
+                  </Button>
+                )}
             </div>
           </div>
         ) : (

@@ -5,7 +5,13 @@ import { Send, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface PostComposerProps {
   pages: { id: string; name: string }[];
@@ -63,10 +69,15 @@ export function PostComposer({
           <label className="mb-1.5 block text-xs font-medium text-foreground">
             Target Page
           </label>
-          <Select value={fbPageId} onValueChange={(val) => setFbPageId(val as string)}>
+          <Select
+            value={fbPageId}
+            onValueChange={(val) => setFbPageId(val as string)}
+          >
             <SelectTrigger className="h-9 w-full">
               <SelectValue placeholder="Select a page…">
-                {fbPageId ? pages.find((p) => p.id === fbPageId)?.name : "Select a page…"}
+                {fbPageId
+                  ? pages.find((p) => p.id === fbPageId)?.name
+                  : "Select a page…"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -127,7 +138,10 @@ export function PostComposer({
               <label className="mb-1.5 block text-xs font-medium text-foreground">
                 Type
               </label>
-              <Select value={mediaType} onValueChange={(val) => val && setMediaType(val as any)}>
+              <Select
+                value={mediaType}
+                onValueChange={(val) => val && setMediaType(val as any)}
+              >
                 <SelectTrigger className="h-9 w-full">
                   <SelectValue />
                 </SelectTrigger>

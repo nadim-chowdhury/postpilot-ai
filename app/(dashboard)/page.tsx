@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Globe, FileText, CalendarDays, AlertTriangle, Clock } from "lucide-react";
+import {
+  Globe,
+  FileText,
+  CalendarDays,
+  AlertTriangle,
+  Clock,
+} from "lucide-react";
 import { StatCard } from "@/components/shared/stat-card";
 import { ActivityItem } from "@/components/activity/activity-item";
 import { getDashboardStats } from "@/actions/dashboard.actions";
@@ -56,7 +62,8 @@ export default function DashboardPage() {
       value: stats?.failedCount ?? 0,
       subtitle: "Publishing errors",
       icon: AlertTriangle,
-      className: stats?.failedCount && stats.failedCount > 0 ? "text-destructive" : "",
+      className:
+        stats?.failedCount && stats.failedCount > 0 ? "text-destructive" : "",
     },
   ];
 

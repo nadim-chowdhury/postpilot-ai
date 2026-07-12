@@ -27,7 +27,10 @@ export function PostCard({
     | "failed"
     | "archived";
 
-  const canPublish = post.status === "DRAFT" || post.status === "APPROVED" || post.status === "FAILED";
+  const canPublish =
+    post.status === "DRAFT" ||
+    post.status === "APPROVED" ||
+    post.status === "FAILED";
 
   return (
     <div className="rounded-xl border border-border/50 bg-card p-5 transition-all duration-200 hover:border-border hover:shadow-sm">

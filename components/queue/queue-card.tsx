@@ -110,9 +110,7 @@ export function QueueCard({
                 variant="outline"
                 size="xs"
                 className="gap-1"
-                onClick={() =>
-                  onStartEdit(item.id, item.scheduledAt)
-                }
+                onClick={() => onStartEdit(item.id, item.scheduledAt)}
                 disabled={isLoading}
               >
                 <RefreshCw className="h-3 w-3" /> Reschedule

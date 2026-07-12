@@ -26,7 +26,12 @@ interface ConnectPageDialogProps {
   onClose: () => void;
   availablePages: AvailablePage[];
   onConnect: (
-    pages: { metaPageId: string; name: string; topic: string; avatarUrl?: string }[],
+    pages: {
+      metaPageId: string;
+      name: string;
+      topic: string;
+      avatarUrl?: string;
+    }[],
   ) => void;
   onConnectManually?: (data: {
     metaPageId: string;
@@ -45,9 +50,9 @@ export function ConnectPageDialog({
   loading,
 }: ConnectPageDialogProps) {
   const [activeTab, setActiveTab] = useState<"oauth" | "manual">("oauth");
-  const [selected, setSelected] = useState<
-    Map<string, { topic: string }>
-  >(new Map());
+  const [selected, setSelected] = useState<Map<string, { topic: string }>>(
+    new Map(),
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
   // Manual configuration form state
@@ -245,15 +250,32 @@ export function ConnectPageDialog({
 
               {/* Troubleshooting Section */}
               <div className="mt-4 rounded-lg bg-accent/40 p-3 border border-border/30 text-left">
-                <p className="text-[11px] font-semibold text-foreground uppercase tracking-wider mb-1">💡 Missing pages or Business Portfolio assets?</p>
+                <p className="text-[11px] font-semibold text-foreground uppercase tracking-wider mb-1">
+                  💡 Missing pages or Business Portfolio assets?
+                </p>
                 <ol className="list-decimal pl-4 text-[10.5px] text-muted-foreground space-y-1">
                   <li>
-                    <strong>Assign yourself to the Page:</strong> In your 
-                    <a href="https://business.facebook.com/" target="_blank" rel="noreferrer" className="text-brand hover:underline mx-1">Meta Business Suite</a> 
-                    go to <strong>Settings</strong> &gt; <strong>Business Assets</strong> &gt; <strong>Pages</strong>, select your page, and make sure your profile is added under <strong>People</strong> with full permission.
+                    <strong>Assign yourself to the Page:</strong> In your
+                    <a
+                      href="https://business.facebook.com/"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-brand hover:underline mx-1"
+                    >
+                      Meta Business Suite
+                    </a>
+                    go to <strong>Settings</strong> &gt;{" "}
+                    <strong>Business Assets</strong> &gt; <strong>Pages</strong>
+                    , select your page, and make sure your profile is added
+                    under <strong>People</strong> with full permission.
                   </li>
                   <li>
-                    <strong>Reset App Permissions:</strong> Go to Facebook &gt; <strong>Settings & Privacy</strong> &gt; <strong>Settings</strong> &gt; <strong>Business Integrations</strong>. Remove this app, then click &quot;Connect Page&quot; again and check all requested Page permissions.
+                    <strong>Reset App Permissions:</strong> Go to Facebook &gt;{" "}
+                    <strong>Settings & Privacy</strong> &gt;{" "}
+                    <strong>Settings</strong> &gt;{" "}
+                    <strong>Business Integrations</strong>. Remove this app,
+                    then click &quot;Connect Page&quot; again and check all
+                    requested Page permissions.
                   </li>
                 </ol>
               </div>
@@ -265,7 +287,12 @@ export function ConnectPageDialog({
                 {selected.size} page{selected.size !== 1 ? "s" : ""} selected
               </p>
               <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={onClose} disabled={loading}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClose}
+                  disabled={loading}
+                >
                   Cancel
                 </Button>
                 <Button
@@ -274,7 +301,9 @@ export function ConnectPageDialog({
                   onClick={handleConnect}
                   disabled={selected.size === 0 || loading}
                 >
-                  {loading && <Spinner size="sm" className="border-t-current" />}
+                  {loading && (
+                    <Spinner size="sm" className="border-t-current" />
+                  )}
                   {loading ? "Connecting…" : "Connect"}
                 </Button>
               </div>
@@ -331,18 +360,44 @@ export function ConnectPageDialog({
               </p>
               <ol className="list-decimal pl-4 text-[10.5px] text-muted-foreground space-y-1">
                 <li>
-                  Go to the 
-                  <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noreferrer" className="text-brand hover:underline mx-1">Graph API Explorer</a>.
+                  Go to the
+                  <a
+                    href="https://developers.facebook.com/tools/explorer/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-brand hover:underline mx-1"
+                  >
+                    Graph API Explorer
+                  </a>
+                  .
                 </li>
-                <li>Select your Meta App and choose <strong>Get User Access Token</strong> with the scopes: <code>pages_manage_posts</code> and <code>pages_show_list</code>.</li>
-                <li>In the <strong>User or Page</strong> dropdown, choose your Page (e.g. <code>Gamerxlieo</code>). Facebook will swap your token for a Page token.</li>
-                <li>Copy the Access Token and Page ID displayed at the top, and paste them here!</li>
+                <li>
+                  Select your Meta App and choose{" "}
+                  <strong>Get User Access Token</strong> with the scopes:{" "}
+                  <code>pages_manage_posts</code> and{" "}
+                  <code>pages_show_list</code>.
+                </li>
+                <li>
+                  In the <strong>User or Page</strong> dropdown, choose your
+                  Page (e.g. <code>Gamerxlieo</code>). Facebook will swap your
+                  token for a Page token.
+                </li>
+                <li>
+                  Copy the Access Token and Page ID displayed at the top, and
+                  paste them here!
+                </li>
               </ol>
             </div>
 
             {/* Footer */}
             <DialogFooter className="mt-5 border-t-0 bg-transparent p-0 sm:justify-end border-t border-border/50 pt-4">
-              <Button variant="ghost" size="sm" type="button" onClick={onClose} disabled={manualLoading}>
+              <Button
+                variant="ghost"
+                size="sm"
+                type="button"
+                onClick={onClose}
+                disabled={manualLoading}
+              >
                 Cancel
               </Button>
               <Button
@@ -351,7 +406,9 @@ export function ConnectPageDialog({
                 className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90"
                 disabled={manualLoading}
               >
-                {manualLoading && <Spinner size="sm" className="border-t-current" />}
+                {manualLoading && (
+                  <Spinner size="sm" className="border-t-current" />
+                )}
                 {manualLoading ? "Connecting…" : "Connect Manually"}
               </Button>
             </DialogFooter>
