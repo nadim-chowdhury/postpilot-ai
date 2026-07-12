@@ -413,7 +413,7 @@ export async function triggerQueueSweeper(): Promise<ActionResult<{ processed: n
             where: { id: schedule.id },
             data: {
               status: "FAILED",
-              errorMessage: `Manual sweeper recovery failed: ${err.message || "Unknown error"}`,
+              errorMessage: `Manual sweeper recovery failed: ${err instanceof Error ? err.message : "Unknown error"}`,
             },
           }),
           prisma.post.update({
@@ -425,7 +425,7 @@ export async function triggerQueueSweeper(): Promise<ActionResult<{ processed: n
     }
 
     return { success: true, data: { processed } };
-  } catch {
+  } catch (error) {
     if (error instanceof AppError) {
       return { success: false, error: error.message, code: error.code };
     }
@@ -491,7 +491,7 @@ export async function forcePublishSchedule(
         where: { id: scheduleId },
         data: {
           status: "FAILED",
-          errorMessage: `Force publish failed: ${error.message || "Unknown error"}`,
+          errorMessage: `Force publish failed: ${error instanceof Error ? error.message : "Unknown error"}`,
         },
       });
       if (schedule) {
@@ -508,7 +508,7 @@ export async function forcePublishSchedule(
     if (error instanceof AppError) {
       return { success: false, error: error.message, code: error.code };
     }
-    return { success: false, error: error.message || "Failed to force publish scheduled post" };
+    return { success: false, error: error instanceof Error ? error.message : "Failed to force publish scheduled post" };
   }
 }
 
