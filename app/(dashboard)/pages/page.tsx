@@ -53,7 +53,10 @@ export default function PagesPage() {
   const handleConnectManually = async (data: {
     metaPageId: string;
     accessToken: string;
+    tokenSecret?: string;
     topic: string;
+    platform?: "FACEBOOK" | "TWITTER" | "LINKEDIN";
+    name?: string;
   }) => {
     const result = await connectPageManually(data);
     if (result.success) {

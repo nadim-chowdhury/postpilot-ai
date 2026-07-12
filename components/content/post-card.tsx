@@ -1,4 +1,5 @@
 import { FileText, Globe, Trash2, Calendar, Edit2 } from "lucide-react";
+import { Twitter, Linkedin } from "@/components/shared/social-icons";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { PostSummary } from "@/types/post.types";
@@ -37,17 +38,32 @@ export function PostCard({
       {/* Header */}
       <div className="mb-3 flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
-            {post.pageAvatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={post.pageAvatarUrl}
-                alt={post.pageName}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <Globe className="h-3.5 w-3.5 text-muted-foreground" />
-            )}
+          <div className="relative shrink-0">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
+              {post.pageAvatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={post.pageAvatarUrl}
+                  alt={post.pageName}
+                  className="h-full w-full object-cover"
+                />
+              ) : post.platform === "TWITTER" ? (
+                <Twitter className="h-3.5 w-3.5 text-sky-500" />
+              ) : post.platform === "LINKEDIN" ? (
+                <Linkedin className="h-3.5 w-3.5 text-blue-600" />
+              ) : (
+                <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+              )}
+            </div>
+            <div className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-card border border-border/80 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+              {post.platform === "TWITTER" ? (
+                <Twitter className="h-1.5 w-1.5 text-sky-500 fill-sky-500" />
+              ) : post.platform === "LINKEDIN" ? (
+                <Linkedin className="h-1.5 w-1.5 text-blue-600 fill-blue-600" />
+              ) : (
+                <Globe className="h-1.5 w-1.5 text-brand" />
+              )}
+            </div>
           </div>
           <span className="text-xs font-medium text-muted-foreground">
             {post.pageName}

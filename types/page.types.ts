@@ -1,10 +1,10 @@
-import type { PageStatus } from "@/lib/generated/prisma/enums";
+import type { PageStatus, SocialPlatform } from "@/lib/generated/prisma/enums";
 
 // ─────────────────────────────────────────────
 // Page Types
 // ─────────────────────────────────────────────
 
-export type { PageStatus };
+export type { PageStatus, SocialPlatform };
 
 export interface PageSummary {
   id: string;
@@ -16,6 +16,7 @@ export interface PageSummary {
   lastPostedAt: Date | null;
   personaPrompt?: string | null;
   game?: string | null;
+  platform: SocialPlatform;
 }
 
 export interface PageDetail extends PageSummary {
@@ -24,6 +25,7 @@ export interface PageDetail extends PageSummary {
   tokenExpiresAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  tokenSecret?: string | null;
 }
 
 export interface ConnectPageInput {
@@ -32,6 +34,8 @@ export interface ConnectPageInput {
   accessToken: string;
   topic: string;
   avatarUrl?: string;
+  platform?: SocialPlatform;
+  tokenSecret?: string;
 }
 
 export interface UpdatePageInput {

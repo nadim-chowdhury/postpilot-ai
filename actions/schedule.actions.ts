@@ -289,6 +289,7 @@ export async function getSchedules(filters?: {
 }): Promise<ActionResult<{ items: ScheduleSummary[]; total: number }>> {
   try {
     const userId = await requireUserId();
+    console.log(`[getSchedules] userId = ${userId}, filters =`, filters);
     const page = filters?.page ?? 1;
     const pageSize = filters?.pageSize ?? 50; // default to 50 for queue list
 
@@ -327,7 +328,7 @@ export async function getSchedules(filters?: {
         where,
         include: {
           post: true,
-          fbPage: { select: { name: true, avatarUrl: true } },
+          fbPage: { select: { name: true, avatarUrl: true, platform: true } },
         },
         orderBy: { scheduledAt: "asc" },
         skip: (page - 1) * pageSize,
@@ -346,14 +347,16 @@ export async function getSchedules(filters?: {
       scheduledAt: s.scheduledAt,
       status: s.post.status === "POSTED" ? "COMPLETED" : s.status,
       retryCount: s.retryCount,
+      platform: s.fbPage.platform,
     }));
 
     return { success: true, data: { items, total } };
-  } catch (error) {
+  } catch (error: any) {
+    console.error("[getSchedules] Failed to fetch schedules:", error);
     if (error instanceof AppError) {
       return { success: false, error: error.message, code: error.code };
     }
-    return { success: false, error: "Failed to fetch schedules" };
+    return { success: false, error: `Failed to fetch schedules: ${error?.message || String(error)}` };
   }
 }
 

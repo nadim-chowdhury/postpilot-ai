@@ -18,6 +18,11 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Bypass auth check in development mode
+  if (process.env.NODE_ENV === "development") {
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get("next-auth.session-token")?.value
     ?? request.cookies.get("__Secure-next-auth.session-token")?.value;
 

@@ -88,6 +88,14 @@ function formatAction(
     (metadata?.name as string) ?? (metadata?.pageName as string) ?? "";
   const postTitle = (metadata?.postTitle as string) ?? "";
   const postBody = (metadata?.postBody as string) ?? "";
+  const platform = (metadata?.platform as string) ?? "";
+
+  const platformLabel =
+    platform === "TWITTER"
+      ? "Twitter account"
+      : platform === "LINKEDIN"
+        ? "LinkedIn page"
+        : "page";
 
   const postInfo =
     postTitle && postTitle !== "Untitled"
@@ -103,15 +111,15 @@ function formatAction(
 
   switch (action) {
     case "page.connected":
-      return `Connected page "${pageName}"`;
+      return `Connected ${platformLabel} "${pageName}"`;
     case "page.disconnected":
-      return `Disconnected page "${pageName}"`;
+      return `Disconnected ${platformLabel} "${pageName}"`;
     case "page.updated":
-      return `Updated page "${pageName}"`;
+      return `Updated ${platformLabel} "${pageName}"`;
     case "page.paused":
-      return `Paused page "${pageName}"`;
+      return `Paused ${platformLabel} "${pageName}"`;
     case "page.resumed":
-      return `Resumed page "${pageName}"`;
+      return `Resumed ${platformLabel} "${pageName}"`;
     case "post.created":
       return `Created post ${postInfo}${forPageStr}`;
     case "post.published":

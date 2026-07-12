@@ -7,6 +7,8 @@ import {
   publishToPageFeed,
   publishPhotoToPage,
 } from "@/lib/services/meta-api.service";
+import { publishToTwitter } from "@/lib/services/twitter.service";
+import { publishToLinkedIn } from "@/lib/services/linkedin.service";
 import { publishPostSchedule } from "@/lib/services/qstash.service";
 import { logActivity } from "@/actions/activity.actions";
 import { AppError, ErrorCodes } from "@/lib/errors";
@@ -29,6 +31,7 @@ export async function getPosts(filters?: {
 }): Promise<ActionResult<{ items: PostSummary[]; total: number }>> {
   try {
     const userId = await requireUserId();
+    console.log(`[getPosts] userId = ${userId}, filters =`, filters);
     const page = filters?.page ?? 1;
     const pageSize = filters?.pageSize ?? 50; // default to 50 for better list view
 
@@ -66,7 +69,7 @@ export async function getPosts(filters?: {
       prisma.post.findMany({
         where,
         include: {
-          fbPage: { select: { name: true, avatarUrl: true } },
+          fbPage: { select: { name: true, avatarUrl: true, platform: true } },
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
@@ -87,14 +90,16 @@ export async function getPosts(filters?: {
       fbPageId: post.fbPageId,
       createdAt: post.createdAt,
       publishedAt: post.publishedAt,
+      platform: post.fbPage.platform,
     }));
 
     return { success: true, data: { items, total } };
-  } catch (error) {
+  } catch (error: any) {
+    console.error("[getPosts] Failed to fetch posts:", error);
     if (error instanceof AppError) {
       return { success: false, error: error.message, code: error.code };
     }
-    return { success: false, error: "Failed to fetch posts" };
+    return { success: false, error: `Failed to fetch posts: ${error?.message || String(error)}` };
   }
 }
 
@@ -107,7 +112,7 @@ export async function getPost(
     const post = await prisma.post.findFirst({
       where: { id: postId, userId },
       include: {
-        fbPage: { select: { name: true, avatarUrl: true } },
+        fbPage: { select: { name: true, avatarUrl: true, platform: true } },
       },
     });
 
@@ -133,6 +138,7 @@ export async function getPost(
         createdAt: post.createdAt,
         updatedAt: post.updatedAt,
         publishedAt: post.publishedAt,
+        platform: post.fbPage.platform,
       },
     };
   } catch (error) {
@@ -274,7 +280,7 @@ export async function publishPostNowInternal(
     const post = await prisma.post.findUnique({
       where: { id: postId },
       include: {
-        fbPage: { select: { id: true, name: true, metaPageId: true, accessToken: true, status: true } },
+        fbPage: { select: { id: true, name: true, metaPageId: true, accessToken: true, status: true, platform: true } },
       },
     });
 
@@ -318,24 +324,38 @@ export async function publishPostNowInternal(
       const pageToken = decrypt(post.fbPage.accessToken);
       let fbPostId: string;
 
-      // Publish based on media type
-      if (post.mediaType === "IMAGE" && post.mediaUrl) {
-        fbPostId = await publishPhotoToPage(pageToken, post.fbPage.metaPageId, {
-          url: post.mediaUrl,
-          caption: post.body,
+      if (post.fbPage.platform === "TWITTER") {
+        fbPostId = await publishToTwitter(pageToken, {
+          text: post.body,
+          link: post.mediaType === "LINK" && post.mediaUrl ? post.mediaUrl : undefined,
+        });
+      } else if (post.fbPage.platform === "LINKEDIN") {
+        fbPostId = await publishToLinkedIn(pageToken, {
+          text: post.body,
+          link: post.mediaType === "LINK" && post.mediaUrl ? post.mediaUrl : undefined,
+          authorId: post.fbPage.metaPageId,
         });
       } else {
-        const payload: { message: string; link?: string } = {
-          message: post.body,
-        };
-        if (post.mediaType === "LINK" && post.mediaUrl) {
-          payload.link = post.mediaUrl;
+        // Facebook (default)
+        // Publish based on media type
+        if (post.mediaType === "IMAGE" && post.mediaUrl) {
+          fbPostId = await publishPhotoToPage(pageToken, post.fbPage.metaPageId, {
+            url: post.mediaUrl,
+            caption: post.body,
+          });
+        } else {
+          const payload: { message: string; link?: string } = {
+            message: post.body,
+          };
+          if (post.mediaType === "LINK" && post.mediaUrl) {
+            payload.link = post.mediaUrl;
+          }
+          fbPostId = await publishToPageFeed(
+            pageToken,
+            post.fbPage.metaPageId,
+            payload,
+          );
         }
-        fbPostId = await publishToPageFeed(
-          pageToken,
-          post.fbPage.metaPageId,
-          payload,
-        );
       }
 
       // Mark as posted
@@ -359,6 +379,7 @@ export async function publishPostNowInternal(
           postBody: post.body,
           pageName: post.fbPage.name ?? "Unknown",
           fbPostId,
+          platform: post.fbPage.platform,
         },
       });
 
@@ -394,6 +415,7 @@ export async function publishPostNowInternal(
           postBody: post.body,
           pageName: post.fbPage.name ?? "Unknown",
           error: publishError instanceof Error ? publishError.message : "Unknown error",
+          platform: post.fbPage.platform,
         },
       });
 

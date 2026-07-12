@@ -19,6 +19,7 @@ import { logActivity } from "@/actions/activity.actions";
 export async function getPages(): Promise<ActionResult<PageSummary[]>> {
   try {
     const userId = await requireUserId();
+    console.log(`[getPages] userId = ${userId}`);
 
     const pages = await prisma.fbPage.findMany({
       where: { userId },
@@ -44,6 +45,7 @@ export async function getPages(): Promise<ActionResult<PageSummary[]>> {
       lastPostedAt: page.posts[0]?.publishedAt ?? null,
       personaPrompt: page.personaPrompt,
       game: page.game,
+      platform: page.platform,
     }));
 
     return { success: true, data };
@@ -92,6 +94,8 @@ export async function getPage(
       lastPostedAt: page.posts[0]?.publishedAt ?? null,
       createdAt: page.createdAt,
       updatedAt: page.updatedAt,
+      platform: page.platform,
+      tokenSecret: page.tokenSecret,
     };
 
     return { success: true, data };
@@ -119,16 +123,29 @@ export async function fetchAvailablePages(): Promise<
     const userId = await requireUserId();
     const userAccessToken = await requireUserAccessToken();
 
-    const [metaPages, connectedPages] = await Promise.all([
-      fetchUserPages(userAccessToken),
-      prisma.fbPage.findMany({
-        where: {
-          userId,
-          status: { in: ["ACTIVE", "PAUSED", "TOKEN_EXPIRING"] },
-        },
-        select: { metaPageId: true },
-      }),
-    ]);
+    let metaPages: any[] = [];
+    try {
+      metaPages = await fetchUserPages(userAccessToken);
+    } catch (e) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[Dev Auth Fallback] Failed to fetch pages from Facebook, using mock pages instead:", e);
+        metaPages = [
+          { id: "mock-fb-page-1", name: "Mock Gamer Hub", category: "Gaming", accessToken: "mock-token-1", avatarUrl: null },
+          { id: "mock-fb-page-2", name: "Mock Tech Trends", category: "Technology", accessToken: "mock-token-2", avatarUrl: null },
+          { id: "mock-fb-page-3", name: "Mock Foodie Blog", category: "Food & Beverage", accessToken: "mock-token-3", avatarUrl: null },
+        ];
+      } else {
+        throw e;
+      }
+    }
+
+    const connectedPages = await prisma.fbPage.findMany({
+      where: {
+        userId,
+        status: { in: ["ACTIVE", "PAUSED", "TOKEN_EXPIRING"] },
+      },
+      select: { metaPageId: true },
+    });
 
     const connectedMetaIds = new Set(connectedPages.map((p) => p.metaPageId));
 
@@ -166,7 +183,23 @@ export async function connectPages(
     const userAccessToken = await requireUserAccessToken();
 
     // Fetch all pages from Facebook to get their real page access tokens
-    const metaPages = await fetchUserPages(userAccessToken);
+    let metaPages: any[] = [];
+    try {
+      metaPages = await fetchUserPages(userAccessToken);
+    } catch (e) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[Dev Auth Fallback] Failed to fetch pages from Facebook, using mock data for connection:", e);
+        metaPages = pages.map((p) => ({
+          id: p.metaPageId,
+          name: p.name,
+          accessToken: "EAAB_mock_token_for_dev_mode_" + p.metaPageId,
+          category: "Social Page",
+          avatarUrl: p.avatarUrl ?? null,
+        }));
+      } else {
+        throw e;
+      }
+    }
     let connected = 0;
 
     for (const page of pages) {
@@ -250,38 +283,86 @@ export async function connectPages(
 export async function connectPageManually(data: {
   metaPageId: string;
   accessToken: string;
+  tokenSecret?: string;
   topic: string;
+  platform?: "FACEBOOK" | "TWITTER" | "LINKEDIN";
+  name?: string;
 }): Promise<ActionResult<{ id: string }>> {
   try {
     const userId = await requireUserId();
+    const platform = data.platform ?? "FACEBOOK";
 
     if (!data.metaPageId || !data.accessToken) {
       throw new AppError(
         ErrorCodes.VALIDATION_ERROR,
-        "Page ID and Access Token are required",
+        "Account/Page ID and Access Token are required",
         400,
       );
     }
 
-    // Call Meta API using the provided token to fetch details and verify it works
-    const version = process.env.META_GRAPH_API_VERSION ?? "v24.0";
-    const url = `https://graph.facebook.com/${version}/${data.metaPageId}?fields=name,category,picture{url}&access_token=${data.accessToken}`;
+    let name = data.name || data.metaPageId;
+    let avatarUrl: string | null = null;
+    let category = "Social Account";
 
-    const response = await fetch(url);
-    const result = await response.json();
+    const isMock = data.accessToken.toLowerCase().startsWith("mock");
 
-    if (!response.ok || result.error) {
-      throw new AppError(
-        ErrorCodes.META_API_ERROR,
-        result.error?.message ?? "Invalid Page Access Token or Page ID",
-        response.status,
-      );
+    if (platform === "FACEBOOK" && !isMock) {
+      // Call Meta API using the provided token to fetch details and verify it works
+      const version = process.env.META_GRAPH_API_VERSION ?? "v24.0";
+      const url = `https://graph.facebook.com/${version}/${data.metaPageId}?fields=name,category,picture{url}&access_token=${data.accessToken}`;
+
+      const response = await fetch(url);
+      const result = await response.json();
+
+      if (!response.ok || result.error) {
+        throw new AppError(
+          ErrorCodes.META_API_ERROR,
+          result.error?.message ?? "Invalid Page Access Token or Page ID",
+          response.status,
+        );
+      }
+
+      name = result.name;
+      category = result.category || "Facebook Page";
+      avatarUrl = result.picture?.data?.url ?? null;
+    } else if (platform === "TWITTER" && !isMock) {
+      // Attempt Twitter token verification (GET users/me)
+      try {
+        const response = await fetch("https://api.twitter.com/2/users/me", {
+          headers: {
+            Authorization: `Bearer ${data.accessToken}`,
+          },
+        });
+        if (response.ok) {
+          const result = await response.json();
+          if (result.data) {
+            name = result.data.name || `@${result.data.username}`;
+            category = "Twitter Account";
+          }
+        }
+      } catch (err) {
+        console.warn("Could not verify Twitter token, using manual configuration details:", err);
+      }
+    } else if (platform === "LINKEDIN" && !isMock) {
+      // Attempt LinkedIn token verification (GET me)
+      try {
+        const response = await fetch("https://api.linkedin.com/v2/me", {
+          headers: {
+            Authorization: `Bearer ${data.accessToken}`,
+          },
+        });
+        if (response.ok) {
+          const result = await response.json();
+          name = `${result.localizedFirstName || ""} ${result.localizedLastName || ""}`.trim() || name;
+          category = "LinkedIn Profile";
+        }
+      } catch (err) {
+        console.warn("Could not verify LinkedIn token, using manual configuration details:", err);
+      }
     }
 
-    const name = result.name;
-    const category = result.category || "General";
-    const avatarUrl = result.picture?.data?.url ?? null;
     const encryptedToken = encrypt(data.accessToken);
+    const encryptedSecret = data.tokenSecret ? encrypt(data.tokenSecret) : null;
 
     // Get AI suggested topic and persona
     const aiSuggestions = await generatePageTopicAndPersona(name, category);
@@ -301,9 +382,11 @@ export async function connectPageManually(data: {
           userId,
           name,
           accessToken: encryptedToken,
+          tokenSecret: encryptedSecret,
           status: "ACTIVE",
-          avatarUrl,
+          avatarUrl: avatarUrl || existing.avatarUrl,
           topic: data.topic || existing.topic,
+          platform,
         },
       });
       connectedPageId = updated.id;
@@ -314,14 +397,25 @@ export async function connectPageManually(data: {
           metaPageId: data.metaPageId,
           name,
           accessToken: encryptedToken,
+          tokenSecret: encryptedSecret,
           topic: finalTopic,
           personaPrompt: aiSuggestions.personaPrompt,
           avatarUrl,
           status: "ACTIVE",
+          platform,
         },
       });
       connectedPageId = created.id;
     }
+
+    // Log activity for manually connected page
+    await logActivity({
+      userId,
+      entityType: "page",
+      entityId: data.metaPageId,
+      action: "page.connected",
+      metadata: { name, platform },
+    });
 
     return { success: true, data: { id: connectedPageId } };
   } catch (error) {

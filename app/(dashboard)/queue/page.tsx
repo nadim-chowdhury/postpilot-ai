@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ListChecks, Clock, Send, Ban, RefreshCw, Globe } from "lucide-react";
+import { Twitter, Linkedin } from "@/components/shared/social-icons";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -333,17 +334,32 @@ export default function QueuePage() {
                   {/* Left side: Post and Page Info */}
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     {/* Page avatar */}
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
-                      {item.pageAvatarUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={item.pageAvatarUrl}
-                          alt={item.pageName}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <Globe className="h-4.5 w-4.5 text-muted-foreground" />
-                      )}
+                    <div className="relative shrink-0">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
+                        {item.pageAvatarUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={item.pageAvatarUrl}
+                            alt={item.pageName}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : item.platform === "TWITTER" ? (
+                          <Twitter className="h-4.5 w-4.5 text-sky-500" />
+                        ) : item.platform === "LINKEDIN" ? (
+                          <Linkedin className="h-4.5 w-4.5 text-blue-600" />
+                        ) : (
+                          <Globe className="h-4.5 w-4.5 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-card border border-border/80 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+                        {item.platform === "TWITTER" ? (
+                          <Twitter className="h-1.5 w-1.5 text-sky-500 fill-sky-500" />
+                        ) : item.platform === "LINKEDIN" ? (
+                          <Linkedin className="h-1.5 w-1.5 text-blue-600 fill-blue-600" />
+                        ) : (
+                          <Globe className="h-1.5 w-1.5 text-brand" />
+                        )}
+                      </div>
                     </div>
 
                     <div className="min-w-0 flex-1 space-y-1">

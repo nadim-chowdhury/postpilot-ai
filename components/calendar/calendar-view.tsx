@@ -12,6 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { Twitter, Linkedin } from "@/components/shared/social-icons";
+import { cn } from "@/lib/utils";
 import type { ScheduleSummary } from "@/types/schedule.types";
 
 interface CalendarViewProps {
@@ -29,6 +31,10 @@ export function CalendarView({
   const [selectedPost, setSelectedPost] = useState<ScheduleSummary | null>(
     null,
   );
+  const [selectedDayInfo, setSelectedDayInfo] = useState<{
+    day: number;
+    schedules: ScheduleSummary[];
+  } | null>(null);
   const [rescheduleTime, setRescheduleTime] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -147,12 +153,12 @@ export function CalendarView({
           </div>
 
           {/* Grid cells */}
-          <div className="grid grid-cols-7 divide-x divide-y divide-border/50 bg-background text-sm">
+          <div className="grid grid-cols-7 gap-[1px] bg-border/40 text-sm">
             {/* Prev month fill */}
             {prevMonthDays.map((day) => (
               <div
                 key={`prev-${day}`}
-                className="min-h-24 bg-muted/10 p-2 text-muted-foreground/40 select-none border-t border-l"
+                className="min-h-28 bg-muted/10 p-2 text-muted-foreground/40 select-none"
               >
                 {day}
               </div>
@@ -169,9 +175,20 @@ export function CalendarView({
               return (
                 <div
                   key={`curr-${day}`}
-                  className={`min-h-24 p-2 transition-colors hover:bg-muted/10 border-t ${
-                    isToday ? "bg-brand/5 border-brand/20 border-l" : ""
-                  }`}
+                  onClick={() => {
+                    if (daySchedules.length > 0) {
+                      setSelectedDayInfo({ day, schedules: daySchedules });
+                      setSelectedPost(null);
+                    } else {
+                      setSelectedDayInfo(null);
+                      setSelectedPost(null);
+                    }
+                  }}
+                  className={cn(
+                    "min-h-28 p-2 bg-background transition-colors hover:bg-muted/5 flex flex-col justify-between cursor-pointer",
+                    isToday && "bg-brand/5",
+                    selectedDayInfo?.day === day && "ring-1 ring-brand/40 bg-brand/5"
+                  )}
                 >
                   <div className="flex justify-between items-center mb-1">
                     <span
@@ -186,12 +203,16 @@ export function CalendarView({
                   </div>
 
                   {/* Day events */}
-                  <div className="space-y-1 overflow-y-auto max-h-16">
-                    {daySchedules.map((s) => (
+                  <div className="space-y-1 overflow-hidden flex-1 flex flex-col justify-start">
+                    {daySchedules.slice(0, 2).map((s) => (
                       <button
                         key={s.id}
-                        onClick={() => setSelectedPost(s)}
-                        className={`w-full text-left truncate rounded px-1.5 py-0.5 text-[10px] font-medium border flex items-center gap-1 cursor-pointer transition-all ${
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedPost(s);
+                          setSelectedDayInfo(null);
+                        }}
+                        className={`w-full text-left truncate rounded px-1 py-0.5 text-[9px] font-medium border flex items-center gap-1 cursor-pointer transition-all ${
                           s.status === "PENDING"
                             ? "bg-violet-500/10 text-violet-400 border-violet-500/20 hover:bg-violet-500/20"
                             : s.status === "COMPLETED"
@@ -199,12 +220,23 @@ export function CalendarView({
                               : "bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20"
                         }`}
                       >
-                        <span className="h-1 w-1 rounded-full bg-current shrink-0" />
+                        {s.platform === "TWITTER" ? (
+                          <Twitter className="h-2.5 w-2.5 text-sky-500 fill-sky-500 shrink-0" />
+                        ) : s.platform === "LINKEDIN" ? (
+                          <Linkedin className="h-2.5 w-2.5 text-blue-600 fill-blue-600 shrink-0" />
+                        ) : (
+                          <Globe className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
+                        )}
                         <span className="truncate">
                           {s.postTitle || s.postBody}
                         </span>
                       </button>
                     ))}
+                    {daySchedules.length > 2 && (
+                      <div className="text-[9px] font-semibold text-brand px-1 mt-0.5">
+                        +{daySchedules.length - 2} more
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -214,7 +246,7 @@ export function CalendarView({
             {nextMonthDays.map((day) => (
               <div
                 key={`next-${day}`}
-                className="min-h-24 bg-muted/10 p-2 text-muted-foreground/40 select-none"
+                className="min-h-28 bg-muted/10 p-2 text-muted-foreground/40 select-none"
               >
                 {day}
               </div>
@@ -230,17 +262,32 @@ export function CalendarView({
             {/* Header info */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted/50">
-                  {selectedPost.pageAvatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={selectedPost.pageAvatarUrl}
-                      alt={selectedPost.pageName}
-                      className="h-8 w-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <Globe className="h-4 w-4 text-muted-foreground" />
-                  )}
+                <div className="relative shrink-0">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
+                    {selectedPost.pageAvatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={selectedPost.pageAvatarUrl}
+                        alt={selectedPost.pageName}
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                    ) : selectedPost.platform === "TWITTER" ? (
+                      <Twitter className="h-4 w-4 text-sky-500" />
+                    ) : selectedPost.platform === "LINKEDIN" ? (
+                      <Linkedin className="h-4 w-4 text-blue-600" />
+                    ) : (
+                      <Globe className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-card border border-border/80 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+                    {selectedPost.platform === "TWITTER" ? (
+                      <Twitter className="h-1.5 w-1.5 text-sky-500 fill-sky-500" />
+                    ) : selectedPost.platform === "LINKEDIN" ? (
+                      <Linkedin className="h-1.5 w-1.5 text-blue-600 fill-blue-600" />
+                    ) : (
+                      <Globe className="h-1.5 w-1.5 text-brand" />
+                    )}
+                  </div>
                 </div>
                 <div>
                   <h4 className="text-xs font-semibold text-foreground leading-none">
@@ -302,13 +349,13 @@ export function CalendarView({
                       type="datetime-local"
                       value={rescheduleTime}
                       onChange={(e) => setRescheduleTime(e.target.value)}
-                      className="h-8 flex-1"
+                      className="h-8 flex-1 text-xs"
                     />
                     <Button
                       size="xs"
                       onClick={handleRescheduleSubmit}
                       disabled={!rescheduleTime || actionLoading}
-                      className="bg-brand text-brand-foreground hover:bg-brand/90 gap-1"
+                      className="bg-brand text-brand-foreground hover:bg-brand/90 gap-1 shrink-0"
                     >
                       <RefreshCw className="h-3 w-3" /> Save
                     </Button>
@@ -317,7 +364,7 @@ export function CalendarView({
               )}
 
             {/* Action buttons */}
-            <div className="flex justify-between items-center pt-2">
+            <div className="flex flex-col gap-2 pt-2">
               {(selectedPost.status === "PENDING" ||
                 selectedPost.status === "FAILED") &&
                 onCancelSchedule && (
@@ -331,13 +378,79 @@ export function CalendarView({
                     Cancel Schedule
                   </Button>
                 )}
+              {selectedDayInfo && (
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onClick={() => setSelectedPost(null)}
+                  className="w-full gap-1 text-muted-foreground hover:text-foreground"
+                >
+                  <ChevronLeft className="h-3 w-3" /> Back to Day List
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : selectedDayInfo ? (
+          <div className="rounded-xl border border-border/50 bg-card p-5 space-y-4 animate-in fade-in slide-in-from-right-3 duration-200">
+            <div className="flex items-center justify-between pb-2 border-b border-border/50">
+              <div>
+                <h3 className="text-xs font-semibold text-foreground">
+                  {monthNames[month]} {selectedDayInfo.day}, {year}
+                </h3>
+                <p className="text-[10px] text-muted-foreground">
+                  {selectedDayInfo.schedules.length} scheduled posts
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={() => setSelectedDayInfo(null)}
+                className="h-7 text-[10px] px-2 text-muted-foreground hover:text-foreground"
+              >
+                Clear Selection
+              </Button>
+            </div>
+            <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+              {selectedDayInfo.schedules.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => setSelectedPost(s)}
+                  className="w-full text-left p-2.5 rounded-lg border border-border/50 bg-background hover:bg-muted/30 transition-all space-y-2 flex flex-col cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between gap-2 w-full">
+                    <span className="text-[9px] text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-2.5 w-2.5" />
+                      {new Date(s.scheduledAt).toLocaleTimeString(undefined, {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    <span className={`text-[8px] font-semibold px-1.5 py-0.25 rounded-full border ${
+                      s.status === "PENDING"
+                        ? "bg-violet-500/10 text-violet-400 border-violet-500/20"
+                        : s.status === "COMPLETED"
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          : "bg-red-500/10 text-red-400 border-red-500/20"
+                    }`}>
+                      {s.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-foreground font-medium truncate w-full group-hover:text-brand transition-colors">
+                    {s.postTitle || s.postBody}
+                  </p>
+                  <div className="flex items-center justify-between text-[9px] text-muted-foreground w-full">
+                    <span className="truncate max-w-[120px]">{s.pageName}</span>
+                    <span className="capitalize">{s.platform?.toLowerCase()}</span>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-border/60 p-8 text-center text-xs text-muted-foreground bg-card/30 flex flex-col items-center justify-center min-h-[300px]">
             <CalendarIcon className="h-8 w-8 text-muted-foreground/40 mb-2" />
             <p>
-              Select a scheduled post in the calendar to view detail settings.
+              Select a day or scheduled post in the calendar to view detail settings.
             </p>
           </div>
         )}

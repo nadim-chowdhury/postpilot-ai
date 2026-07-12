@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Globe, Check, Search, Cpu, Key } from "lucide-react";
+import { Globe, Check, Search, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,6 +37,9 @@ interface ConnectPageDialogProps {
     metaPageId: string;
     accessToken: string;
     topic: string;
+    platform?: "FACEBOOK" | "TWITTER" | "LINKEDIN";
+    name?: string;
+    tokenSecret?: string;
   }) => Promise<boolean>;
   loading?: boolean;
 }
@@ -55,11 +58,7 @@ export function ConnectPageDialog({
   );
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Manual configuration form state
-  const [manualPageId, setManualPageId] = useState("");
-  const [manualToken, setManualToken] = useState("");
-  const [manualTopic, setManualTopic] = useState("");
-  const [manualLoading, setManualLoading] = useState(false);
+
 
   if (!open) return null;
 
@@ -92,30 +91,7 @@ export function ConnectPageDialog({
     onConnect(pages);
   };
 
-  const handleManualSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!manualPageId.trim() || !manualToken.trim()) {
-      alert("Please enter both Page ID and Page Access Token.");
-      return;
-    }
-    if (!onConnectManually) return;
 
-    setManualLoading(true);
-    const success = await onConnectManually({
-      metaPageId: manualPageId.trim(),
-      accessToken: manualToken.trim(),
-      topic: manualTopic.trim(),
-    });
-    setManualLoading(false);
-
-    if (success) {
-      // Clear form
-      setManualPageId("");
-      setManualToken("");
-      setManualTopic("");
-      onClose();
-    }
-  };
 
   const filteredPages = availablePages.filter(
     (page) =>
@@ -125,11 +101,12 @@ export function ConnectPageDialog({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg sm:max-w-xl">
         <DialogHeader className="mb-2">
-          <DialogTitle>Connect Pages</DialogTitle>
+          <DialogTitle>Connect Channels</DialogTitle>
           <DialogDescription>
-            Connect your Facebook Pages to publish content.
+            Connect your Facebook pages, Twitter/X accounts, or LinkedIn
+            channels to publish content.
           </DialogDescription>
         </DialogHeader>
 
@@ -144,7 +121,7 @@ export function ConnectPageDialog({
             }`}
           >
             <Globe className="h-3.5 w-3.5" />
-            Facebook Account
+            Facebook Pages
           </button>
           <button
             onClick={() => setActiveTab("manual")}
@@ -155,7 +132,7 @@ export function ConnectPageDialog({
             }`}
           >
             <Key className="h-3.5 w-3.5" />
-            Manual Token
+            Other Platforms
           </button>
         </div>
 
@@ -174,7 +151,7 @@ export function ConnectPageDialog({
             </div>
 
             {/* Page list */}
-            <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+            <div className="max-h-72 space-y-2 overflow-y-auto pr-1 pb-2">
               {filteredPages.length === 0 && (
                 <p className="py-8 text-center text-sm text-muted-foreground">
                   {availablePages.length === 0
@@ -282,7 +259,7 @@ export function ConnectPageDialog({
             </div>
 
             {/* Footer */}
-            <DialogFooter className="mt-4 border-t-0 bg-transparent p-0 sm:justify-between border-t border-border/50 pt-4 flex-row items-center justify-between">
+            <div className="mt-5 flex items-center justify-between border-t border-border/50 pt-4">
               <p className="text-xs text-muted-foreground">
                 {selected.size} page{selected.size !== 1 ? "s" : ""} selected
               </p>
@@ -307,112 +284,49 @@ export function ConnectPageDialog({
                   {loading ? "Connecting…" : "Connect"}
                 </Button>
               </div>
-            </DialogFooter>
+            </div>
           </>
         ) : (
-          <form onSubmit={handleManualSubmit} className="space-y-4">
-            {/* Meta Page ID */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Meta Page ID
-              </label>
-              <Input
-                type="text"
-                placeholder="e.g. 1048203859203"
-                value={manualPageId}
-                onChange={(e) => setManualPageId(e.target.value)}
-                required
-              />
+          <div className="space-y-5">
+            {/* Quick platform OAuth connection buttons */}
+            <div className="space-y-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 block">
+                Automatic Account Logins
+              </span>
+              <div className="grid grid-cols-2 gap-2.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    window.location.href = "/api/auth/twitter";
+                  }}
+                  className="gap-2 text-xs border-border/50 hover:bg-muted/40 cursor-pointer"
+                >
+                  Login with Twitter / X
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    window.location.href = "/api/auth/linkedin";
+                  }}
+                  className="gap-2 text-xs border-border/50 hover:bg-muted/40 cursor-pointer"
+                >
+                  Login with LinkedIn
+                </Button>
+              </div>
             </div>
-
-            {/* Page Access Token */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Page Access Token
-              </label>
-              <Input
-                type="password"
-                placeholder="Paste EAAB... token here"
-                value={manualToken}
-                onChange={(e) => setManualToken(e.target.value)}
-                required
-              />
-            </div>
-
-            {/* Topic */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Topic / Category
-              </label>
-              <Input
-                type="text"
-                placeholder="e.g. Gaming, Tech News"
-                value={manualTopic}
-                onChange={(e) => setManualTopic(e.target.value)}
-              />
-            </div>
-
-            {/* Helper Info */}
-            <div className="rounded-lg bg-accent/40 p-3 border border-border/30 text-left">
-              <p className="text-[11px] font-semibold text-foreground uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                <Cpu className="h-3 w-3 text-brand" />
-                How to get a Page Access Token:
-              </p>
-              <ol className="list-decimal pl-4 text-[10.5px] text-muted-foreground space-y-1">
-                <li>
-                  Go to the
-                  <a
-                    href="https://developers.facebook.com/tools/explorer/"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-brand hover:underline mx-1"
-                  >
-                    Graph API Explorer
-                  </a>
-                  .
-                </li>
-                <li>
-                  Select your Meta App and choose{" "}
-                  <strong>Get User Access Token</strong> with the scopes:{" "}
-                  <code>pages_manage_posts</code> and{" "}
-                  <code>pages_show_list</code>.
-                </li>
-                <li>
-                  In the <strong>User or Page</strong> dropdown, choose your
-                  Page (e.g. <code>Gamerxlieo</code>). Facebook will swap your
-                  token for a Page token.
-                </li>
-                <li>
-                  Copy the Access Token and Page ID displayed at the top, and
-                  paste them here!
-                </li>
-              </ol>
-            </div>
-
-            {/* Footer */}
-            <DialogFooter className="mt-5 border-t-0 bg-transparent p-0 sm:justify-end border-t border-border/50 pt-4">
+            {/* Footer with cancel button */}
+            <div className="mt-6 flex items-center justify-end border-t border-border/50 pt-4">
               <Button
                 variant="ghost"
                 size="sm"
-                type="button"
                 onClick={onClose}
-                disabled={manualLoading}
               >
                 Cancel
               </Button>
-              <Button
-                size="sm"
-                type="submit"
-                className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90"
-                disabled={manualLoading}
-              >
-                {manualLoading && (
-                  <Spinner size="sm" className="border-t-current" />
-                )}
-                {manualLoading ? "Connecting…" : "Connect Manually"}
-              </Button>
-            </DialogFooter>
-          </form>
+            </div>
+          </div>
         )}
       </DialogContent>
     </Dialog>

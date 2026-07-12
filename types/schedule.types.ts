@@ -1,10 +1,10 @@
-import type { ScheduleStatus } from "@/lib/generated/prisma/enums";
+import type { ScheduleStatus, SocialPlatform } from "@/lib/generated/prisma/enums";
 
 // ─────────────────────────────────────────────
 // Schedule Types
 // ─────────────────────────────────────────────
 
-export type { ScheduleStatus };
+export type { ScheduleStatus, SocialPlatform };
 
 export interface ScheduleSummary {
   id: string;
@@ -16,6 +16,7 @@ export interface ScheduleSummary {
   scheduledAt: Date;
   status: ScheduleStatus;
   retryCount: number;
+  platform?: SocialPlatform;
 }
 
 export interface ScheduleDetail extends ScheduleSummary {

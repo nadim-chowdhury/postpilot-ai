@@ -1,10 +1,10 @@
-import type { PostStatus, MediaType } from "@/lib/generated/prisma/enums";
+import type { PostStatus, MediaType, SocialPlatform } from "@/lib/generated/prisma/enums";
 
 // ─────────────────────────────────────────────
 // Post Types
 // ─────────────────────────────────────────────
 
-export type { PostStatus, MediaType };
+export type { PostStatus, MediaType, SocialPlatform };
 
 export interface PostSummary {
   id: string;
@@ -18,6 +18,7 @@ export interface PostSummary {
   fbPageId: string;
   createdAt: Date;
   publishedAt: Date | null;
+  platform?: SocialPlatform;
 }
 
 export interface PostDetail extends PostSummary {

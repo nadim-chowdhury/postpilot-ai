@@ -1,6 +1,7 @@
 "use client";
 
 import { Globe, Pencil, Pause, Play, Unplug, Gamepad2 } from "lucide-react";
+import { Twitter, Linkedin } from "@/components/shared/social-icons";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { PageSummary } from "@/types/page.types";
@@ -26,17 +27,32 @@ export function PageListItem({
   return (
     <div className="flex items-center gap-4 rounded-xl border border-border/50 bg-card px-4 py-3.5 transition-all duration-200 hover:border-border hover:shadow-sm">
       {/* Avatar */}
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
-        {page.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={page.avatarUrl}
-            alt={page.name}
-            className="h-10 w-10 rounded-full object-cover"
-          />
-        ) : (
-          <Globe className="h-4.5 w-4.5" />
-        )}
+      <div className="relative shrink-0">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand/10 text-brand overflow-hidden">
+          {page.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={page.avatarUrl}
+              alt={page.name}
+              className="h-10 w-10 rounded-full object-cover"
+            />
+          ) : page.platform === "TWITTER" ? (
+            <Twitter className="h-4.5 w-4.5 text-sky-500" />
+          ) : page.platform === "LINKEDIN" ? (
+            <Linkedin className="h-4.5 w-4.5 text-blue-600" />
+          ) : (
+            <Globe className="h-4.5 w-4.5" />
+          )}
+        </div>
+        <div className="absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-card border border-border shadow-xs">
+          {page.platform === "TWITTER" ? (
+            <Twitter className="h-2.5 w-2.5 text-sky-500 fill-sky-500" />
+          ) : page.platform === "LINKEDIN" ? (
+            <Linkedin className="h-2.5 w-2.5 text-blue-600 fill-blue-600" />
+          ) : (
+            <Globe className="h-2.5 w-2.5 text-brand" />
+          )}
+        </div>
       </div>
 
       {/* Name + Game */}
@@ -50,6 +66,10 @@ export function PageListItem({
               <Gamepad2 className="h-3 w-3" />
               {page.game}
             </span>
+          ) : page.platform === "TWITTER" ? (
+            "Twitter Account"
+          ) : page.platform === "LINKEDIN" ? (
+            "LinkedIn Channel"
           ) : (
             "Facebook Page"
           )}

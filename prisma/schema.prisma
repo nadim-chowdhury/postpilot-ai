@@ -19,6 +19,12 @@ enum UserRole {
   EDITOR
 }
 
+enum SocialPlatform {
+  FACEBOOK
+  TWITTER
+  LINKEDIN
+}
+
 enum PageStatus {
   ACTIVE
   PAUSED
@@ -74,17 +80,19 @@ model User {
 }
 
 model FbPage {
-  id             String     @id @default(cuid())
-  userId         String     @map("user_id")
-  metaPageId     String     @unique @map("meta_page_id")
+  id             String         @id @default(cuid())
+  userId         String         @map("user_id")
+  metaPageId     String         @unique @map("meta_page_id")
   name           String
-  accessToken    String     @map("access_token")
-  tokenExpiresAt DateTime?  @map("token_expires_at")
+  accessToken    String         @map("access_token")
+  tokenSecret    String?        @map("token_secret")
+  tokenExpiresAt DateTime?      @map("token_expires_at")
   topic          String
-  personaPrompt  String?    @map("persona_prompt") @db.Text
-  status         PageStatus @default(ACTIVE)
-  avatarUrl      String?    @map("avatar_url")
+  personaPrompt  String?        @map("persona_prompt") @db.Text
+  status         PageStatus     @default(ACTIVE)
+  avatarUrl      String?        @map("avatar_url")
   game           String?
+  platform       SocialPlatform @default(FACEBOOK)
 
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   posts     Post[]
