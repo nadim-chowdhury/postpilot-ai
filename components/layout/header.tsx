@@ -24,7 +24,7 @@ export function Header() {
   const pageTitle = currentItem?.label ?? "Dashboard";
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/50 bg-background/80 px-6 backdrop-blur-sm">
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/50 bg-card px-6 backdrop-blur-sm">
       {/* Left: Page title */}
       <div>
         <h1 className="text-sm font-semibold text-foreground">{pageTitle}</h1>
