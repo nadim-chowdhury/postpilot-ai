@@ -1,0 +1,27 @@
+name: Daily Token Expiry Check
+
+on:
+  schedule:
+    # Check token expiry — daily at midnight UTC
+    - cron: "0 0 * * *"
+  workflow_dispatch: # Allow manual trigger
+
+env:
+  APP_URL: ${{ secrets.APP_URL }}
+  CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+jobs:
+  check-token-expiry:
+    name: Check Facebook Token Expiry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger check-token-expiry endpoint
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$APP_URL/api/cron/check-token-expiry")
+          echo "Response status: $response"
+          if [ "$response" -ge 400 ]; then
+            echo "::error::Cron endpoint returned HTTP $response"
+            exit 1
+          fi

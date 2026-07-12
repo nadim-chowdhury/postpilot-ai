@@ -1,0 +1,27 @@
+name: Scheduled Cron Jobs
+
+on:
+  schedule:
+    # Process queue — every 5 minutes
+    - cron: "*/5 * * * *"
+  workflow_dispatch: # Allow manual trigger
+
+env:
+  APP_URL: ${{ secrets.APP_URL }}
+  CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+jobs:
+  process-queue:
+    name: Process Publishing Queue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger process-queue endpoint
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$APP_URL/api/cron/process-queue")
+          echo "Response status: $response"
+          if [ "$response" -ge 400 ]; then
+            echo "::error::Cron endpoint returned HTTP $response"
+            exit 1
+          fi

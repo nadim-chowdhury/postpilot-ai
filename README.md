@@ -190,19 +190,46 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ## ⚙️ Cron Jobs
 
-The app uses two Vercel Cron Jobs (configured in `vercel.json`):
+The app has two cron endpoints that are triggered **externally** (keeping Vercel on the free tier):
 
-| Cron                           | Schedule          | Description                                                      |
+| Endpoint                       | Schedule          | Description                                                      |
 | ------------------------------ | ----------------- | ---------------------------------------------------------------- |
 | `/api/cron/process-queue`      | Every 5 minutes   | Processes pending scheduled posts and dispatches them via QStash |
 | `/api/cron/check-token-expiry` | Daily at midnight | Flags pages with expiring Facebook access tokens                 |
 
-For local development, you can trigger these manually:
+Both endpoints are secured with `CRON_SECRET` — they accept `Authorization: Bearer <secret>` headers or `?secret=<secret>` query params.
+
+### Option 1: GitHub Actions (included)
+
+Two workflow files are included in `.github/workflows/`:
+
+- **`cron.yml`** — Hits `/api/cron/process-queue` every 5 minutes
+- **`cron-daily.yml`** — Hits `/api/cron/check-token-expiry` daily at midnight UTC
+
+**Setup:**
+1. Go to your GitHub repo → **Settings → Secrets and variables → Actions**
+2. Add these repository secrets:
+   - `APP_URL` — Your deployed Vercel URL (e.g. `https://postpilot-ai.vercel.app`)
+   - `CRON_SECRET` — Same value as your `CRON_SECRET` env variable in Vercel
+3. Push the workflow files — GitHub Actions will start running automatically
+
+### Option 2: cron-job.org (alternative)
+
+1. Go to [cron-job.org](https://cron-job.org) and create a free account
+2. Create two cron jobs:
+   - **Process Queue**: URL = `https://your-app.vercel.app/api/cron/process-queue?secret=YOUR_CRON_SECRET`, schedule = every 5 minutes
+   - **Token Expiry**: URL = `https://your-app.vercel.app/api/cron/check-token-expiry?secret=YOUR_CRON_SECRET`, schedule = daily at midnight
+
+### Local Development
+
+Trigger cron endpoints manually:
 
 ```bash
 curl http://localhost:3000/api/cron/process-queue
 curl http://localhost:3000/api/cron/check-token-expiry
 ```
+
+> **Note:** `CRON_SECRET` is optional in dev — if not set, the endpoints are publicly accessible with a console warning.
 
 ---
 
@@ -244,12 +271,13 @@ The system auto-detects which API keys are configured and uses the highest-prior
 
 ## 🚢 Deployment
 
-The app is optimized for deployment on **Vercel**:
+The app is optimized for deployment on **Vercel** (free tier):
 
 1. Push your repo to GitHub
 2. Import the project on [Vercel](https://vercel.com/new)
 3. Add all environment variables from `.env.example`
-4. Deploy — Vercel will automatically configure cron jobs from `vercel.json`
+4. Deploy
+5. Set up cron triggers using **GitHub Actions** or **cron-job.org** (see [Cron Jobs](#️-cron-jobs) above)
 
 ---
 
