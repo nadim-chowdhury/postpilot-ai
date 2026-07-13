@@ -103,7 +103,7 @@ export function Sidebar() {
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          "hidden md:flex h-screen flex-col border-r border-border/50 bg-card transition-all duration-200",
+          "hidden md:flex h-screen flex-col border-r border-border/50 bg-card transition-all duration-200 overflow-hidden",
           collapsed ? "w-[64px]" : "w-[240px]",
         )}
       >
