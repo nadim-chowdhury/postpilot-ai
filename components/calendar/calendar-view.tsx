@@ -142,7 +142,7 @@ export function CalendarView({
         {/* Month grid */}
         <div className="overflow-hidden rounded-xl border border-border/50 bg-card">
           {/* Day labels */}
-          <div className="grid grid-cols-7 border-b border-border/50 bg-accent text-center text-[10px] sm:text-xs font-semibold text-muted-foreground py-2">
+          <div className="grid grid-cols-7 border-b-2 border-border/50 bg-card text-center text-[10px] sm:text-xs font-semibold text-muted-foreground py-2">
             <div className="hidden sm:block">Sun</div>
             <div className="sm:hidden">S</div>
             <div className="hidden sm:block">Mon</div>
@@ -241,15 +241,25 @@ export function CalendarView({
                           </span>
                         </span>
                         {/* Mobile: just a small colored dot */}
-                        <span className={`sm:hidden inline-block h-1.5 w-1.5 rounded-full ${
-                          s.status === "PENDING" ? "bg-violet-400" : s.status === "COMPLETED" ? "bg-emerald-400" : "bg-red-400"
-                        }`} />
+                        <span
+                          className={`sm:hidden inline-block h-1.5 w-1.5 rounded-full ${
+                            s.status === "PENDING"
+                              ? "bg-violet-400"
+                              : s.status === "COMPLETED"
+                                ? "bg-emerald-400"
+                                : "bg-red-400"
+                          }`}
+                        />
                       </button>
                     ))}
                     {daySchedules.length > 2 && (
                       <div className="text-[9px] font-semibold text-brand px-1 mt-0.5">
-                        <span className="hidden sm:inline">+{daySchedules.length - 2} more</span>
-                        <span className="sm:hidden">+{daySchedules.length - 2}</span>
+                        <span className="hidden sm:inline">
+                          +{daySchedules.length - 2} more
+                        </span>
+                        <span className="sm:hidden">
+                          +{daySchedules.length - 2}
+                        </span>
                       </div>
                     )}
                   </div>

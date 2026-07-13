@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { Moon, Sun, Menu } from "lucide-react";
+import { Moon, Sun, Menu, LogOut } from "lucide-react";
 import { useTheme } from "next-themes";
+import { signOut } from "next-auth/react";
 import { navConfig } from "@/config/nav";
 import { useAppDispatch } from "@/store/hooks";
 import { setMobileSidebarOpen } from "@/store/slices/ui.slice";
@@ -41,7 +42,7 @@ export function Header() {
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {/* Theme toggle */}
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -54,7 +55,17 @@ export function Header() {
             <Moon className="h-4 w-4" />
           )}
         </button>
+
+        {/* Logout */}
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-destructive"
+          title="Sign out"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
       </div>
     </header>
   );
 }
+

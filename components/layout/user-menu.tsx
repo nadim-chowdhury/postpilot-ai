@@ -1,7 +1,7 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
-import { LogOut, User } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { User } from "lucide-react";
 import { Spinner } from "@/components/shared/spinner";
 import { cn } from "@/lib/utils";
 
@@ -48,7 +48,6 @@ export function UserMenu({ collapsed }: UserMenuProps) {
       </div>
 
       {!collapsed && (
-        <>
           <div className="flex-1 truncate">
             <p className="truncate text-sm font-medium text-foreground">
               {user.name || "User"}
@@ -57,14 +56,6 @@ export function UserMenu({ collapsed }: UserMenuProps) {
               {user.email || ""}
             </p>
           </div>
-          <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            title="Sign out"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-          </button>
-        </>
       )}
     </div>
   );
