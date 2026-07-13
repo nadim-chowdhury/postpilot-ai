@@ -507,6 +507,7 @@ export async function bulkImportPosts(data: {
   fbPageId: string;
   posts: { title?: string; body: string }[];
   autoSchedule?: boolean;
+  scheduleMode?: "CUSTOM" | "APPEND";
   startDate?: string;
   endDate?: string;
   postsPerDay?: number;
@@ -524,10 +525,56 @@ export async function bulkImportPosts(data: {
 
     // Generate schedule slots if auto-scheduling
     let scheduledDates: Date[] = [];
-    if (data.autoSchedule && data.startDate && data.endDate && data.postsPerDay) {
+    if (data.autoSchedule && data.postsPerDay) {
+      let start: Date;
+      let end: Date;
+
+      if (data.scheduleMode === "APPEND") {
+        // Find the latest pending schedule for this page
+        const latestSchedule = await prisma.schedule.findFirst({
+          where: {
+            fbPageId: data.fbPageId,
+            status: "PENDING",
+          },
+          orderBy: {
+            scheduledAt: "desc",
+          },
+        });
+
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+
+        if (latestSchedule) {
+          // Start the day after the latest scheduled post
+          start = new Date(latestSchedule.scheduledAt);
+          start.setDate(start.getDate() + 1);
+
+          // Ensure we don't schedule in the past
+          if (start < tomorrow) {
+            start = tomorrow;
+          }
+        } else {
+          // If no scheduled posts, start tomorrow
+          start = tomorrow;
+        }
+
+        // Calculate end date based on posts count and posts per day
+        const daysNeeded = Math.ceil(data.posts.length / data.postsPerDay);
+        end = new Date(start);
+        end.setDate(end.getDate() + daysNeeded - 1);
+      } else {
+        // CUSTOM range mode
+        if (!data.startDate || !data.endDate) {
+          return { success: false, error: "Start and end dates are required for custom scheduling." };
+        }
+        start = new Date(data.startDate);
+        end = new Date(data.endDate);
+      }
+
       scheduledDates = generateScheduleSlots(
-        new Date(data.startDate),
-        new Date(data.endDate),
+        start,
+        end,
         data.postsPerDay,
         data.posts.length,
       );

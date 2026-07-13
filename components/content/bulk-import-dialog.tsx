@@ -48,6 +48,7 @@ export function BulkImportDialog({
 }: BulkImportDialogProps) {
   const [fbPageId, setFbPageId] = useState("");
   const [jsonInput, setJsonInput] = useState("");
+  const [scheduleMode, setScheduleMode] = useState<"CUSTOM" | "APPEND">("CUSTOM");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [postsPerDay, setPostsPerDay] = useState(2);
@@ -98,14 +99,15 @@ export function BulkImportDialog({
       return;
     }
 
-    if (autoSchedule && (!startDate || !endDate)) {
-      setError("Please set both start and end dates for auto-scheduling.");
-      return;
-    }
-
-    if (autoSchedule && new Date(startDate) >= new Date(endDate)) {
-      setError("End date must be after start date.");
-      return;
+    if (autoSchedule && scheduleMode === "CUSTOM") {
+      if (!startDate || !endDate) {
+        setError("Please set both start and end dates for auto-scheduling.");
+        return;
+      }
+      if (new Date(startDate) >= new Date(endDate)) {
+        setError("End date must be after start date.");
+        return;
+      }
     }
 
     setLoading(true);
@@ -114,8 +116,9 @@ export function BulkImportDialog({
       fbPageId,
       posts,
       autoSchedule,
-      startDate: autoSchedule ? startDate : undefined,
-      endDate: autoSchedule ? endDate : undefined,
+      scheduleMode: autoSchedule ? scheduleMode : undefined,
+      startDate: autoSchedule && scheduleMode === "CUSTOM" ? startDate : undefined,
+      endDate: autoSchedule && scheduleMode === "CUSTOM" ? endDate : undefined,
       postsPerDay: autoSchedule ? postsPerDay : undefined,
     });
 
@@ -236,50 +239,74 @@ export function BulkImportDialog({
             </label>
 
             {autoSchedule && (
-              <div className="grid gap-3 sm:grid-cols-3 pt-1">
+              <div className="space-y-3 pt-1">
                 <div>
                   <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
-                    Start Date
-                  </label>
-                  <DatePicker
-                    value={startDate}
-                    onChange={setStartDate}
-                    placeholder="Pick start date"
-                    className="h-8 w-full"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
-                    End Date
-                  </label>
-                  <DatePicker
-                    value={endDate}
-                    onChange={setEndDate}
-                    placeholder="Pick end date"
-                    className="h-8 w-full"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
-                    Posts per Day
+                    Scheduling Mode
                   </label>
                   <Select
-                    value={postsPerDay.toString()}
-                    onValueChange={(val) =>
-                      setPostsPerDay(Number(val as string))
-                    }
+                    value={scheduleMode}
+                    onValueChange={(val) => setScheduleMode(val as "CUSTOM" | "APPEND")}
                   >
                     <SelectTrigger className="h-8 w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <SelectItem key={n} value={n.toString()}>
-                          {n} post{n > 1 ? "s" : ""} / day
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="CUSTOM">Across custom date range</SelectItem>
+                      <SelectItem value="APPEND">Queue after latest scheduled post</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {scheduleMode === "CUSTOM" && (
+                    <>
+                      <div>
+                        <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
+                          Start Date
+                        </label>
+                        <DatePicker
+                          value={startDate}
+                          onChange={setStartDate}
+                          placeholder="Pick start date"
+                          className="h-8 w-full"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
+                          End Date
+                        </label>
+                        <DatePicker
+                          value={endDate}
+                          onChange={setEndDate}
+                          placeholder="Pick end date"
+                          className="h-8 w-full"
+                        />
+                      </div>
+                    </>
+                  )}
+                  <div className={scheduleMode === "APPEND" ? "col-span-3" : ""}>
+                    <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
+                      Posts per Day
+                    </label>
+                    <Select
+                      value={postsPerDay.toString()}
+                      onValueChange={(val) =>
+                        setPostsPerDay(Number(val as string))
+                      }
+                    >
+                      <SelectTrigger className="h-8 w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <SelectItem key={n} value={n.toString()}>
+                            {n} post{n > 1 ? "s" : ""} / day
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             )}
