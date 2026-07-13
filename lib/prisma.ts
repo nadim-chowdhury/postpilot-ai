@@ -5,7 +5,25 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+function logEnvironmentDiagnostic() {
+  console.log("=== [PostPilot AI] Environment Diagnostics ===");
+  console.log(`NODE_ENV:                   ${process.env.NODE_ENV}`);
+  console.log(`NEXT_PUBLIC_APP_URL:        ${process.env.NEXT_PUBLIC_APP_URL}`);
+  console.log(`NEXTAUTH_URL:               ${process.env.NEXTAUTH_URL}`);
+  console.log(`DATABASE_URL:               ${process.env.DATABASE_URL ? "SET (length: " + process.env.DATABASE_URL.length + ")" : "MISSING"}`);
+  console.log(`NEXTAUTH_SECRET:            ${process.env.NEXTAUTH_SECRET ? "SET" : "MISSING"}`);
+  console.log(`META_APP_ID:                ${process.env.META_APP_ID}`);
+  console.log(`META_APP_SECRET:            ${process.env.META_APP_SECRET ? "SET" : "MISSING"}`);
+  console.log(`QSTASH_TOKEN:               ${process.env.QSTASH_TOKEN ? "SET (length: " + process.env.QSTASH_TOKEN.length + ")" : "MISSING"}`);
+  console.log(`QSTASH_CURRENT_SIGNING_KEY: ${process.env.QSTASH_CURRENT_SIGNING_KEY ? "SET" : "MISSING"}`);
+  console.log(`QSTASH_NEXT_SIGNING_KEY:    ${process.env.QSTASH_NEXT_SIGNING_KEY ? "SET" : "MISSING"}`);
+  console.log(`ENCRYPTION_KEY:             ${process.env.ENCRYPTION_KEY ? "SET" : "MISSING"}`);
+  console.log(`CRON_SECRET:                ${process.env.CRON_SECRET ? "SET" : "MISSING"}`);
+  console.log("=============================================");
+}
+
 function createPrismaClient() {
+  logEnvironmentDiagnostic();
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error("DATABASE_URL environment variable is not set");
