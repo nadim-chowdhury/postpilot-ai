@@ -43,15 +43,41 @@ function createPrismaClient() {
 
         for (const schedule of pendingSchedules) {
           console.log(`[Dev Scheduler] Found pending schedule ${schedule.id} ready to publish. Triggering...`);
-          const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/jobs/publish-post`;
-          const res = await fetch(callbackUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ scheduleId: schedule.id }),
-          });
-          console.log(`[Dev Scheduler] Triggered schedule ${schedule.id}, status: ${res.status}`);
+          try {
+            // Mark as IN_PROGRESS to prevent concurrent executions
+            await client.schedule.update({
+              where: { id: schedule.id },
+              data: { status: "IN_PROGRESS" },
+            });
+
+            // Dynamically import to avoid circular dependency
+            const { publishPostNowInternal } = await import("@/actions/post.actions");
+            const result = await publishPostNowInternal(schedule.postId);
+
+            if (result.success) {
+              await client.schedule.update({
+                where: { id: schedule.id },
+                data: {
+                  status: "COMPLETED",
+                  publishedAt: new Date(),
+                  errorMessage: null,
+                },
+              });
+              console.log(`[Dev Scheduler] Successfully published schedule ${schedule.id}`);
+            } else {
+              throw new Error(result.error || "Publishing action failed");
+            }
+          } catch (err) {
+            console.error(`[Dev Scheduler] Failed to publish schedule ${schedule.id}:`, err);
+            const errorMessage = (err as Error).message || "Unknown error";
+            const { autoRescheduleFailedPost } = await import("@/actions/schedule.actions");
+            await autoRescheduleFailedPost(
+              schedule.id,
+              schedule.fbPageId,
+              schedule.postId,
+              `Dev scheduler recovery failed: ${errorMessage}`
+            );
+          }
         }
       } catch (err) {
         console.error(`[Dev Scheduler] Error in background sweeper:`, err);

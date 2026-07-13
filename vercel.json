@@ -1,2 +1,12 @@
 {
+  "crons": [
+    {
+      "path": "/api/cron/process-queue",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/check-token-expiry",
+      "schedule": "0 0 * * *"
+    }
+  ]
 }
