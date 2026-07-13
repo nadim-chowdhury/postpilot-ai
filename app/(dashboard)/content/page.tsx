@@ -201,21 +201,22 @@ export default function ContentPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Content</h2>
           <p className="text-sm text-muted-foreground">
             Create and manage your content pool.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
             className="gap-2"
             onClick={() => setBulkImportOpen(true)}
           >
             <Upload className="h-4 w-4" />
-            Bulk Import
+            <span className="hidden xs:inline">Bulk Import</span>
+            <span className="xs:hidden">Import</span>
           </Button>
           <Button
             variant="outline"
@@ -223,7 +224,8 @@ export default function ContentPage() {
             onClick={() => setAiGenerateOpen(true)}
           >
             <Sparkles className="h-4 w-4" />
-            Generate with AI
+            <span className="hidden sm:inline">Generate with AI</span>
+            <span className="sm:hidden">AI</span>
           </Button>
           <Button
             className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90"
@@ -234,7 +236,7 @@ export default function ContentPage() {
             ) : (
               <Plus className="h-4 w-4" />
             )}
-            {showComposer ? "Hide Composer" : "Create Post"}
+            {showComposer ? "Hide" : "Create"}
           </Button>
         </div>
       </div>

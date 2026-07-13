@@ -2,14 +2,17 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import { navConfig } from "@/config/nav";
+import { useAppDispatch } from "@/store/hooks";
+import { setMobileSidebarOpen } from "@/store/slices/ui.slice";
 
 export function Header() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
+  const dispatch = useAppDispatch();
 
   React.useEffect(() => {
     // eslint-disable-next-line
@@ -24,9 +27,16 @@ export function Header() {
   const pageTitle = currentItem?.label ?? "Dashboard";
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/50 bg-card px-6 backdrop-blur-sm">
-      {/* Left: Page title */}
-      <div>
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/50 bg-card px-4 sm:px-6 backdrop-blur-sm">
+      {/* Left: Hamburger + Page title */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => dispatch(setMobileSidebarOpen(true))}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:hidden"
+          title="Open menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
         <h1 className="text-sm font-semibold text-foreground">{pageTitle}</h1>
       </div>
 

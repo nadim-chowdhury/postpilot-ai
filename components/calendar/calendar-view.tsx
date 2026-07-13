@@ -142,14 +142,21 @@ export function CalendarView({
         {/* Month grid */}
         <div className="overflow-hidden rounded-xl border border-border/50 bg-card">
           {/* Day labels */}
-          <div className="grid grid-cols-7 border-b border-border/50 bg-muted/30 text-center text-xs font-semibold text-muted-foreground py-2">
-            <div>Sun</div>
-            <div>Mon</div>
-            <div>Tue</div>
-            <div>Wed</div>
-            <div>Thu</div>
-            <div>Fri</div>
-            <div>Sat</div>
+          <div className="grid grid-cols-7 border-b border-border/50 bg-accent text-center text-[10px] sm:text-xs font-semibold text-muted-foreground py-2">
+            <div className="hidden sm:block">Sun</div>
+            <div className="sm:hidden">S</div>
+            <div className="hidden sm:block">Mon</div>
+            <div className="sm:hidden">M</div>
+            <div className="hidden sm:block">Tue</div>
+            <div className="sm:hidden">T</div>
+            <div className="hidden sm:block">Wed</div>
+            <div className="sm:hidden">W</div>
+            <div className="hidden sm:block">Thu</div>
+            <div className="sm:hidden">T</div>
+            <div className="hidden sm:block">Fri</div>
+            <div className="sm:hidden">F</div>
+            <div className="hidden sm:block">Sat</div>
+            <div className="sm:hidden">S</div>
           </div>
 
           {/* Grid cells */}
@@ -158,7 +165,7 @@ export function CalendarView({
             {prevMonthDays.map((day) => (
               <div
                 key={`prev-${day}`}
-                className="min-h-28 bg-muted/10 p-2 text-muted-foreground/40 select-none"
+                className="min-h-16 sm:min-h-28 bg-muted/10 p-1 sm:p-2 text-muted-foreground/40 select-none text-xs sm:text-sm"
               >
                 {day}
               </div>
@@ -185,9 +192,10 @@ export function CalendarView({
                     }
                   }}
                   className={cn(
-                    "min-h-28 p-2 bg-background transition-colors hover:bg-muted/5 flex flex-col justify-between cursor-pointer",
+                    "min-h-16 sm:min-h-28 p-1 sm:p-2 bg-card transition-colors hover:bg-muted/5 flex flex-col justify-between cursor-pointer text-xs sm:text-sm",
                     isToday && "bg-brand/5",
-                    selectedDayInfo?.day === day && "ring-1 ring-brand/40 bg-brand/5"
+                    selectedDayInfo?.day === day &&
+                      "ring-1 ring-brand/40 bg-brand/5",
                   )}
                 >
                   <div className="flex justify-between items-center mb-1">
@@ -220,21 +228,28 @@ export function CalendarView({
                               : "bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20"
                         }`}
                       >
-                        {s.platform === "TWITTER" ? (
-                          <Twitter className="h-2.5 w-2.5 text-sky-500 fill-sky-500 shrink-0" />
-                        ) : s.platform === "LINKEDIN" ? (
-                          <Linkedin className="h-2.5 w-2.5 text-blue-600 fill-blue-600 shrink-0" />
-                        ) : (
-                          <Globe className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
-                        )}
-                        <span className="truncate">
-                          {s.postTitle || s.postBody}
+                        <span className="hidden sm:inline-flex items-center gap-1 truncate">
+                          {s.platform === "TWITTER" ? (
+                            <Twitter className="h-2.5 w-2.5 text-sky-500 fill-sky-500 shrink-0" />
+                          ) : s.platform === "LINKEDIN" ? (
+                            <Linkedin className="h-2.5 w-2.5 text-blue-600 fill-blue-600 shrink-0" />
+                          ) : (
+                            <Globe className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
+                          )}
+                          <span className="truncate">
+                            {s.postTitle || s.postBody}
+                          </span>
                         </span>
+                        {/* Mobile: just a small colored dot */}
+                        <span className={`sm:hidden inline-block h-1.5 w-1.5 rounded-full ${
+                          s.status === "PENDING" ? "bg-violet-400" : s.status === "COMPLETED" ? "bg-emerald-400" : "bg-red-400"
+                        }`} />
                       </button>
                     ))}
                     {daySchedules.length > 2 && (
                       <div className="text-[9px] font-semibold text-brand px-1 mt-0.5">
-                        +{daySchedules.length - 2} more
+                        <span className="hidden sm:inline">+{daySchedules.length - 2} more</span>
+                        <span className="sm:hidden">+{daySchedules.length - 2}</span>
                       </div>
                     )}
                   </div>
@@ -246,7 +261,7 @@ export function CalendarView({
             {nextMonthDays.map((day) => (
               <div
                 key={`next-${day}`}
-                className="min-h-28 bg-muted/10 p-2 text-muted-foreground/40 select-none"
+                className="min-h-16 sm:min-h-28 bg-muted/10 p-1 sm:p-2 text-muted-foreground/40 select-none text-xs sm:text-sm"
               >
                 {day}
               </div>
@@ -391,7 +406,7 @@ export function CalendarView({
             </div>
           </div>
         ) : selectedDayInfo ? (
-          <div className="rounded-xl border border-border/50 bg-card p-5 space-y-4 animate-in fade-in slide-in-from-right-3 duration-200">
+          <div className="rounded-xl border border-border/50 bg-card p-5 space-y-4 animate-in fade-in slide-in-from-right-3 duration-200 h-full">
             <div className="flex items-center justify-between pb-2 border-b border-border/50">
               <div>
                 <h3 className="text-xs font-semibold text-foreground">
@@ -410,7 +425,7 @@ export function CalendarView({
                 Clear Selection
               </Button>
             </div>
-            <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+            <div className="space-y-2 h-full overflow-y-auto pr-1">
               {selectedDayInfo.schedules.map((s) => (
                 <button
                   key={s.id}
@@ -425,13 +440,15 @@ export function CalendarView({
                         minute: "2-digit",
                       })}
                     </span>
-                    <span className={`text-[8px] font-semibold px-1.5 py-0.25 rounded-full border ${
-                      s.status === "PENDING"
-                        ? "bg-violet-500/10 text-violet-400 border-violet-500/20"
-                        : s.status === "COMPLETED"
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                          : "bg-red-500/10 text-red-400 border-red-500/20"
-                    }`}>
+                    <span
+                      className={`text-[8px] font-semibold px-1.5 py-0.25 rounded-full border ${
+                        s.status === "PENDING"
+                          ? "bg-violet-500/10 text-violet-400 border-violet-500/20"
+                          : s.status === "COMPLETED"
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : "bg-red-500/10 text-red-400 border-red-500/20"
+                      }`}
+                    >
                       {s.status}
                     </span>
                   </div>
@@ -440,7 +457,9 @@ export function CalendarView({
                   </p>
                   <div className="flex items-center justify-between text-[9px] text-muted-foreground w-full">
                     <span className="truncate max-w-[120px]">{s.pageName}</span>
-                    <span className="capitalize">{s.platform?.toLowerCase()}</span>
+                    <span className="capitalize">
+                      {s.platform?.toLowerCase()}
+                    </span>
                   </div>
                 </button>
               ))}
@@ -450,7 +469,8 @@ export function CalendarView({
           <div className="rounded-xl border border-dashed border-border/60 p-8 text-center text-xs text-muted-foreground bg-card/30 flex flex-col items-center justify-center min-h-[300px]">
             <CalendarIcon className="h-8 w-8 text-muted-foreground/40 mb-2" />
             <p>
-              Select a day or scheduled post in the calendar to view detail settings.
+              Select a day or scheduled post in the calendar to view detail
+              settings.
             </p>
           </div>
         )}

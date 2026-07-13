@@ -1,9 +1,11 @@
 "use client";
 
-import { Zap, PanelLeftClose, PanelLeft } from "lucide-react";
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { Zap, PanelLeftClose, PanelLeft, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { toggleSidebar } from "@/store/slices/ui.slice";
+import { toggleSidebar, setMobileSidebarOpen } from "@/store/slices/ui.slice";
 import { navConfig } from "@/config/nav";
 import { NavItem } from "./nav-item";
 import { UserMenu } from "./user-menu";
@@ -11,14 +13,16 @@ import { UserMenu } from "./user-menu";
 export function Sidebar() {
   const dispatch = useAppDispatch();
   const collapsed = useAppSelector((state) => state.ui.sidebarCollapsed);
+  const mobileSidebarOpen = useAppSelector((state) => state.ui.mobileSidebarOpen);
+  const pathname = usePathname();
 
-  return (
-    <aside
-      className={cn(
-        "flex h-screen flex-col border-r border-border/50 bg-card transition-all duration-200",
-        collapsed ? "w-[64px]" : "w-[240px]",
-      )}
-    >
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    dispatch(setMobileSidebarOpen(false));
+  }, [pathname, dispatch]);
+
+  const sidebarContent = (
+    <>
       {/* ── Logo ── */}
       <div
         className={cn(
@@ -36,6 +40,13 @@ export function Sidebar() {
             </span>
           )}
         </div>
+        {/* Mobile close button */}
+        <button
+          onClick={() => dispatch(setMobileSidebarOpen(false))}
+          className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground md:hidden"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
       {/* ── Navigation ── */}
@@ -64,8 +75,8 @@ export function Sidebar() {
         <UserMenu collapsed={collapsed} />
       </div>
 
-      {/* ── Collapse Toggle ── */}
-      <div className="border-t border-border/50 px-3 py-2">
+      {/* ── Collapse Toggle (desktop only) ── */}
+      <div className="hidden md:block border-t border-border/50 px-3 py-2">
         <button
           onClick={() => dispatch(toggleSidebar())}
           className={cn(
@@ -84,6 +95,33 @@ export function Sidebar() {
           )}
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside
+        className={cn(
+          "hidden md:flex h-screen flex-col border-r border-border/50 bg-card transition-all duration-200",
+          collapsed ? "w-[64px]" : "w-[240px]",
+        )}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile sidebar overlay */}
+      {mobileSidebarOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+            onClick={() => dispatch(setMobileSidebarOpen(false))}
+          />
+          <aside className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col bg-card shadow-2xl md:hidden">
+            {sidebarContent}
+          </aside>
+        </>
+      )}
+    </>
   );
 }

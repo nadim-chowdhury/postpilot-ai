@@ -155,7 +155,7 @@ export default function PagesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Pages</h2>
           <p className="text-sm text-muted-foreground">
@@ -163,7 +163,7 @@ export default function PagesPage() {
           </p>
         </div>
         <Button
-          className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90"
+          className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90 w-full sm:w-auto"
           onClick={handleOpenConnect}
         >
           <Plus className="h-4 w-4" />
@@ -174,8 +174,8 @@ export default function PagesPage() {
       {/* Search Bar */}
       {pages.length > 0 && (
         <div className="rounded-xl border border-border/40 bg-card p-4 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3 flex-1">
               <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground shrink-0">
                 Search Pages
               </label>
@@ -184,7 +184,7 @@ export default function PagesPage() {
                 placeholder="Search by page name or topic..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9 w-full max-w-md rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
+                className="h-9 w-full sm:max-w-md rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
               />
             </div>
             <ViewModeToggle mode={viewMode} onModeChange={setViewMode} />

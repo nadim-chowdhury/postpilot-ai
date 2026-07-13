@@ -147,7 +147,7 @@ export default function SettingsPage() {
         <div className="space-y-6">
           {/* Search Bar */}
           <div className="rounded-xl border border-border/40 bg-card p-4 shadow-sm">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
               <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Search Settings
               </label>
@@ -156,7 +156,7 @@ export default function SettingsPage() {
                 placeholder="Search by page name, topic, or game..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9 w-full max-w-md rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
+                className="h-9 w-full sm:max-w-md rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
               />
             </div>
           </div>
@@ -175,7 +175,7 @@ export default function SettingsPage() {
                     className="rounded-xl border border-border/50 bg-card p-6 space-y-6"
                   >
                     {/* Page Header */}
-                    <div className="flex items-center justify-between border-b border-border/50 pb-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/50 pb-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted/50 overflow-hidden">
                           {page.avatarUrl ? (
@@ -199,7 +199,7 @@ export default function SettingsPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-wrap">
                         {/* Status Toggle */}
                         <Select
                           value={statuses[pageId] || "ACTIVE"}
@@ -210,7 +210,7 @@ export default function SettingsPage() {
                             })
                           }
                         >
-                          <SelectTrigger className="h-8 w-[240px]">
+                          <SelectTrigger className="h-8 w-full sm:w-[240px]">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -231,7 +231,7 @@ export default function SettingsPage() {
 
                         <Button
                           size="sm"
-                          className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90"
+                          className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90 w-full sm:w-auto"
                           onClick={() => handleSavePageSettings(pageId)}
                           disabled={isSaving}
                         >
