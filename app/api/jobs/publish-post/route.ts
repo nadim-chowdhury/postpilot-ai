@@ -28,14 +28,22 @@ export async function POST(request: Request) {
 
   // Verify QStash Signature
   const qstashReceiver = getReceiver();
-  if (qstashReceiver && signature) {
-    const isValid = await qstashReceiver.verify({
-      signature,
-      body: bodyText,
-    });
+  if (qstashReceiver) {
+    const isDev = process.env.NODE_ENV === "development";
+    // In production, signature header is strictly required if receiver keys are configured
+    if (!signature && !isDev) {
+      return new Response("Missing signature header", { status: 401 });
+    }
 
-    if (!isValid) {
-      return new Response("Unauthorized signature", { status: 401 });
+    if (signature) {
+      const isValid = await qstashReceiver.verify({
+        signature,
+        body: bodyText,
+      });
+
+      if (!isValid) {
+        return new Response("Unauthorized signature", { status: 401 });
+      }
     }
   }
 

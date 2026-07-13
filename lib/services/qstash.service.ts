@@ -12,6 +12,13 @@ function getQStashClient() {
     return null;
   }
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+  const isLocal = appUrl.includes("localhost") || appUrl.includes("127.0.0.1") || appUrl.includes("::1");
+  if (isLocal) {
+    console.warn(`NEXT_PUBLIC_APP_URL is a loopback address (${appUrl}). QStash operations will run in mock mode.`);
+    return null;
+  }
+
   qstashClient = new Client({ token });
   return qstashClient;
 }

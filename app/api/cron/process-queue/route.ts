@@ -26,15 +26,33 @@ export async function GET(request: Request) {
     console.warn("CRON_SECRET is not configured. Cron route is publicly accessible in dev.");
   }
 
-  // Find missed PENDING schedules (older than 10 minutes from now)
-  const safetyThreshold = new Date(Date.now() - 10 * 60 * 1000);
+  // Find PENDING schedules that are missed or ready to publish.
+  // We wait 10 minutes for schedules that should be handled by QStash to allow retries.
+  // However, schedules with null or mock QStash message IDs are processed immediately when due.
+  const now = new Date();
+  const safetyThreshold = new Date(now.getTime() - 10 * 60 * 1000);
 
   const missedSchedules = await prisma.schedule.findMany({
     where: {
       status: "PENDING",
-      scheduledAt: {
-        lte: safetyThreshold,
-      },
+      OR: [
+        // Case A: Real QStash schedules that were missed (safety net)
+        {
+          scheduledAt: {
+            lte: safetyThreshold,
+          },
+        },
+        // Case B: Mock/null QStash schedules that are due (process immediately)
+        {
+          scheduledAt: {
+            lte: now,
+          },
+          OR: [
+            { qstashMsgId: null },
+            { qstashMsgId: { startsWith: "mock_" } },
+          ],
+        },
+      ],
     },
     include: { post: { include: { fbPage: true } } },
     take: 10, // Process in small chunks to prevent timeout
