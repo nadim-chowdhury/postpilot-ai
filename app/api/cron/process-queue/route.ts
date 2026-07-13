@@ -92,19 +92,14 @@ export async function GET(request: Request) {
     } catch (err) {
       console.error(`[Safety Sweeper] Failed to recover schedule ${schedule.id}:`, err);
       
-      await prisma.$transaction([
-        prisma.schedule.update({
-          where: { id: schedule.id },
-          data: {
-            status: "FAILED",
-            errorMessage: `Sweeper recovery failed: ${(err as Error).message || "Unknown error"}`,
-          },
-        }),
-        prisma.post.update({
-          where: { id: schedule.postId },
-          data: { status: "FAILED" },
-        }),
-      ]);
+      const errorMessage = (err as Error).message || "Unknown error";
+      const { autoRescheduleFailedPost } = await import("@/actions/schedule.actions");
+      await autoRescheduleFailedPost(
+        schedule.id,
+        schedule.fbPageId,
+        schedule.postId,
+        `Sweeper recovery failed: ${errorMessage}`
+      );
     }
     processed++;
   }

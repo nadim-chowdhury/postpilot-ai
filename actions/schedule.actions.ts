@@ -515,3 +515,100 @@ export async function forcePublishSchedule(
   }
 }
 
+/**
+ * Automatically reschedule a failed post to the end of the queue.
+ * Resets retry count, calculates the next available date after the latest schedule,
+ * enqueues to QStash, and updates the database record.
+ */
+export async function autoRescheduleFailedPost(
+  scheduleId: string,
+  fbPageId: string,
+  postId: string,
+  originalError: string,
+): Promise<void> {
+  try {
+    console.log(`[Auto-Reschedule] Initiating reschedule for schedule ${scheduleId} on page ${fbPageId}`);
+
+    // 1. Find the latest pending schedule for this page
+    const latestSchedule = await prisma.schedule.findFirst({
+      where: {
+        fbPageId,
+        status: "PENDING",
+      },
+      orderBy: {
+        scheduledAt: "desc",
+      },
+    });
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    let start: Date;
+    if (latestSchedule) {
+      // Start the day after the latest scheduled post
+      start = new Date(latestSchedule.scheduledAt);
+      start.setDate(start.getDate() + 1);
+      if (start < tomorrow) {
+        start = tomorrow;
+      }
+    } else {
+      start = tomorrow;
+    }
+
+    // Set a random posting time on the target day (between 9 AM and 6 PM)
+    const hours = [9, 11, 13, 15, 17, 19];
+    const randomHour = hours[Math.floor(Math.random() * hours.length)];
+    const randomMinutes = Math.floor(Math.random() * 50) + 5;
+    const newScheduledTime = new Date(start);
+    newScheduledTime.setHours(randomHour, randomMinutes, 0, 0);
+
+    console.log(`[Auto-Reschedule] Selected new schedule time: ${newScheduledTime.toISOString()}`);
+
+    // 2. Schedule new callback in QStash
+    const newQstashMsgId = await publishPostSchedule(scheduleId, newScheduledTime);
+
+    // 3. Update database schedule and post status
+    await prisma.$transaction([
+      prisma.schedule.update({
+        where: { id: scheduleId },
+        data: {
+          scheduledAt: newScheduledTime,
+          status: "PENDING",
+          retryCount: 0,
+          qstashMsgId: newQstashMsgId,
+          errorMessage: `Rescheduled automatically after failure: ${originalError}`,
+        },
+      }),
+      prisma.post.update({
+        where: { id: postId },
+        data: {
+          status: "SCHEDULED",
+        },
+      }),
+    ]);
+
+    console.log(`[Auto-Reschedule] Successfully rescheduled schedule ${scheduleId} to ${newScheduledTime.toISOString()}`);
+  } catch (error) {
+    console.error(`[Auto-Reschedule] Failed to auto-reschedule schedule ${scheduleId}:`, error);
+    // If auto-rescheduling fails, ensure database is marked as failed as a safety fallback
+    try {
+      await prisma.$transaction([
+        prisma.schedule.update({
+          where: { id: scheduleId },
+          data: {
+            status: "FAILED",
+            errorMessage: `Auto-rescheduling failed: ${(error as Error).message}. Original error: ${originalError}`,
+          },
+        }),
+        prisma.post.update({
+          where: { id: postId },
+          data: { status: "FAILED" },
+        }),
+      ]);
+    } catch (fallbackError) {
+      console.error("[Auto-Reschedule Fallback Fail]", fallbackError);
+    }
+  }
+}
+

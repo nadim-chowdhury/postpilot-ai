@@ -103,28 +103,18 @@ export async function POST(request: Request) {
     const errorMessage = (error as Error).message || "Unknown publishing error";
     const nextRetryAttempt = schedule.retryCount + 1;
 
-    // Retry handling policy
     if (nextRetryAttempt >= MAX_RETRY_ATTEMPTS) {
-      // Retries exhausted: mark schedule as FAILED
-      await prisma.$transaction([
-        prisma.schedule.update({
-          where: { id: scheduleId },
-          data: {
-            status: "FAILED",
-            errorMessage: `Failed after ${MAX_RETRY_ATTEMPTS} attempts: ${errorMessage}`,
-            retryCount: nextRetryAttempt,
-          },
-        }),
-        prisma.post.update({
-          where: { id: schedule.postId },
-          data: { status: "FAILED" },
-        }),
-      ]);
+      // Retries exhausted: automatically reschedule to the end of the queue
+      const { autoRescheduleFailedPost } = await import("@/actions/schedule.actions");
+      await autoRescheduleFailedPost(
+        scheduleId,
+        schedule.fbPageId,
+        schedule.postId,
+        `Failed after ${MAX_RETRY_ATTEMPTS} attempts: ${errorMessage}`
+      );
 
       // Return 200 so QStash stops retrying
-
-      // Return 200 so QStash stops retrying
-      return NextResponse.json({ success: false, error: "Max retries reached. Job marked as failed." }, { status: 200 });
+      return NextResponse.json({ success: true, message: "Max retries reached. Job automatically rescheduled." }, { status: 200 });
     } else {
       // Increment retry counts and return 500 so QStash schedules another retry
       await prisma.schedule.update({
