@@ -13,7 +13,9 @@ import { UserMenu } from "./user-menu";
 export function Sidebar() {
   const dispatch = useAppDispatch();
   const collapsed = useAppSelector((state) => state.ui.sidebarCollapsed);
-  const mobileSidebarOpen = useAppSelector((state) => state.ui.mobileSidebarOpen);
+  const mobileSidebarOpen = useAppSelector(
+    (state) => state.ui.mobileSidebarOpen,
+  );
   const pathname = usePathname();
 
   // Close mobile sidebar on route change
@@ -50,7 +52,7 @@ export function Sidebar() {
       </div>
 
       {/* ── Navigation ── */}
-      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 space-y-6 px-3 py-4">
         {navConfig.map((group, i) => (
           <div key={i}>
             {group.label && !collapsed && (
