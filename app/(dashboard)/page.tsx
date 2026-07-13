@@ -98,7 +98,7 @@ export default function DashboardPage() {
             Recent Activity
           </h3>
           {stats?.recentActivities && stats.recentActivities.length > 0 ? (
-            <div className="divide-y divide-border/50 flex-1">
+            <div className="divide-y divide-border/50 flex-1 max-h-[380px] overflow-y-auto pr-1.5">
               {stats.recentActivities.map((activity) => (
                 <ActivityItem key={activity.id} activity={activity} />
               ))}
@@ -118,7 +118,7 @@ export default function DashboardPage() {
             Upcoming Queue
           </h3>
           {stats?.upcomingSchedules && stats.upcomingSchedules.length > 0 ? (
-            <div className="space-y-3 flex-1">
+            <div className="space-y-3 flex-1 max-h-[380px] overflow-y-auto pr-1.5">
               {stats.upcomingSchedules.map((item) => (
                 <div
                   key={item.id}

@@ -187,7 +187,9 @@ export default function PagesPage() {
                 className="h-9 w-full sm:max-w-md rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
               />
             </div>
-            <ViewModeToggle mode={viewMode} onModeChange={setViewMode} />
+            <div className="flex justify-end">
+              <ViewModeToggle mode={viewMode} onModeChange={setViewMode} />
+            </div>
           </div>
         </div>
       )}

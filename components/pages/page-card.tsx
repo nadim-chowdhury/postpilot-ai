@@ -88,7 +88,7 @@ export function PageCard({
           <span className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">
             Target Topic / Niche
           </span>
-          <p className="text-xs text-foreground font-medium leading-relaxed">
+          <p className="text-xs text-foreground font-medium leading-relaxed max-h-[60px] overflow-y-auto pr-1.5">
             {page.topic}
           </p>
         </div>
@@ -98,7 +98,7 @@ export function PageCard({
             <span className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">
               AI Persona / Description
             </span>
-            <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
+            <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap max-h-[120px] overflow-y-auto pr-1.5">
               {page.personaPrompt}
             </p>
           </div>
