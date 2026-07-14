@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, Calendar, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Upload, Calendar, AlertCircle, CheckCircle2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -21,6 +21,7 @@ import {
 import { DatePicker } from "@/components/ui/date-picker";
 import { Spinner } from "@/components/shared/spinner";
 import { bulkImportPosts } from "@/actions/post.actions";
+import { convertMarkdownToUnicode } from "@/lib/utils";
 
 interface BulkImportDialogProps {
   open: boolean;
@@ -61,6 +62,7 @@ export function BulkImportDialog({
     imported: number;
     scheduled: number;
   } | null>(null);
+  const [convertRichText, setConvertRichText] = useState(true);
 
   if (!open) return null;
 
@@ -101,6 +103,13 @@ export function BulkImportDialog({
       return;
     }
 
+    const processedPosts = convertRichText
+      ? posts.map((post) => ({
+          ...post,
+          body: convertMarkdownToUnicode(post.body || ""),
+        }))
+      : posts;
+
     if (autoSchedule && scheduleMode === "CUSTOM") {
       if (!startDate || !endDate) {
         setError("Please set both start and end dates for auto-scheduling.");
@@ -116,7 +125,7 @@ export function BulkImportDialog({
 
     const res = await bulkImportPosts({
       fbPageId,
-      posts,
+      posts: processedPosts,
       autoSchedule,
       scheduleMode: autoSchedule ? scheduleMode : undefined,
       startDate:
@@ -141,14 +150,16 @@ export function BulkImportDialog({
     setLoading(false);
   };
 
-  const parsedCount = (() => {
+  const parsedPosts = (() => {
     try {
       const p = JSON.parse(jsonInput);
-      return Array.isArray(p) ? p.length : 0;
+      return Array.isArray(p) ? p : [];
     } catch {
-      return 0;
+      return [];
     }
   })();
+
+  const parsedCount = parsedPosts.length;
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -221,6 +232,63 @@ export function BulkImportDialog({
               className="font-mono"
             />
           </div>
+
+          {/* Rich Text Format Option */}
+          <div className="rounded-lg border border-border/50 bg-muted/10 p-4 space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={convertRichText}
+                onChange={(e) => setConvertRichText(e.target.checked)}
+                className="h-4 w-4 rounded border-border accent-brand"
+              />
+              <div>
+                <span className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-brand" />
+                  Convert Markdown to Unicode Rich Text
+                </span>
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  Automatically convert **bold**, *italic*, ***bold-italic***, and `monospace` tags to Facebook-friendly Unicode glyphs.
+                </p>
+              </div>
+            </label>
+          </div>
+
+          {/* Real-time Preview */}
+          {parsedPosts.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-foreground block">
+                Post Preview ({parsedPosts.length} post{parsedPosts.length !== 1 ? "s" : ""})
+              </label>
+              <div className="max-h-48 overflow-y-auto space-y-3 rounded-lg border border-border/50 bg-muted/5 p-3.5">
+                {parsedPosts.map((post: { title?: string; body: string }, idx: number) => {
+                  const previewBody = convertRichText
+                    ? convertMarkdownToUnicode(post.body || "")
+                    : (post.body || "");
+                  return (
+                    <div
+                      key={idx}
+                      className="border-b border-border/30 last:border-0 pb-3 last:pb-0"
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="text-[10px] font-semibold text-brand bg-brand/10 px-1.5 py-0.5 rounded">
+                          Post #{idx + 1}
+                        </span>
+                        {post.title && (
+                          <span className="text-[11px] font-medium text-foreground truncate max-w-[200px]">
+                            {post.title}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed">
+                        {previewBody}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Auto-Schedule Toggle */}
           <div className="rounded-lg border border-border/50 bg-muted/10 p-4 space-y-3">
