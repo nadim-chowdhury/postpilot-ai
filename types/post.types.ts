@@ -18,6 +18,7 @@ export interface PostSummary {
   fbPageId: string;
   createdAt: Date;
   publishedAt: Date | null;
+  scheduledAt: Date | null;
   platform?: SocialPlatform;
 }
 

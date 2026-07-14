@@ -94,7 +94,12 @@ export default function QueuePage() {
       setSchedules(queueResult.data.items);
     }
     if (pagesResult.success) {
-      setPages(pagesResult.data.map((p) => ({ id: p.id, name: p.name })));
+      setPages(
+        pagesResult.data
+          .filter((p) => p.status !== "DISCONNECTED")
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((p) => ({ id: p.id, name: p.name }))
+      );
     }
   };
 

@@ -103,6 +103,17 @@ export function PostListItem({
             day: "numeric",
           })}
         </span>
+        {post.scheduledAt && (
+          <span className="flex items-center gap-1 text-amber-400">
+            <Calendar className="h-3 w-3" />
+            {new Date(post.scheduledAt).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>
+        )}
       </div>
 
       {/* Actions */}

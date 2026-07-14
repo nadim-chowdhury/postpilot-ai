@@ -48,7 +48,9 @@ export function BulkImportDialog({
 }: BulkImportDialogProps) {
   const [fbPageId, setFbPageId] = useState("");
   const [jsonInput, setJsonInput] = useState("");
-  const [scheduleMode, setScheduleMode] = useState<"CUSTOM" | "APPEND">("CUSTOM");
+  const [scheduleMode, setScheduleMode] = useState<"CUSTOM" | "APPEND">(
+    "APPEND",
+  );
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [postsPerDay, setPostsPerDay] = useState(2);
@@ -117,7 +119,8 @@ export function BulkImportDialog({
       posts,
       autoSchedule,
       scheduleMode: autoSchedule ? scheduleMode : undefined,
-      startDate: autoSchedule && scheduleMode === "CUSTOM" ? startDate : undefined,
+      startDate:
+        autoSchedule && scheduleMode === "CUSTOM" ? startDate : undefined,
       endDate: autoSchedule && scheduleMode === "CUSTOM" ? endDate : undefined,
       postsPerDay: autoSchedule ? postsPerDay : undefined,
     });
@@ -178,11 +181,13 @@ export function BulkImportDialog({
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {pages.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name}
-                  </SelectItem>
-                ))}
+                {[...pages]
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
@@ -232,8 +237,8 @@ export function BulkImportDialog({
                   Auto-schedule posts across a date range
                 </span>
                 <p className="text-[10px] text-muted-foreground mt-0.5">
-                  Posts will be evenly distributed with randomized times (no two
-                  posts at the same time).
+                  Posts will be spaced at least 4 hours apart with randomized
+                  gaps for a natural posting rhythm.
                 </p>
               </div>
             </label>
@@ -246,14 +251,20 @@ export function BulkImportDialog({
                   </label>
                   <Select
                     value={scheduleMode}
-                    onValueChange={(val) => setScheduleMode(val as "CUSTOM" | "APPEND")}
+                    onValueChange={(val) =>
+                      setScheduleMode(val as "CUSTOM" | "APPEND")
+                    }
                   >
                     <SelectTrigger className="h-8 w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="CUSTOM">Across custom date range</SelectItem>
-                      <SelectItem value="APPEND">Queue after latest scheduled post</SelectItem>
+                      <SelectItem value="CUSTOM">
+                        Across custom date range
+                      </SelectItem>
+                      <SelectItem value="APPEND">
+                        Queue after latest scheduled post
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -285,7 +296,9 @@ export function BulkImportDialog({
                       </div>
                     </>
                   )}
-                  <div className={scheduleMode === "APPEND" ? "col-span-3" : ""}>
+                  <div
+                    className={scheduleMode === "APPEND" ? "col-span-3" : ""}
+                  >
                     <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
                       Posts per Day
                     </label>
@@ -299,7 +312,7 @@ export function BulkImportDialog({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {[1, 2, 3, 4, 5].map((n) => (
+                        {[1, 2, 3, 4].map((n) => (
                           <SelectItem key={n} value={n.toString()}>
                             {n} post{n > 1 ? "s" : ""} / day
                           </SelectItem>

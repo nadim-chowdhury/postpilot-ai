@@ -34,12 +34,21 @@ export default function PagesPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [sortByPosts, setSortByPosts] = useState(false);
+  const [showDisconnected, setShowDisconnected] = useState(false);
 
-  const filteredPages = pages.filter(
-    (p) =>
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.topic?.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredPages = pages
+    .filter(
+      (p) =>
+        (showDisconnected ? p.status === "DISCONNECTED" : p.status !== "DISCONNECTED") &&
+        (p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.topic?.toLowerCase().includes(searchQuery.toLowerCase())),
+    )
+    .sort((a, b) =>
+      sortByPosts
+        ? a.postCount - b.postCount
+        : a.name.localeCompare(b.name),
+    );
 
   const fetchPages = async () => {
     setLoading(true);
@@ -187,7 +196,47 @@ export default function PagesPage() {
                 className="h-9 w-full sm:max-w-md rounded-lg border border-border/50 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/45 focus:border-brand/50 focus:outline-none"
               />
             </div>
-            <div className="flex justify-end">
+            <div className="flex items-center gap-3 justify-end">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  Disconnected
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={showDisconnected}
+                  onClick={() => setShowDisconnected((v) => !v)}
+                  className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 ${
+                    showDisconnected ? "bg-brand" : "bg-muted"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform ${
+                      showDisconnected ? "translate-x-4" : "translate-x-0.5"
+                    }`}
+                  />
+                </button>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  {sortByPosts ? "Posts ↑" : "A–Z"}
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={sortByPosts}
+                  onClick={() => setSortByPosts((v) => !v)}
+                  className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 ${
+                    sortByPosts ? "bg-brand" : "bg-muted"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform ${
+                      sortByPosts ? "translate-x-4" : "translate-x-0.5"
+                    }`}
+                  />
+                </button>
+              </label>
               <ViewModeToggle mode={viewMode} onModeChange={setViewMode} />
             </div>
           </div>
@@ -197,7 +246,7 @@ export default function PagesPage() {
       {/* Page grid */}
       {filteredPages.length > 0 ? (
         viewMode === "grid" ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {filteredPages.map((page) => (
               <PageCard
                 key={page.id}

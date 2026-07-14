@@ -85,7 +85,7 @@ export function PostCard({
       </p>
 
       {/* Meta */}
-      <div className="flex items-center gap-3 text-[11px] text-muted-foreground/60">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground/60">
         {post.aiGenerated && (
           <span className="rounded bg-violet-500/10 px-1.5 py-0.5 text-violet-400">
             AI
@@ -99,6 +99,17 @@ export function PostCard({
             minute: "2-digit",
           })}
         </span>
+        {post.scheduledAt && (
+          <span className="flex items-center gap-1 text-amber-400">
+            <Calendar className="h-3 w-3" />
+            {new Date(post.scheduledAt).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>
+        )}
         {post.publishedAt && (
           <span>
             Published{" "}

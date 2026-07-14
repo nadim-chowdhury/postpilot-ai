@@ -24,7 +24,12 @@ export default function AnalyticsPage() {
       setLoading(true);
       const pagesRes = await getPages();
       if (pagesRes.success) {
-        setPages(pagesRes.data.map((p: any) => ({ id: p.id, name: p.name })));
+        setPages(
+          pagesRes.data
+            .filter((p: any) => p.status !== "DISCONNECTED")
+            .sort((a: any, b: any) => a.name.localeCompare(b.name))
+            .map((p: any) => ({ id: p.id, name: p.name }))
+        );
       }
       setLoading(false);
     };

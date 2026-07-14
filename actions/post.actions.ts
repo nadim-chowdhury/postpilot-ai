@@ -70,6 +70,12 @@ export async function getPosts(filters?: {
         where,
         include: {
           fbPage: { select: { name: true, avatarUrl: true, platform: true } },
+          schedules: {
+            where: { status: "PENDING" },
+            orderBy: { scheduledAt: "asc" },
+            take: 1,
+            select: { scheduledAt: true },
+          },
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
@@ -90,6 +96,7 @@ export async function getPosts(filters?: {
       fbPageId: post.fbPageId,
       createdAt: post.createdAt,
       publishedAt: post.publishedAt,
+      scheduledAt: post.schedules[0]?.scheduledAt ?? null,
       platform: post.fbPage.platform,
     }));
 
@@ -113,6 +120,12 @@ export async function getPost(
       where: { id: postId, userId },
       include: {
         fbPage: { select: { name: true, avatarUrl: true, platform: true } },
+        schedules: {
+          where: { status: "PENDING" },
+          orderBy: { scheduledAt: "asc" },
+          take: 1,
+          select: { scheduledAt: true },
+        },
       },
     });
 
@@ -138,6 +151,7 @@ export async function getPost(
         createdAt: post.createdAt,
         updatedAt: post.updatedAt,
         publishedAt: post.publishedAt,
+        scheduledAt: post.schedules[0]?.scheduledAt ?? null,
         platform: post.fbPage.platform,
       },
     };
@@ -645,9 +659,10 @@ export async function bulkImportPosts(data: {
 }
 
 /**
- * Generate evenly-distributed schedule slots across a date range.
- * Each day gets up to `postsPerDay` posts at randomized hours (8am–9pm range).
- * No two posts share the same time slot.
+ * Generate schedule slots across a date range with random spacing.
+ * Each day gets up to `postsPerDay` posts within an 8am–9pm window.
+ * The minimum gap between any two posts on the same day is 4 hours,
+ * with a random extra 0–2 hours added so gaps feel natural and varied.
  */
 function generateScheduleSlots(
   start: Date,
@@ -662,21 +677,42 @@ function generateScheduleSlots(
   const endDate = new Date(end);
   endDate.setHours(23, 59, 59, 999);
 
+  // Posting window: 8am (480 min) to 9pm (1260 min)
+  const WINDOW_START_MIN = 480; // 8:00 AM in minutes
+  const WINDOW_END_MIN = 1260; // 9:00 PM in minutes
+  const MIN_GAP_MIN = 240; // 4 hours in minutes
+
+  // Cap postsPerDay so they can actually fit with 4-hour gaps
+  const windowSize = WINDOW_END_MIN - WINDOW_START_MIN; // 780 min
+  const maxFittable = Math.floor(windowSize / MIN_GAP_MIN) + 1; // how many fit
+  const effectivePerDay = Math.min(postsPerDay, maxFittable);
+
   while (currentDate <= endDate && slots.length < totalPosts) {
-    // Generate time slots for this day (between 8am and 9pm)
     const daySlots: Date[] = [];
-    const hoursRange = [8, 10, 12, 14, 16, 18, 20]; // Possible posting hours
+    const postsToday = Math.min(effectivePerDay, totalPosts - slots.length);
 
-    // Shuffle hours for randomness
-    const shuffled = hoursRange.sort(() => Math.random() - 0.5);
-    const selectedHours = shuffled.slice(0, postsPerDay);
-    selectedHours.sort((a, b) => a - b); // Sort chronologically
+    // Build posting times for this day by walking forward with random gaps
+    let earliestMin = WINDOW_START_MIN;
 
-    for (const hour of selectedHours) {
-      if (slots.length >= totalPosts) break;
+    for (let i = 0; i < postsToday; i++) {
+      // How much room is left for remaining posts (each needing MIN_GAP_MIN)?
+      const remainingPosts = postsToday - i - 1;
+      const reservedMin = remainingPosts * MIN_GAP_MIN;
+      const latestMin = WINDOW_END_MIN - reservedMin;
+
+      if (earliestMin > latestMin) break; // can't fit more
+
+      // Pick a random minute within [earliestMin, latestMin]
+      const chosenMin =
+        earliestMin + Math.floor(Math.random() * (latestMin - earliestMin + 1));
+
       const slotDate = new Date(currentDate);
-      slotDate.setHours(hour, Math.floor(Math.random() * 50) + 5, 0, 0); // Random minutes 5-54
+      slotDate.setHours(0, chosenMin, 0, 0); // setHours(0, totalMinutes) rolls over correctly
       daySlots.push(slotDate);
+
+      // Next post must be at least 4 hours later, plus a random extra 0–120 min
+      const extraJitter = Math.floor(Math.random() * 121); // 0–120 minutes
+      earliestMin = chosenMin + MIN_GAP_MIN + extraJitter;
     }
 
     slots.push(...daySlots);

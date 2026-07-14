@@ -91,14 +91,14 @@ export default function DashboardPage() {
       </div>
 
       {/* Main dashboard columns */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         {/* Recent Activity */}
         <div className="rounded-xl border border-border/50 bg-card p-6 flex flex-col">
           <h3 className="mb-4 text-sm font-semibold text-foreground">
             Recent Activity
           </h3>
           {stats?.recentActivities && stats.recentActivities.length > 0 ? (
-            <div className="divide-y divide-border/50 flex-1 max-h-[380px] overflow-y-auto pr-1.5">
+            <div className="divide-y divide-border/50 flex-1 max-h-full overflow-y-auto pr-1.5">
               {stats.recentActivities.map((activity) => (
                 <ActivityItem key={activity.id} activity={activity} />
               ))}
@@ -118,7 +118,7 @@ export default function DashboardPage() {
             Upcoming Queue
           </h3>
           {stats?.upcomingSchedules && stats.upcomingSchedules.length > 0 ? (
-            <div className="space-y-3 flex-1 max-h-[380px] overflow-y-auto pr-1.5">
+            <div className="space-y-3 flex-1 max-h-full overflow-y-auto pr-1.5">
               {stats.upcomingSchedules.map((item) => (
                 <div
                   key={item.id}

@@ -53,6 +53,7 @@ export default function ContentPage() {
   const [filterEndDate, setFilterEndDate] = useState("");
   const [filterSearch, setFilterSearch] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [filterLoading, setFilterLoading] = useState(false);
 
   const fetchPosts = async () => {
     const postsResult = await getPosts({
@@ -82,7 +83,12 @@ export default function ContentPage() {
       setPosts(postsResult.data.items);
     }
     if (pagesResult.success) {
-      setPages(pagesResult.data.map((p) => ({ id: p.id, name: p.name })));
+      setPages(
+        pagesResult.data
+          .filter((p) => p.status !== "DISCONNECTED")
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((p) => ({ id: p.id, name: p.name })),
+      );
     }
   };
 
@@ -101,8 +107,9 @@ export default function ContentPage() {
   useEffect(() => {
     // Skip first run when loading is true
     if (!loading) {
+      setFilterLoading(true);
       // eslint-disable-next-line
-      fetchPosts();
+      fetchPosts().finally(() => setFilterLoading(false));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -374,54 +381,61 @@ export default function ContentPage() {
       )}
 
       {/* Post list */}
-      {posts.length > 0 ? (
-        viewMode === "grid" ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                onPublish={handlePublishExisting}
-                onSchedule={setSchedulingPostId}
-                onDelete={handleDelete}
-                onEdit={setEditingPost}
-              />
-            ))}
+      <div className="relative">
+        {filterLoading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/60 backdrop-blur-[2px]">
+            <Spinner size="md" />
           </div>
+        )}
+        {posts.length > 0 ? (
+          viewMode === "grid" ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {posts.map((post) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  onPublish={handlePublishExisting}
+                  onSchedule={setSchedulingPostId}
+                  onDelete={handleDelete}
+                  onEdit={setEditingPost}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {posts.map((post) => (
+                <PostListItem
+                  key={post.id}
+                  post={post}
+                  onPublish={handlePublishExisting}
+                  onSchedule={setSchedulingPostId}
+                  onDelete={handleDelete}
+                  onEdit={setEditingPost}
+                />
+              ))}
+            </div>
+          )
         ) : (
-          <div className="flex flex-col gap-2">
-            {posts.map((post) => (
-              <PostListItem
-                key={post.id}
-                post={post}
-                onPublish={handlePublishExisting}
-                onSchedule={setSchedulingPostId}
-                onDelete={handleDelete}
-                onEdit={setEditingPost}
-              />
-            ))}
-          </div>
-        )
-      ) : (
-        !showComposer && (
-          <EmptyState
-            icon={FileText}
-            title="No content yet"
-            description="Create posts manually or use AI to generate content for your pages."
-            action={
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={() => setShowComposer(true)}
-              >
-                <FileText className="h-3.5 w-3.5" />
-                Create your first post
-              </Button>
-            }
-          />
-        )
-      )}
+          !showComposer && (
+            <EmptyState
+              icon={FileText}
+              title="No content yet"
+              description="Create posts manually or use AI to generate content for your pages."
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => setShowComposer(true)}
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  Create your first post
+                </Button>
+              }
+            />
+          )
+        )}
+      </div>
 
       {/* Scheduling Modal */}
       {schedulingPostId && (
