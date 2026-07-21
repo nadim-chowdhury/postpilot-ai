@@ -1,0 +1,11 @@
+# Antigravity Indexer Exclusions
+# Prevents scanning large, generated, or dependency directories to save token costs and improve performance.
+
+node_modules/
+.next/
+dist/
+.git/
+.gemini/
+*.tsbuildinfo
+package-lock.json
+lint-output.txt
