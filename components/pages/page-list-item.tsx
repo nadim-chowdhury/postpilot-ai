@@ -1,6 +1,7 @@
 "use client";
 
-import { Globe, Pencil, Pause, Play, Unplug, Gamepad2 } from "lucide-react";
+import Link from "next/link";
+import { Globe, Pencil, Pause, Play, Unplug, Gamepad2, BarChart3 } from "lucide-react";
 import { Twitter, Linkedin } from "@/components/shared/social-icons";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -104,6 +105,13 @@ export function PageListItem({
 
       {/* Actions */}
       <div className="flex items-center gap-0.5 shrink-0 ml-auto">
+        <Link
+          href={`/pages/${page.id}`}
+          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          title="View stats"
+        >
+          <BarChart3 className="h-3.5 w-3.5" />
+        </Link>
         <Button
           variant="ghost"
           size="icon-xs"

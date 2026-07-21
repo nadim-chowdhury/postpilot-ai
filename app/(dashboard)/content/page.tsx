@@ -107,9 +107,11 @@ export default function ContentPage() {
   useEffect(() => {
     // Skip first run when loading is true
     if (!loading) {
-      setFilterLoading(true);
-      // eslint-disable-next-line
-      fetchPosts().finally(() => setFilterLoading(false));
+      const timer = setTimeout(() => {
+        setFilterLoading(true);
+        fetchPosts().finally(() => setFilterLoading(false));
+      }, 0);
+      return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

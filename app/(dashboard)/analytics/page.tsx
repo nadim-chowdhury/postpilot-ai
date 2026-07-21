@@ -1,22 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LineChart as LineChartIcon, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { LineChart as LineChartIcon } from "lucide-react";
 import { Spinner } from "@/components/shared/spinner";
 import { EmptyState } from "@/components/shared/empty-state";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { getPages } from "@/actions/page.actions";
 import AnalyticsClient from "@/components/analytics/analytics-client";
+import type { PageSummary } from "@/types/page.types";
 
 export default function AnalyticsPage() {
-  const [pages, setPages] = useState<{ id: string; name: string }[]>([]);
+  const [pages, setPages] = useState<PageSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,9 +19,8 @@ export default function AnalyticsPage() {
       if (pagesRes.success) {
         setPages(
           pagesRes.data
-            .filter((p: any) => p.status !== "DISCONNECTED")
-            .sort((a: any, b: any) => a.name.localeCompare(b.name))
-            .map((p: any) => ({ id: p.id, name: p.name }))
+            .filter((p: PageSummary) => p.status !== "DISCONNECTED")
+            .sort((a: PageSummary, b: PageSummary) => a.name.localeCompare(b.name))
         );
       }
       setLoading(false);

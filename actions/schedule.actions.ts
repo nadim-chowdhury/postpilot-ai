@@ -351,12 +351,13 @@ export async function getSchedules(filters?: {
     }));
 
     return { success: true, data: { items, total } };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[getSchedules] Failed to fetch schedules:", error);
     if (error instanceof AppError) {
       return { success: false, error: error.message, code: error.code };
     }
-    return { success: false, error: `Failed to fetch schedules: ${error?.message || String(error)}` };
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return { success: false, error: `Failed to fetch schedules: ${errMsg}` };
   }
 }
 

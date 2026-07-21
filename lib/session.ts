@@ -32,7 +32,7 @@ export async function requireUserId(): Promise<string> {
   }
 
   const session = await getSession();
-  let userId = (session?.user as Record<string, unknown> | undefined)?.id as
+  const userId = (session?.user as Record<string, unknown> | undefined)?.id as
     | string
     | undefined;
 
@@ -74,7 +74,7 @@ export async function requireUserAccessToken(): Promise<string> {
   }
 
   const session = await getSession();
-  let token = (session?.user as Record<string, unknown> | undefined)?.accessToken as
+  const token = (session?.user as Record<string, unknown> | undefined)?.accessToken as
     | string
     | undefined;
 

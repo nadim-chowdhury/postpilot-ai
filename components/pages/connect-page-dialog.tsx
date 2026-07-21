@@ -8,7 +8,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -49,7 +48,6 @@ export function ConnectPageDialog({
   onClose,
   availablePages,
   onConnect,
-  onConnectManually,
   loading,
 }: ConnectPageDialogProps) {
   const [activeTab, setActiveTab] = useState<"oauth" | "manual">("oauth");

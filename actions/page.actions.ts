@@ -5,6 +5,7 @@ import { requireUserId, requireUserAccessToken } from "@/lib/session";
 import { encrypt, decrypt } from "@/lib/services/encryption.service";
 import {
   fetchUserPages,
+  type MetaPage,
 } from "@/lib/services/meta-api.service";
 import { AppError, ErrorCodes } from "@/lib/errors";
 import type { ActionResult } from "@/types/api.types";
@@ -123,7 +124,7 @@ export async function fetchAvailablePages(): Promise<
     const userId = await requireUserId();
     const userAccessToken = await requireUserAccessToken();
 
-    let metaPages: any[] = [];
+    let metaPages: MetaPage[] = [];
     try {
       metaPages = await fetchUserPages(userAccessToken);
     } catch (e) {
@@ -183,7 +184,7 @@ export async function connectPages(
     const userAccessToken = await requireUserAccessToken();
 
     // Fetch all pages from Facebook to get their real page access tokens
-    let metaPages: any[] = [];
+    let metaPages: MetaPage[] = [];
     try {
       metaPages = await fetchUserPages(userAccessToken);
     } catch (e) {

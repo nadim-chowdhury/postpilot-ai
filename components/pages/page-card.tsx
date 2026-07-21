@@ -1,6 +1,7 @@
 "use client";
 
-import { Globe, Pause, Play, Unplug, Pencil, Gamepad2 } from "lucide-react";
+import Link from "next/link";
+import { Globe, Pause, Play, Unplug, Pencil, Gamepad2, BarChart3 } from "lucide-react";
 import { Twitter, Linkedin } from "@/components/shared/social-icons";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -120,6 +121,13 @@ export function PageCard({
 
       {/* Actions */}
       <div className="mt-4 flex items-center gap-1.5 border-t border-border/50 pt-3">
+        <Link
+          href={`/pages/${page.id}`}
+          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          title="View stats"
+        >
+          <BarChart3 className="h-3.5 w-3.5" />
+        </Link>
         <Button
           variant="ghost"
           size="icon-xs"

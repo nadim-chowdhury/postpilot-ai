@@ -101,12 +101,13 @@ export async function getPosts(filters?: {
     }));
 
     return { success: true, data: { items, total } };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[getPosts] Failed to fetch posts:", error);
     if (error instanceof AppError) {
       return { success: false, error: error.message, code: error.code };
     }
-    return { success: false, error: `Failed to fetch posts: ${error?.message || String(error)}` };
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return { success: false, error: `Failed to fetch posts: ${errMsg}` };
   }
 }
 

@@ -387,9 +387,8 @@ export default function QueuePage() {
                             },
                           )}
                         </span>
-                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         <StatusBadge
-                          status={item.status.toLowerCase() as any}
+                          status={item.status.toLowerCase() as "pending" | "completed" | "failed" | "cancelled"}
                           className="py-0 h-4 text-[9px]"
                         />
                       </div>

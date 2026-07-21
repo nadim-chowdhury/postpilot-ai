@@ -149,7 +149,7 @@ export function AiGenerateDialog({
               </label>
               <Select
                 value={tone}
-                onValueChange={(val) => val && setTone(val as any)}
+                onValueChange={(val) => val && setTone(val as "educational" | "inspirational" | "conversational" | "humorous")}
               >
                 <SelectTrigger className="h-9 w-full">
                   <SelectValue />

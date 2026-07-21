@@ -165,7 +165,7 @@ export function EditPostDialog({
               </label>
               <Select
                 value={mediaType}
-                onValueChange={(val) => val && setMediaType(val as any)}
+                onValueChange={(val) => val && setMediaType(val as "NONE" | "IMAGE" | "LINK")}
               >
                 <SelectTrigger className="h-9 w-full">
                   <SelectValue />

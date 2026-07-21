@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
     const redirectUrl = new URL("/pages", request.url);
     redirectUrl.searchParams.set("success", "twitter_connected");
     return NextResponse.redirect(redirectUrl);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Twitter callback error:", error);
     const redirectUrl = new URL("/pages", request.url);
     redirectUrl.searchParams.set("error", "twitter_failed");

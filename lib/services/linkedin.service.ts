@@ -33,8 +33,32 @@ export async function publishToLinkedIn(
     authorUrn = `urn:li:organization:${payload.authorId}`;
   }
 
-  // Build the request body matching LinkedIn UGC Posts specification
-  const requestBody: Record<string, any> = {
+  interface ShareContent {
+    shareCommentary: {
+      text: string;
+    };
+    shareMediaCategory: string;
+    media?: {
+      status: string;
+      originalUrl: string;
+      title: {
+        text: string;
+      };
+    }[];
+  }
+
+  interface UgcPostPayload {
+    author: string;
+    lifecycleState: string;
+    specificContent: {
+      "com.linkedin.ugc.ShareContent": ShareContent;
+    };
+    visibility: {
+      "com.linkedin.ugc.MemberNetworkVisibility": string;
+    };
+  }
+
+  const requestBody: UgcPostPayload = {
     author: authorUrn,
     lifecycleState: "PUBLISHED",
     specificContent: {
