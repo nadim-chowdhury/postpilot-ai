@@ -42,12 +42,14 @@ import {
   CalendarCheck,
   Globe,
   Gamepad2,
+  RefreshCw,
 } from "lucide-react";
 import { Twitter, Linkedin } from "@/components/shared/social-icons";
 import { cn } from "@/lib/utils";
 import type { PageDetail } from "@/types/page.types";
 import {
   getPageDetailedStats,
+  syncPostInsights,
   type PageDetailedStats as PageDetailedStatsType,
 } from "@/actions/analytics.actions";
 
@@ -87,6 +89,16 @@ export function PageDetailStats({ page, stats: initialStats }: PageDetailStatsPr
     return new Date().toISOString().split("T")[0];
   });
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    const res = await syncPostInsights(page.id);
+    if (res.success) {
+      await fetchStats(datePreset, startDate, endDate);
+    }
+    setSyncing(false);
+  };
 
   const fetchStats = async (preset: string, start?: string, end?: string) => {
     setLoading(true);
@@ -277,38 +289,67 @@ export function PageDetailStats({ page, stats: initialStats }: PageDetailStatsPr
           </div>
 
           {/* Meta info */}
-          <div className="hidden sm:flex flex-col items-end gap-1 text-xs text-muted-foreground shrink-0">
-            <span>
-              Connected{" "}
-              {new Date(page.createdAt).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </span>
-            <span>
-              Last post:{" "}
-              {page.lastPostedAt
-                ? new Date(page.lastPostedAt).toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                  })
-                : "Never"}
-            </span>
+          <div className="flex flex-col items-end gap-2.5 shrink-0">
+            <div className="hidden sm:flex flex-col items-end gap-1 text-xs text-muted-foreground">
+              <span>
+                Connected{" "}
+                {new Date(page.createdAt).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
+              <span>
+                Last post:{" "}
+                {page.lastPostedAt
+                  ? new Date(page.lastPostedAt).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : "Never"}
+              </span>
+            </div>
+
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleSync}
+              disabled={syncing || loading}
+              className="h-8 text-xs gap-1.5 border-border/50 hover:bg-muted/40 cursor-pointer"
+            >
+              {syncing ? (
+                <Spinner size="sm" />
+              ) : (
+                <RefreshCw className="h-3.5 w-3.5 text-brand" />
+              )}
+              {syncing ? "Syncing..." : "Sync Page Feed"}
+            </Button>
           </div>
         </div>
       </div>
 
       {/* ── Show empty state if no stats ── */}
       {!stats ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <BarChart3 className="h-10 w-10 text-muted-foreground/40 mb-3" />
-          <p className="text-sm font-medium text-muted-foreground">
-            No stats available yet
+        <div className="flex flex-col items-center justify-center py-20 text-center bg-card rounded-xl border border-border/45 p-8 shadow-xs">
+          <BarChart3 className="h-10 w-10 text-muted-foreground/30 mb-3" />
+          <p className="text-sm font-semibold text-foreground">
+            No stats available for this period
           </p>
-          <p className="text-xs text-muted-foreground/70 mt-1">
-            Start creating and publishing posts to see detailed analytics.
+          <p className="text-xs text-muted-foreground/80 mt-1 max-w-md mb-4 leading-relaxed">
+            If you have published content directly on this page (outside of this app) in the selected range, click below to import your feed posts and metrics.
           </p>
+          <Button
+            onClick={handleSync}
+            disabled={syncing || loading}
+            className="bg-brand text-brand-foreground hover:bg-brand/90 gap-2 text-xs h-9 shrink-0"
+          >
+            {syncing ? (
+              <Spinner size="sm" className="border-t-brand-foreground" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            {syncing ? "Importing Feed..." : "Import Page Feed & Insights"}
+          </Button>
         </div>
       ) : (
         <>

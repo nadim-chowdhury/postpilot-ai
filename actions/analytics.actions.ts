@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/session";
 import { decrypt } from "@/lib/services/encryption.service";
-import { fetchPostInsights } from "@/lib/services/meta-api.service";
+import { fetchPostInsights, fetchPageFeed } from "@/lib/services/meta-api.service";
 import { AppError } from "@/lib/errors";
 import type { ActionResult } from "@/types/api.types";
 
@@ -375,6 +375,39 @@ export async function syncPostInsights(fbPageId: string): Promise<ActionResult<{
       return { success: false, error: "Page not found" };
     }
 
+    const accessToken = decrypt(page.accessToken);
+
+    // 1. Fetch latest feed posts from Meta API (with Dev Fallback for mock pages)
+    const feedPosts = await fetchPageFeed(accessToken, page.metaPageId, 50);
+
+    // 2. Import posts that do not exist in the database yet
+    for (const feedPost of feedPosts) {
+      const existing = await prisma.post.findFirst({
+        where: { fbPostId: feedPost.id, userId },
+      });
+
+      if (!existing) {
+        const titleStr = feedPost.message 
+          ? (feedPost.message.length > 30 ? feedPost.message.slice(0, 30) + "..." : feedPost.message)
+          : "Imported Feed Post";
+
+        await prisma.post.create({
+          data: {
+            fbPageId,
+            userId,
+            fbPostId: feedPost.id,
+            title: titleStr,
+            body: feedPost.message || "No commentary text.",
+            status: "POSTED",
+            publishedAt: new Date(feedPost.created_time),
+            createdAt: new Date(feedPost.created_time),
+            aiGenerated: false,
+          },
+        });
+      }
+    }
+
+    // 3. Query all posts under this page that need insights syncing
     const posts = await prisma.post.findMany({
       where: {
         fbPageId,
@@ -390,7 +423,6 @@ export async function syncPostInsights(fbPageId: string): Promise<ActionResult<{
       return { success: true, data: { syncedCount: 0 } };
     }
 
-    const accessToken = decrypt(page.accessToken);
     let syncedCount = 0;
 
     for (const post of posts) {

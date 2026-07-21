@@ -301,3 +301,45 @@ export async function fetchPostInsights(
     sharesCount: response.shares?.count ?? 0,
   };
 }
+
+export interface MetaFeedPost {
+  id: string;
+  message?: string;
+  created_time: string;
+}
+
+/**
+ * Fetch feed posts for a given Facebook Page.
+ */
+export async function fetchPageFeed(
+  pageAccessToken: string,
+  pageId: string,
+  limit: number = 50,
+): Promise<MetaFeedPost[]> {
+  if (process.env.NODE_ENV === "development" || pageAccessToken.startsWith("EAAB_mock_token")) {
+    console.log(`[Dev Fallback] Generating mock feed posts for page ${pageId}`);
+    const mockPosts: MetaFeedPost[] = [];
+    
+    for (let i = 1; i <= 25; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i * 2); // Spread out over the last 50 days
+
+      mockPosts.push({
+        id: `${pageId}_post_${i}`,
+        message: `This is a historical mock post #${i} containing analytics insights and updates from your feed.`,
+        created_time: date.toISOString(),
+      });
+    }
+    return mockPosts;
+  }
+
+  const endpoint = `/${pageId}/feed?fields=id,message,created_time&limit=${limit}`;
+  try {
+    const response = await metaFetch<{ data?: MetaFeedPost[] }>(endpoint, pageAccessToken);
+    return response.data ?? [];
+  } catch (error) {
+    console.error(`Failed to fetch page feed for ${pageId}:`, error);
+    return [];
+  }
+}
+
